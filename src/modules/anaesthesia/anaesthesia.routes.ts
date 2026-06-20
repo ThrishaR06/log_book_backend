@@ -1,82 +1,62 @@
 import { Elysia } from "elysia";
+import { AnaesthesiaController } from "./anaesthesia.controller";
+import {
+  createAnaesthesiaSchema,
+  updateAnaesthesiaSchema
+} from "./anaesthesia.validation";
 
-import { AnaesthesiaController }
-from "./anaesthesia.controller";
+const controller = new AnaesthesiaController();
 
-import {createAnaesthesiaSchema,updateAnaesthesiaSchema}
-from "./anaesthesia.validation";
-
-const controller =
-new AnaesthesiaController();
-
-export const anaesthesiaRoutes =
-new Elysia({
+export const anaesthesiaRoutes = new Elysia({
   prefix: "/anaesthesia"
 })
 
+// CREATE
 .post(
   "/",
-  ({ body }) =>
-    controller.create(body),
+  ({ body }) => controller.create(body),
   {
-    body:
-    createAnaesthesiaSchema
+    body: createAnaesthesiaSchema
   }
 )
 
+// GET ALL BY DOCTOR
 .get(
   "/doctor/:doctorId",
   ({ params }) =>
-    controller.getAll(
-      Number(params.doctorId)
-    )
+    controller.getAll(Number(params.doctorId))
 )
 
+// SEARCH (FIXED - no categoryId)
 .get(
   "/search",
   ({ query }) =>
     controller.search(
       Number(query.doctorId),
-      String(
-        query.keyword || ""
-      )
+      String(query.keyword || "")
     )
 )
 
-.get(
- "/list",
- ({ query }) =>
- controller.list(
-   Number(query.doctorId),
-   Number(query.categoryId)
- )
-)
-
+// GET BY ID
 .get(
   "/:id",
   ({ params }) =>
-    controller.getById(
-      Number(params.id)
-    )
+    controller.getById(Number(params.id))
 )
 
+// UPDATE
 .put(
   "/:id",
   ({ params, body }) =>
-    controller.update(
-      Number(params.id),
-      body
-    ),
+    controller.update(Number(params.id), body),
   {
-    body:
-    updateAnaesthesiaSchema
+    body: updateAnaesthesiaSchema
   }
 )
 
+// DELETE
 .delete(
   "/:id",
   ({ params }) =>
-    controller.delete(
-      Number(params.id)
-    )
+    controller.delete(Number(params.id))
 );
