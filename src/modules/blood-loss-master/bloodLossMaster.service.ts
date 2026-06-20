@@ -2,6 +2,7 @@ import { db } from "../../db";
 import { bloodLossMaster } from "../../db/schema/bloodLossMaster";
 import { and, desc, eq, like } from "drizzle-orm";
 import { ApiResponse } from "../../utils/apiResponse";
+import { categories } from "../../db/schema/categories";
 
 export class BloodLossMasterService {
 
@@ -18,7 +19,22 @@ export class BloodLossMasterService {
         instruction: string;
     }) {
 
-        const [result] = await db
+        // Check whether the category belongs to the logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
+
+const [result] = await db
     .insert(bloodLossMaster)
     .values({
         doctorId,
@@ -48,6 +64,21 @@ return ApiResponse.success(
         doctorId: number;
         categoryId: number;
     }) {
+
+        // Verify category belongs to doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
 
         const data = await db
             .select()
@@ -132,6 +163,21 @@ return ApiResponse.success(
             };
         }
 
+        // Verify new category belongs to doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
+
        await db
 .update(bloodLossMaster)
 .set({
@@ -202,6 +248,21 @@ return ApiResponse.success(
         categoryId: number;
         search: string;
     }) {
+
+        // Verify category belongs to doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
 
         const data = await db
             .select()
