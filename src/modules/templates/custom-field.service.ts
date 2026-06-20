@@ -5,20 +5,24 @@ import { templateCustomFields } from "../../db/schema/templateCustomFields";
 export class CustomFieldService {
 
   static async create(data: any) {
+  const result = await db
+    .insert(templateCustomFields)
+    .values({
+      templateId: data.templateId,
+      fieldLabel: data.fieldLabel,
+      fieldType: data.fieldType,
+      fieldOptions: data.fieldOptions,
+    });
 
-    const result = await db
-      .insert(templateCustomFields)
-      .values({
-        templateId: data.templateId,
-        fieldLabel: data.fieldLabel,
-        fieldType: data.fieldType,
-        fieldOptions: data.fieldOptions,
-      });
+  const insertedId = result[0]?.insertId;
 
-    return {
-      id: result[0].insertId,
-    };
-  }
+  const [created] = await db
+    .select()
+    .from(templateCustomFields)
+    .where(eq(templateCustomFields.id, insertedId));
+
+  return created;
+}
 
   static async update(
     id: number,
