@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1781344718717,
+      "tag": "0000_cute_devos",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1781441108176,
+      "tag": "0001_flippant_ikaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1781443345579,
+      "tag": "0002_cold_daredevil",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1781445060299,
+      "tag": "0003_mighty_dreadnoughts",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1781452999021,
+      "tag": "0004_optimal_wallow",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1781505018615,
+      "tag": "0005_silent_spyke",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1781509038347,
+      "tag": "0006_petite_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1781592499980,
+      "tag": "0007_good_mac_gargan",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1781592910526,
+      "tag": "0008_cheerful_james_howlett",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1781760069184,
+      "tag": "0009_eager_argent",
+      "breakpoints": true
+    }
+  ]
+}

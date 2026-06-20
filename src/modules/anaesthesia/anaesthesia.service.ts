@@ -1,0 +1,122 @@
+import { AnaesthesiaRepository }
+from "./anaesthesia.repository";
+
+export class AnaesthesiaService {
+
+  private repository =
+    new AnaesthesiaRepository();
+
+  async create(data: any) {
+
+    try {
+
+      const id =
+        await this.repository.create(data);
+
+      return {
+        success: true,
+        message:
+          "Anaesthesia created successfully",
+        data: { id }
+      };
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message,
+        data: null
+      };
+    }
+  }
+
+  async list(
+  doctorId: number,
+  categoryId: number
+) {
+
+  const data =
+    await this.repository.list(
+      doctorId,
+      categoryId
+    );
+
+  return {
+    success: true,
+    message: "Anaesthesia fetched successfully",
+    data
+  };
+}
+
+  async getAll(doctorId: number) {
+
+    const data =
+      await this.repository.findAll(
+        doctorId
+      );
+
+    return {
+      success: true,
+      message:
+        "Anaesthesia fetched successfully",
+      data
+    };
+  }
+
+  async getById(id: number) {
+
+    const data =
+      await this.repository.findById(id);
+
+    return {
+      success: true,
+      message:
+        "Anaesthesia fetched successfully",
+      data
+    };
+  }
+
+  async update(id: number, data: any) {
+
+    await this.repository.update(
+      id,
+      data
+    );
+
+    return {
+      success: true,
+      message:
+        "Anaesthesia updated successfully"
+    };
+  }
+
+  async delete(id: number) {
+
+    await this.repository.delete(id);
+
+    return {
+      success: true,
+      message:
+        "Anaesthesia deleted successfully"
+    };
+  }
+
+  async search(
+    doctorId: number,
+    keyword: string
+  ) {
+
+    const data =
+      await this.repository.search(
+        doctorId,
+        keyword
+      );
+
+    return {
+      success: true,
+      message:
+        "Anaesthesia search completed",
+      data
+    };
+  }
+}
