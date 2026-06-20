@@ -8,3 +8,4 @@ export * from "./subscription-plans";
 export * from "./bloodLossMaster";
 export * from "./specimensMaster";
 export * from "./additionalNotesMaster";
+export * from "./anaesthesiaMasters";
