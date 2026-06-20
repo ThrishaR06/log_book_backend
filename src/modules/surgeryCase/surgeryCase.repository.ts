@@ -154,6 +154,23 @@ export class SurgeryCaseRepository {
 
     return result.insertId;
   }
+  async getDoctorIdBySurgeryId(surgeryId: number) {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT doctor_id
+        FROM surgeries
+        WHERE id = ?
+        `,
+        [surgeryId]
+    );
+
+    if (!rows.length) {
+        throw new Error("Surgery not found");
+    }
+
+    return rows[0].doctor_id;
+}
 
 async findById(id: number) {
 
