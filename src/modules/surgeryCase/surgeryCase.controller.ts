@@ -11,12 +11,11 @@ export class SurgeryCaseController {
 
   async create(body: any) {
 
+    // Convert surgeryId once
+body.surgeryId = Number(body.surgeryId);
 
-    console.log("BODY =", body);
-console.log("PRE OP =", body.preOpImages);
-console.log("INTRA OP =", body.intraOpImages);
-console.log("POST OP =", body.postOpImages);
-console.log("BODY KEYS =", Object.keys(body));
+// Fetch doctorId once
+const doctorId = await this.service.getDoctorId(body.surgeryId);
 
 
     const preOpImages: string[] = [];
@@ -32,14 +31,16 @@ console.log("BODY KEYS =", Object.keys(body));
 
       for (const file of files) {
 
-        const path =
-await uploadToS3(
-    file,
-    "pre-op"
-);
+     for (const file of files) {
 
-        preOpImages.push(path);
-      }
+    const path = await uploadToS3(
+        file,
+        "pre-op",
+        doctorId
+    );
+
+    preOpImages.push(path);
+}
     }
 
     if (body.intraOpImages) {
@@ -51,15 +52,14 @@ await uploadToS3(
 
       for (const file of files) {
 
-        const path =
-await uploadToS3(
-    file,
-    "intra-op"
-);
+    const path = await uploadToS3(
+        file,
+        "intra-op",
+        doctorId
+    );
 
-        intraOpImages.push(path);
-      }
-    }
+    intraOpImages.push(path);
+}
 
     if (body.postOpImages) {
 
@@ -70,14 +70,14 @@ await uploadToS3(
 
       for (const file of files) {
 
-        const path =
-await uploadToS3(
-    file,
-    "post-op"
-);
+    const path = await uploadToS3(
+        file,
+        "post-op",
+        doctorId
+    );
 
-        postOpImages.push(path);
-      }
+    postOpImages.push(path);
+}
     }
 
     body.preOpImages = preOpImages;
@@ -145,5 +145,4 @@ await uploadToS3(
     // =============================
 
     return this.service.create(body);
-  }
-}
+    }}}}

@@ -6,16 +6,16 @@ import { s3 } from "../config/s3";
 
 export async function uploadToS3(
     file: any,
-    folder: string
+    folder: string,
+    doctorId: number | string
 ) {
-    const fileName =
-        `${Date.now()}-${file.name}`;
+    const fileName = `${Date.now()}-${file.name}`;
 
-    const key =
-        `${folder}/${fileName}`;
+    const key = `${doctorId}/${folder}/${fileName}`;
 
-    const buffer =
-        Buffer.from(await file.arrayBuffer());
+    const buffer = Buffer.from(
+        await file.arrayBuffer()
+    );
 
     await s3.send(
         new PutObjectCommand({

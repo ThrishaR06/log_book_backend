@@ -20,4 +20,11 @@ export class SurgeryCaseService {
     data: surgeryCase
   };
 }
+async getDoctorId(surgeryId: number) {
+
+    return await this.repository.getDoctorIdBySurgeryId(
+        surgeryId
+    );
+
+}
 }
