@@ -2,6 +2,7 @@ import { db } from "../../db";
 import { additionalNotesMaster } from "../../db/schema/additionalNotesMaster";
 import { and, desc, eq, like } from "drizzle-orm";
 import { ApiResponse } from "../../utils/apiResponse";
+import { categories } from "../../db/schema/categories";
 
 export class AdditionalNotesMasterService {
 
@@ -18,7 +19,22 @@ export class AdditionalNotesMasterService {
         instruction: string;
     }) {
 
-        const [result] = await db
+        // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
+
+const [result] = await db
     .insert(additionalNotesMaster)
     .values({
         doctorId,
@@ -48,6 +64,21 @@ return ApiResponse.success(
         doctorId: number;
         categoryId: number;
     }) {
+
+        // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
 
         const data = await db
             .select()
@@ -131,6 +162,21 @@ return ApiResponse.success(
             };
         }
 
+        // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
+
         await db
     .update(additionalNotesMaster)
     .set({
@@ -200,6 +246,21 @@ return ApiResponse.success(
         categoryId: number;
         search: string;
     }) {
+
+        // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return ApiResponse.error("Category not found.");
+}
 
         const data = await db
             .select()
