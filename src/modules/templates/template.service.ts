@@ -6,21 +6,33 @@ import { templateCustomFields } from "../../db/schema/templateCustomFields";
 
 export class TemplateService {
   static async createTemplate(data: any) {
-  const result = await db.insert(templates).values({
+  // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, data.categoryId),
+            eq(categories.doctorId, data.doctorId)
+        )
+    );
+
+if (!category) {
+    return {
+        success: false,
+        message: "Category not found.",
+    };
+}
+
+const result = await db.insert(templates).values({
     doctorId: data.doctorId,
-
     categoryId: data.categoryId,
-
     templateName: data.procedureName,
-
     procedureName: data.procedureName,
-
     diagnosisTemplate: data.diagnosisTemplate,
-
     intraoperativeFindings: data.intraoperativeFindings,
-
     procedureDetailsTemplate: data.procedureDetailsTemplate,
-  });
+});
 
   const templateId = result[0].insertId;
 
@@ -98,6 +110,24 @@ return {
   data: any,
 ) {
 
+  // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, data.categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return {
+        success: false,
+        message: "Category not found.",
+    };
+}
+
   // Update template
 
   await db
@@ -159,27 +189,94 @@ return {
   );
 }
 
-  static async getByCategoryId(doctorId: number, categoryId: number) {
-    return await db
-      .select({
-        id: templates.id,
+static async getByCategoryId(
+  doctorId: number,
+  categoryId: number,
+) {
+  // Verify category belongs to logged-in doctor
+  const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+      and(
+        eq(categories.id, categoryId),
+        eq(categories.doctorId, doctorId),
+      ),
+    );
 
-        templateName: templates.templateName,
-
-        description: templates.description,
-
-        categoryId: templates.categoryId,
-      })
-      .from(templates)
-      .where(
-        and(
-          eq(templates.doctorId, doctorId),
-
-          eq(templates.categoryId, categoryId),
-        ),
-      );
+  if (!category) {
+    return {
+      success: false,
+      message: "Category not found.",
+    };
   }
+
+  // Fetch templates
+  const templateList = await db
+    .select({
+      id: templates.id,
+      categoryId: templates.categoryId,
+      procedureName: templates.procedureName,
+      diagnosisTemplate: templates.diagnosisTemplate,
+      intraoperativeFindings:
+        templates.intraoperativeFindings,
+      procedureDetailsTemplate:
+        templates.procedureDetailsTemplate,
+    })
+    .from(templates)
+    .where(
+      and(
+        eq(templates.doctorId, doctorId),
+        eq(templates.categoryId, categoryId),
+      ),
+    );
+
+  // Fetch custom fields for each template
+  const result = await Promise.all(
+    templateList.map(async (template) => {
+      const customFields = await db
+        .select({
+          id: templateCustomFields.id,
+          fieldLabel: templateCustomFields.fieldLabel,
+          fieldType: templateCustomFields.fieldType,
+          fieldOptions: templateCustomFields.fieldOptions,
+        })
+        .from(templateCustomFields)
+        .where(
+          eq(
+            templateCustomFields.templateId,
+            template.id,
+          ),
+        );
+
+      return {
+        ...template,
+        customFields,
+      };
+    }),
+  );
+
+  return result;
+}
   static async getByCategory(doctorId: number, categoryId: number) {
+
+    // Verify category belongs to logged-in doctor
+const [category] = await db
+    .select()
+    .from(categories)
+    .where(
+        and(
+            eq(categories.id, categoryId),
+            eq(categories.doctorId, doctorId)
+        )
+    );
+
+if (!category) {
+    return {
+        success: false,
+        message: "Category not found.",
+    };
+}
     return await db
       .select()
       .from(templates)
