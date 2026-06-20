@@ -2,34 +2,32 @@ import { pool } from "../../db";
 
 export class SurgeryStaffRepository {
 
-  async create(data: any) {
+async create(data: any) {
 
-    const [result]: any = await pool.query(
-      `
-      INSERT INTO surgery_staff_masters
-      (
-        doctor_id,
-        staff_type_id,
-        name,
-        qualification,
-        category_id,
-        mobile
-      )
-      VALUES
-      (?, ?, ?, ?, ?)
-      `,
-      [
-        data.doctorId,
-        data.staffTypeId,
-        data.name,
-        data.categoryid,
-        data.qualification ?? null,
-        data.mobile ?? null
-      ]
-    );
+  const [result]: any = await pool.query(
+    `
+    INSERT INTO surgery_staff_masters
+    (
+      doctor_id,
+      staff_type_id,
+      name,
+      qualification,
+      mobile
+    )
+    VALUES
+    (?, ?, ?, ?, ?)
+    `,
+    [
+      data.doctorId,
+      data.staffTypeId,
+      data.name,
+      data.qualification ?? null,
+      data.mobile ?? null
+    ]
+  );
 
-    return result.insertId;
-  }
+  return result.insertId;
+}
 
 
   async search(doctorId: number, keyword: string) {

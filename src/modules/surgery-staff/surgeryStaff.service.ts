@@ -11,12 +11,17 @@ export class SurgeryStaffService {
     const id = await this.repository.create(data);
 
     return {
-      success: true,
-      message: "Staff created successfully",
-      data: {
-        id
-      }
-    };
+  success: true,
+  message: "Staff created successfully",
+  data: {
+    id,
+    doctorId: data.doctorId,
+    staffTypeId: data.staffTypeId,
+    name: data.name,
+    qualification: data.qualification,
+    mobile: data.mobile
+  }
+};
 
   } catch (error: any) {
 
