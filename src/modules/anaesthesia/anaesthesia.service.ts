@@ -1,5 +1,6 @@
 import { AnaesthesiaRepository }
 from "./anaesthesia.repository";
+import { anaesthesiaMasters } from "../../db/schema/anaesthesiaMasters";
 
 export class AnaesthesiaService {
 
@@ -10,15 +11,15 @@ export class AnaesthesiaService {
 
     try {
 
-      const id =
-        await this.repository.create(data);
+      const anaesthesia =
+  await this.repository.create(data);
 
-      return {
-        success: true,
-        message:
-          "Anaesthesia created successfully",
-        data: { id }
-      };
+return {
+  success: true,
+  message:
+    "Anaesthesia created successfully",
+  data: anaesthesia
+};
 
     } catch (error: any) {
 
@@ -101,22 +102,25 @@ export class AnaesthesiaService {
     };
   }
 
-  async search(
-    doctorId: number,
-    keyword: string
-  ) {
+async search(
+  doctorId: number,
+  categoryId: number,
+  keyword: string
+) {
 
-    const data =
-      await this.repository.search(
-        doctorId,
-        keyword
-      );
+  const data =
+    await this.repository.search(
+      doctorId,
+      categoryId,
+      keyword
+    );
 
-    return {
-      success: true,
-      message:
-        "Anaesthesia search completed",
-      data
-    };
-  }
+  return {
+    success: true,
+    message:
+      "Anaesthesia search completed",
+    data
+  };
+
+}
 }

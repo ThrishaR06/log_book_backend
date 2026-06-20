@@ -4,45 +4,91 @@ export class AnaesthesiaRepository {
 
   async create(data: any) {
 
-    const [result]: any = await pool.query(
-      `
-      INSERT INTO anaesthesia_masters
-      (
-        doctor_id,
-        category_id,
-        anaesthesia_name
-      )
-      VALUES
-      (?, ?)
-      `,
-      [
-        data.doctorId,
-        data.categoryId,
-        data.anaesthesiaName
-      ]
-    );
+  // Verify category belongs to logged-in doctor
+  const [category]: any = await pool.query(
+    `
+    SELECT id
+    FROM categories
+    WHERE id = ?
+      AND doctor_id = ?
+    LIMIT 1
+    `,
+    [
+      data.categoryId,
+      data.doctorId
+    ]
+  );
 
-    return result.insertId;
+  if (category.length === 0) {
+    throw new Error("Category not found.");
   }
 
-  async list(
-  doctorId: number,
-  categoryId: number
-) {
+  const [result]: any = await pool.query(
+    `
+    INSERT INTO anaesthesia_masters
+    (
+      doctor_id,
+      category_id,
+      anaesthesia_name
+    )
+    VALUES
+    (?, ?, ?)
+    `,
+    [
+      data.doctorId,
+      data.categoryId,
+      data.anaesthesiaName
+    ]
+  );
 
   const [rows]: any = await pool.query(
     `
     SELECT *
     FROM anaesthesia_masters
-    WHERE doctor_id = ?
-      AND category_id = ?
-    ORDER BY id DESC
+    WHERE id = ?
     `,
-    [doctorId, categoryId]
+    [result.insertId]
   );
 
-  return rows;
+  return rows[0];
 }
+  async list(
+    doctorId: number,
+    categoryId: number
+  ) {
+
+    // Verify category belongs to logged-in doctor
+const [category]: any = await pool.query(
+  `
+  SELECT id
+  FROM categories
+  WHERE id = ?
+    AND doctor_id = ?
+  LIMIT 1
+  `,
+  [
+    categoryId,
+    doctorId
+  ]
+);
+
+if (category.length === 0) {
+  throw new Error("Category not found.");
+}
+
+    const [rows]: any = await pool.query(
+      `
+      SELECT *
+      FROM anaesthesia_masters
+      WHERE doctor_id = ?
+        AND category_id = ?
+      ORDER BY id DESC
+      `,
+      [doctorId, categoryId]
+    );
+
+    return rows;
+  }
 
   async findAll(doctorId: number) {
 
@@ -100,25 +146,47 @@ export class AnaesthesiaRepository {
     );
   }
 
-  async search(
-    doctorId: number,
-    keyword: string
-  ) {
+ async search(
+  doctorId: number,
+  categoryId: number,
+  keyword: string
+) {
 
-    const [rows]: any = await pool.query(
-      `
-      SELECT *
-      FROM anaesthesia_masters
-      WHERE doctor_id = ?
-      AND anaesthesia_name LIKE ?
-      ORDER BY anaesthesia_name ASC
-      `,
-      [
-        doctorId,
-        `%${keyword}%`
-      ]
-    );
+  // Verify category belongs to logged-in doctor
+  const [category]: any = await pool.query(
+    `
+    SELECT id
+    FROM categories
+    WHERE id = ?
+      AND doctor_id = ?
+    LIMIT 1
+    `,
+    [
+      categoryId,
+      doctorId
+    ]
+  );
 
-    return rows;
+  if (category.length === 0) {
+    throw new Error("Category not found.");
   }
+
+  const [rows]: any = await pool.query(
+    `
+    SELECT *
+    FROM anaesthesia_masters
+    WHERE doctor_id = ?
+      AND category_id = ?
+      AND anaesthesia_name LIKE ?
+    ORDER BY anaesthesia_name ASC
+    `,
+    [
+      doctorId,
+      categoryId,
+      `%${keyword}%`
+    ]
+  );
+
+  return rows;
+}
 }

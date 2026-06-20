@@ -3,10 +3,13 @@ from "./anaesthesia.service";
 
 export class AnaesthesiaController {
 
+  
+
   private service =
     new AnaesthesiaService();
 
   create(body: any) {
+    
     return this.service.create(body);
   }
 
@@ -35,13 +38,15 @@ export class AnaesthesiaController {
   }
 
   search(
-    doctorId: number,
-    keyword: string
-  ) {
-    return this.service.search(
-      doctorId,
-      keyword
-    );
+  doctorId: number,
+  categoryId: number,
+  keyword: string
+) {
+   return this.service.search(
+  doctorId,
+  categoryId,
+  keyword
+);
   }
   list(
   doctorId: number,
