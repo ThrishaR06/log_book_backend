@@ -15,9 +15,6 @@ export const anaesthesiaMasters = mysqlTable(
     doctorId: bigint("doctor_id", { mode: "number" })
       .notNull(),
 
-    categoryId: bigint("category_id", { mode: "number" })
-      .notNull(),
-
     anaesthesiaName: varchar("anaesthesia_name", {
       length: 255,
     }).notNull(),
