@@ -32,6 +32,7 @@ import { postOpOrdersRoutes } from "./modules/postOpOrders/postOpOrders.routes";
 import { surgeryImagesRoutes } from "./modules/surgeryImages/surgeryImages.routes";
 import { surgeryFinanceRoutes } from "./modules/surgeryFinance/surgeryFinance.routes";
 import { surgeryCaseRoutes } from "./modules/surgeryCase/surgeryCase.routes";
+import { diagnosisMasterRoutes }from "./modules/diagnosisMaster/diagnosisMaster.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
 import { specimensMasterRoutes } from "./modules/specimens-master/specimensMaster.route";
@@ -79,4 +80,5 @@ export const app = new Elysia()
     .use(surgeryClinicalSelectionsRoutes)
     .use(surgeryImagesRoutes)
     .use(surgeryFinanceRoutes)
-    .use(surgeryCaseRoutes);
+    .use(surgeryCaseRoutes)
+    .use(diagnosisMasterRoutes);

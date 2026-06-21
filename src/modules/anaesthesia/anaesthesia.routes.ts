@@ -59,4 +59,19 @@ export const anaesthesiaRoutes = new Elysia({
   "/:id",
   ({ params }) =>
     controller.delete(Number(params.id))
+)
+.get(
+  "/list",
+  ({ query }) => {
+    const doctorId = Number(query.doctorId);
+
+    if (Number.isNaN(doctorId)) {
+      return {
+        success: false,
+        message: "doctorId must be a valid number"
+      };
+    }
+
+    return controller.getAll(doctorId);
+  }
 );
