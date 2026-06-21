@@ -4,26 +4,24 @@ export class IncisionRepository {
 
   async create(data: any) {
 
-    const [result]: any = await pool.query(
-      `
-      INSERT INTO incision_masters
-      (
-        doctor_id,
-        category_id,
-        incision_name
-      )
-      VALUES
-      (?, ?)
-      `,
-      [
-        data.doctorId,
-        data.categoryId,
-        data.incisionName
-      ]
-    );
+const [result]: any = await pool.query(
+  `
+  INSERT INTO incision_masters
+  (
+    doctor_id,
+    incision_name
+  )
+  VALUES
+  (?, ?)
+  `,
+  [
+    data.doctorId,
+    data.incisionName
+  ]
+);
 
-    return result.insertId;
-  }
+return result.insertId;
+}
 
   async findAll(doctorId: number) {
 
@@ -103,22 +101,19 @@ export class IncisionRepository {
     return rows;
   }
 
-  async list(
-  doctorId: number,
-  categoryId: number
-) {
+  async list(doctorId: number) {
 
-  const [rows]: any = await pool.query(
-    `
-    SELECT *
-    FROM incision_masters
-    WHERE doctor_id = ?
-      AND category_id = ?
-    ORDER BY id DESC
-    `,
-    [doctorId, categoryId]
-  );
+const [rows]: any = await pool.query(
+  `
+  SELECT *
+  FROM incision_masters
+  WHERE doctor_id = ?
+  ORDER BY id DESC
+  `,
+  [doctorId]
+);
 
-  return rows;
+return rows;
 }
+
 }

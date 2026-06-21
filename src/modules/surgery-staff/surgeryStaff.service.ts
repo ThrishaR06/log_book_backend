@@ -47,16 +47,10 @@ async search(doctorId: number, keyword: string) {
   };
 }
 
-async list(
-  doctorId: number,
-  categoryId: number
-) {
+async list(doctorId: number) {
 
   const data =
-    await this.repository.list(
-      doctorId,
-      categoryId
-    );
+    await this.repository.list(doctorId);
 
   return {
     success: true,

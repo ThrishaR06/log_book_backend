@@ -26,21 +26,15 @@ export class IncisionService {
     };
   }
 
-  async list(
-  doctorId: number,
-  categoryId: number
-) {
+ async list(doctorId: number) {
 
-  const data = await this.repository.list(
-    doctorId,
-    categoryId
-  );
+const data = await this.repository.list(doctorId);
 
-  return {
-    success: true,
-    message: "Incisions fetched successfully",
-    data
-  };
+return {
+  success: true,
+  message: "Incisions fetched successfully",
+  data
+};
 }
 
   async getById(id: number) {
