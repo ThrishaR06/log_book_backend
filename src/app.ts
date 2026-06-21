@@ -39,6 +39,7 @@ import { monitoringMasterRoutes } from "./modules/monitoringMaster/monitoring.ro
 import { dietMasterRoutes } from "./modules/dietMaster/diet.route";
 import { woundCareMasterRoutes } from "./modules/woundCareMasters/woundCare.route";
 import { drainManagementMasterRoutes } from "./modules/drainManagementMaster/drainManagement.route";
+import { followUpMasterRoutes } from "./modules/followUpMaster/followUp.route";
 import { specialInstructionMasterRoutes } from "./modules/specialInstructionMasters/specialInstruction.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
@@ -95,4 +96,5 @@ export const app = new Elysia()
     .use(dietMasterRoutes)
     .use(drainManagementMasterRoutes)
     .use(woundCareMasterRoutes)
-    .use(specialInstructionMasterRoutes);
+    .use(specialInstructionMasterRoutes)
+    .use(followUpMasterRoutes);
