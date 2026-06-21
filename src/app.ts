@@ -41,6 +41,7 @@ import { woundCareMasterRoutes } from "./modules/woundCareMasters/woundCare.rout
 import { drainManagementMasterRoutes } from "./modules/drainManagementMaster/drainManagement.route";
 import { followUpMasterRoutes } from "./modules/followUpMaster/followUp.route";
 import { followUpImagingMasterRoutes } from "./modules/followUpImagingMaster/followUpImaging.route";
+import { surgeryStaffTypeRoutes } from "./modules/surgeryStaffType/surgeryStaffType.route";
 import { specialInstructionMasterRoutes } from "./modules/specialInstructionMasters/specialInstruction.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
@@ -99,4 +100,5 @@ export const app = new Elysia()
     .use(woundCareMasterRoutes)
     .use(specialInstructionMasterRoutes)
     .use(followUpMasterRoutes)
-    .use(followUpImagingMasterRoutes);
+    .use(followUpImagingMasterRoutes)
+    .use(surgeryStaffTypeRoutes);
