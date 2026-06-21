@@ -37,6 +37,7 @@ import { operativeFindingsRoutes } from "./modules/operativeFindings/operativeFi
 import { procedureDetailsRoutes } from "./modules/procedureDetails/procedureDetails.route";
 import { monitoringMasterRoutes } from "./modules/monitoringMaster/monitoring.route";
 import { dietMasterRoutes } from "./modules/dietMaster/diet.route";
+import { woundCareMasterRoutes } from "./modules/woundCareMasters/woundCare.route";
 import { drainManagementMasterRoutes } from "./modules/drainManagementMaster/drainManagement.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
@@ -91,4 +92,5 @@ export const app = new Elysia()
     .use(procedureDetailsRoutes)
     .use(monitoringMasterRoutes)
     .use(dietMasterRoutes)
-    .use(drainManagementMasterRoutes);
+    .use(drainManagementMasterRoutes)
+    .use(woundCareMasterRoutes);
