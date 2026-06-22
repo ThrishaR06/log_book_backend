@@ -36,12 +36,10 @@ export class IncisionController {
   }
 
   list(
-  doctorId: number,
-  categoryId: number
-) {
-  return this.service.list(
-    doctorId,
-    categoryId
-  );
-}
+    doctorId: number
+  ) {
+    return this.service.list(
+      doctorId
+    );
+  }
 }

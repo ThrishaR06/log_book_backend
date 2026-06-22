@@ -67,10 +67,7 @@ async create(data: any) {
   return rows;
 }
 
-async list(
-  doctorId: number,
-  categoryId: number
-) {
+async list(doctorId: number) {
 
   const [rows]: any = await pool.query(
     `
@@ -81,10 +78,9 @@ async list(
     LEFT JOIN surgery_staff_types sst
       ON sst.id = ssm.staff_type_id
     WHERE ssm.doctor_id = ?
-      AND ssm.category_id = ?
     ORDER BY ssm.id DESC
     `,
-    [doctorId, categoryId]
+    [doctorId]
   );
 
   return rows;

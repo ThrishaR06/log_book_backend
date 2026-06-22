@@ -35,6 +35,14 @@ import { surgeryCaseRoutes } from "./modules/surgeryCase/surgeryCase.routes";
 import { diagnosisMasterRoutes }from "./modules/diagnosisMaster/diagnosisMaster.route";
 import { operativeFindingsRoutes } from "./modules/operativeFindings/operativeFindings.route";
 import { procedureDetailsRoutes } from "./modules/procedureDetails/procedureDetails.route";
+import { monitoringMasterRoutes } from "./modules/monitoringMaster/monitoring.route";
+import { dietMasterRoutes } from "./modules/dietMaster/diet.route";
+import { woundCareMasterRoutes } from "./modules/woundCareMasters/woundCare.route";
+import { drainManagementMasterRoutes } from "./modules/drainManagementMaster/drainManagement.route";
+import { followUpMasterRoutes } from "./modules/followUpMaster/followUp.route";
+import { followUpImagingMasterRoutes } from "./modules/followUpImagingMaster/followUpImaging.route";
+import { surgeryStaffTypeRoutes } from "./modules/surgeryStaffType/surgeryStaffType.route";
+import { specialInstructionMasterRoutes } from "./modules/specialInstructionMasters/specialInstruction.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
 import { specimensMasterRoutes } from "./modules/specimens-master/specimensMaster.route";
@@ -85,4 +93,12 @@ export const app = new Elysia()
     .use(surgeryCaseRoutes)
     .use(diagnosisMasterRoutes)
     .use(operativeFindingsRoutes)
-    .use(procedureDetailsRoutes);
+    .use(procedureDetailsRoutes)
+    .use(monitoringMasterRoutes)
+    .use(dietMasterRoutes)
+    .use(drainManagementMasterRoutes)
+    .use(woundCareMasterRoutes)
+    .use(specialInstructionMasterRoutes)
+    .use(followUpMasterRoutes)
+    .use(followUpImagingMasterRoutes)
+    .use(surgeryStaffTypeRoutes);
