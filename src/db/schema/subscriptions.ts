@@ -2,10 +2,14 @@ import {
     mysqlTable,
     bigint,
     varchar,
-    timestamp,
+    decimal,
+    mysqlEnum,
+    datetime,
+    timestamp
 } from "drizzle-orm/mysql-core";
 
 export const subscriptions = mysqlTable("subscriptions", {
+
     id: bigint("id", { mode: "number" })
         .primaryKey()
         .autoincrement(),
@@ -13,17 +17,41 @@ export const subscriptions = mysqlTable("subscriptions", {
     doctorId: bigint("doctor_id", { mode: "number" })
         .notNull(),
 
-    plan: varchar("plan", { length: 50 })
+    planId: bigint("plan_id", { mode: "number" })
         .notNull(),
 
-    status: varchar("status", { length: 20 })
-        .notNull(),
+    orderId: varchar("order_id", { length: 100 }),
 
-    startDate: timestamp("start_date")
-        .defaultNow(),
+    paymentId: varchar("payment_id", { length: 100 }),
 
-    endDate: timestamp("end_date"),
+    paymentStatus: mysqlEnum("payment_status", [
+        "PENDING",
+        "SUCCESS",
+        "FAILED",
+        "CANCELLED"
+    ]).default("PENDING"),
+
+    amount: decimal("amount", {
+        precision: 10,
+        scale: 2
+    }),
+
+    startDate: datetime("start_date"),
+
+    expiryDate: datetime("expiry_date"),
+
+    transactionId: varchar("transaction_id", {
+        length: 150
+    }),
+
+    paymentMethod: varchar("payment_method", {
+        length: 50
+    }),
 
     createdAt: timestamp("created_at")
         .defaultNow(),
+
+    updatedAt: timestamp("updated_at")
+        .defaultNow()
+
 });

@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
+import "dotenv/config";
 
 import * as hospitals from "./schema/hospitals";
 import * as doctors from "./schema/doctors";

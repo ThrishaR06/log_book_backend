@@ -45,22 +45,22 @@ export const authMiddleware = async ({ cookie, store }: any) => {
 
         // Attach authenticated user
         store.user = {
-            id: decoded.id,
-            role: decoded.role,
-            subscription: current
-                ? {
-                      plan: current.plan,
-                      status: current.status,
-                      startDate: current.startDate,
-                      endDate: current.endDate,
-                  }
-                : {
-                      plan: "free",
-                      status: "active",
-                      startDate: null,
-                      endDate: null,
-                  },
-        };
+    id: decoded.id,
+    role: decoded.role,
+    subscription: current
+        ? {
+              planId: current.planId,
+              paymentStatus: current.paymentStatus,
+              startDate: current.startDate,
+              expiryDate: current.expiryDate,
+          }
+        : {
+              planId: null,
+              paymentStatus: "PENDING",
+              startDate: null,
+              expiryDate: null,
+          },
+};
     } catch (error) {
         return {
             success: false,

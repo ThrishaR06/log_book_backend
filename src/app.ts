@@ -13,7 +13,6 @@ import { adminRoutes } from "./modules/admin/admin.routes";
 import { exportRoutes } from "./modules/exports/export.routes";
 import { notificationRoutes } from "./modules/notifications/notification.routes";
 import { masterPresetRoutes } from "./modules/master-presets/masterPreset.route";
-import { subscriptionRoutes } from "./modules/subscriptions/subscription.routes";
 
 import { categoryRoutes } from "./modules/categories/category.route";
 import { masterCategoryRoutes } from "./modules/master-categories/masterCategory.route";
@@ -42,6 +41,7 @@ import { drainManagementMasterRoutes } from "./modules/drainManagementMaster/dra
 import { followUpMasterRoutes } from "./modules/followUpMaster/followUp.route";
 import { followUpImagingMasterRoutes } from "./modules/followUpImagingMaster/followUpImaging.route";
 import { surgeryStaffTypeRoutes } from "./modules/surgeryStaffType/surgeryStaffType.route";
+import { subscriptionRoutes } from "./modules/subscription/subscription.route";
 import { specialInstructionMasterRoutes } from "./modules/specialInstructionMasters/specialInstruction.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
@@ -101,4 +101,5 @@ export const app = new Elysia()
     .use(specialInstructionMasterRoutes)
     .use(followUpMasterRoutes)
     .use(followUpImagingMasterRoutes)
-    .use(surgeryStaffTypeRoutes);
+    .use(surgeryStaffTypeRoutes)
+    .use(subscriptionRoutes);
