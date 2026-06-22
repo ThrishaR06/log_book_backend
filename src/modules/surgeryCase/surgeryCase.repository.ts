@@ -172,6 +172,28 @@ export class SurgeryCaseRepository {
     return rows[0].doctor_id;
 }
 
+async getDoctorInfoBySurgeryId(surgeryId: number) {
+
+  const [rows]: any = await pool.query(
+    `
+    SELECT
+      d.id,
+      d.full_name AS name
+    FROM surgeries s
+    INNER JOIN doctors d
+      ON d.id = s.doctor_id
+    WHERE s.id = ?
+    `,
+    [surgeryId]
+  );
+
+  if (!rows.length) {
+    throw new Error("Surgery not found");
+  }
+
+  return rows[0];
+}
+
 async findById(id: number) {
 
   const [rows]: any = await pool.query(

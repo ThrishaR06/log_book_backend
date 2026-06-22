@@ -4,40 +4,42 @@ import { SurgeryCaseController } from "./surgeryCase.controller";
 const controller = new SurgeryCaseController();
 
 export const surgeryCaseRoutes = new Elysia({
-    prefix: "/surgery-cases",
+  prefix: "/surgery-cases",
 })
 
 .post("/", async ({ request }) => {
 
-    const formData = await request.formData();
+  const formData = await request.formData();
 
-    const body: any = {};
+  const body: any = {};
 
-    for (const [key, value] of formData.entries()) {
+  for (const [key, value] of formData.entries()) {
 
-        if (
-            key === "preOpImages" ||
-            key === "intraOpImages" ||
-            key === "postOpImages"
-        ) {
+    if (
+      key === "preOpImages" ||
+      key === "intraOpImages" ||
+      key === "postOpImages"
+    ) {
 
-            if (!body[key]) {
-                body[key] = [];
-            }
+      if (!body[key]) {
+        body[key] = [];
+      }
 
-            body[key].push(value);
+      body[key].push(value);
 
-        } else {
+    } else {
 
-            body[key] = value;
-        }
+      body[key] = value;
     }
+  }
 
-    console.log("BODY =", body);
-    console.log("PRE OP =", body.preOpImages);
-    console.log("INTRA OP =", body.intraOpImages);
-    console.log("POST OP =", body.postOpImages);
+  return controller.create(body);
 
-    return controller.create(body);
+})
 
-});
+.get(
+  "/:id",
+  async ({ params }) => {
+    return await controller.getById(params);
+  }
+);
