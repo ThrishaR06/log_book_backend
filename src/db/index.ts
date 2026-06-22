@@ -16,6 +16,9 @@ import * as masterCategories from "./schema/masterCategories";
 import * as surgeryClinicalDetails from "./schema/surgeryClinicalDetails";
 import * as sessions from "./schema/sessions";
 import * as surgeryStaffMasters from "./schema/surgeryStaffMasters";
+import * as surgeryCases from "./schema/surgeryCases";
+import * as media from "./schema/media.schema";
+import * as relations from "./schema/relations";
 
 
 
@@ -45,6 +48,9 @@ export const db = drizzle(pool, {
         ...surgeryClinicalDetails,
         ...sessions,
         ...surgeryStaffMasters,
+        ...surgeryCases,
+        ...media,
+        ...relations,
     },
     mode: "default",
 });

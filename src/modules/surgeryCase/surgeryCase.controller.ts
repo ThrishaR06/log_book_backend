@@ -15,7 +15,10 @@ export class SurgeryCaseController {
 body.surgeryId = Number(body.surgeryId);
 
 // Fetch doctorId once
-const doctorId = await this.service.getDoctorId(body.surgeryId);
+const doctor =
+  await this.service.getDoctorInfo(body.surgeryId);
+
+console.log("DOCTOR =", doctor);
 
 
     const preOpImages: string[] = [];
@@ -34,10 +37,10 @@ const doctorId = await this.service.getDoctorId(body.surgeryId);
      for (const file of files) {
 
     const path = await uploadToS3(
-        file,
-        "pre-op",
-        doctorId
-    );
+    file,
+    "pre-op",
+    doctor.name
+);
 
     preOpImages.push(path);
 }
@@ -53,10 +56,10 @@ const doctorId = await this.service.getDoctorId(body.surgeryId);
       for (const file of files) {
 
     const path = await uploadToS3(
-        file,
-        "intra-op",
-        doctorId
-    );
+    file,
+    "Intra-op",
+    doctor.name
+);
 
     intraOpImages.push(path);
 }
@@ -71,10 +74,10 @@ const doctorId = await this.service.getDoctorId(body.surgeryId);
       for (const file of files) {
 
     const path = await uploadToS3(
-        file,
-        "post-op",
-        doctorId
-    );
+    file,
+    "post-op",
+    doctor.name
+);
 
     postOpImages.push(path);
 }
@@ -145,4 +148,17 @@ const doctorId = await this.service.getDoctorId(body.surgeryId);
     // =============================
 
     return this.service.create(body);
-    }}}}
+    }}}
+
+    async getById(params: any) {
+
+  const id = Number(params.id);
+
+  if (!id) {
+    throw new Error("Invalid surgery case id");
+  }
+
+  return await this.service.getById(id);
+}
+
+  }
