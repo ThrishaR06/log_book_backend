@@ -24,6 +24,16 @@ export const admins = mysqlTable("admins", {
     })
         .notNull(),
 
+    role: varchar("role", {
+        length: 50,
+    })
+        .notNull(),
+
+    status: varchar("status", {
+        length: 20,
+    })
+        .notNull(),
+
     createdAt: timestamp("created_at")
         .defaultNow(),
 });

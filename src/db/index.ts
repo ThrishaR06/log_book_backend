@@ -20,6 +20,8 @@ import * as surgeryStaffMasters from "./schema/surgeryStaffMasters";
 import * as surgeryCases from "./schema/surgeryCases";
 import * as media from "./schema/media.schema";
 import * as relations from "./schema/relations";
+import * as adminSessions
+from "./schema/adminSessions";
 
 
 
@@ -52,6 +54,7 @@ export const db = drizzle(pool, {
         ...surgeryCases,
         ...media,
         ...relations,
+        ...adminSessions,
     },
     mode: "default",
 });
