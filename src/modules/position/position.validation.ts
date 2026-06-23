@@ -2,7 +2,6 @@ import { t } from "elysia";
 
 export const createPositionSchema = t.Object({
   doctorId: t.Number(),
-  categoryId: t.Number(),
   positionName: t.String()
 });
 

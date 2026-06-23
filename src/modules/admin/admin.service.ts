@@ -318,18 +318,14 @@ static async createPlan(
     }
 
     const result = await db
-        .insert(subscriptionPlans)
-        .values({
-            name: String(body.name),
+    .insert(subscriptionPlans)
+    .values({
+        name: String(body.name),
 
-            durationDays: Number(
-                body.durationDays
-            ),
+        durationDays: Number(body.durationDays),
 
-            amount: Number(
-                body.amount
-            ),
-        });
+        amount: String(body.amount),
+    });
 
     return {
         id: Number(
@@ -367,10 +363,7 @@ static async updatePlan(
                     body.durationDays
                 ),
 
-            amount:
-                Number(
-                    body.amount
-                ),
+            amount: String(body.amount),
         })
         .where(
             eq(

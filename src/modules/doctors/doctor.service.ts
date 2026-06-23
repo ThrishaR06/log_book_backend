@@ -38,14 +38,28 @@ export class DoctorService {
 
   const doctorId = result[0].insertId;
 
-  // ✅ CREATE DEFAULT SUBSCRIPTION
-  await db.insert(subscriptions).values({
+  // Fetch FREE plan
+const freePlan = await db
+    .select()
+    .from(subscriptionPlans)
+    .where(eq(subscriptionPlans.name, "FREE"));
+
+if (!freePlan.length) {
+    throw new Error("FREE subscription plan not found.");
+}
+
+// Create FREE subscription
+await db.insert(subscriptions).values({
     doctorId: doctorId,
-    plan: "FREE",
-    status: "active",
+    planId: freePlan[0].id,
+    amount: freePlan[0].amount,
+    paymentStatus: "SUCCESS",
     startDate: new Date(),
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-  });
+    expiryDate: new Date(
+        Date.now() +
+        Number(freePlan[0].durationDays) * 24 * 60 * 60 * 1000
+    ),
+});
 
   return {
     success: true,
@@ -97,7 +111,6 @@ await db.insert(sessions).values({
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 });
   // ✅ FETCH SUBSCRIPTION
-  // ✅ FETCH SUBSCRIPTION
 const subscription = await db
   .select()
   .from(subscriptions)
@@ -109,18 +122,16 @@ if (subscription.length > 0) {
   const planData = await db
     .select()
     .from(subscriptionPlans)
-    .where(
-      eq(
-        subscriptionPlans.name,
-        subscription[0].plan.toLowerCase()
-      )
-    );
+    .where(eq(subscriptionPlans.id, subscription[0].planId));
 
   subscriptionData = {
-    planId: planData.length ? planData[0].id : null,
-    plan: subscription[0].plan,
-    status: subscription[0].status,
-    endDate: subscription[0].endDate,
+    planId: subscription[0].planId,
+    plan: planData.length ? planData[0].name : null,
+    amount: planData.length ? planData[0].amount : null,
+    durationDays: planData.length ? planData[0].durationDays : null,
+    paymentStatus: subscription[0].paymentStatus,
+    startDate: subscription[0].startDate,
+    expiryDate: subscription[0].expiryDate,
   };
 }
 
