@@ -10,3 +10,5 @@ export * from "./specimensMaster";
 export * from "./additionalNotesMaster";
 export * from "./anaesthesiaMasters";
 export * from "./monitoringMasters";
+export * from "./admins";
+export * from "./adminSessions";

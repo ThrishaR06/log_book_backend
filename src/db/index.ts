@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
+import "dotenv/config";
 
 import * as hospitals from "./schema/hospitals";
 import * as doctors from "./schema/doctors";
@@ -19,6 +20,8 @@ import * as surgeryStaffMasters from "./schema/surgeryStaffMasters";
 import * as surgeryCases from "./schema/surgeryCases";
 import * as media from "./schema/media.schema";
 import * as relations from "./schema/relations";
+import * as adminSessions
+from "./schema/adminSessions";
 
 
 
@@ -51,6 +54,7 @@ export const db = drizzle(pool, {
         ...surgeryCases,
         ...media,
         ...relations,
+        ...adminSessions,
     },
     mode: "default",
 });
