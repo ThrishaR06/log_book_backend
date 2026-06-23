@@ -2,108 +2,97 @@ import { pool } from "../../db";
 
 export class SurgeryStaffRepository {
 
-async create(data: any) {
+  async create(data: any) {
 
-  const [result]: any = await pool.query(
-    `
-    INSERT INTO surgery_staff_masters
-    (
-      doctor_id,
-      staff_type_id,
-      name,
-      qualification,
-      mobile
-    )
-    VALUES
-    (?, ?, ?, ?, ?)
-    `,
-    [
-      data.doctorId,
-      data.staffTypeId,
-      data.name,
-      data.qualification ?? null,
-      data.mobile ?? null
-    ]
-  );
+    const [result]: any = await pool.query(
+      `
+      INSERT INTO surgery_staff_masters
+      (
+        doctor_id,
+        staff_type,
+        name,
+        qualification,
+        mobile
+      )
+      VALUES
+      (?, ?, ?, ?, ?)
+      `,
+      [
+        data.doctorId,
+        data.staffType,
+        data.name,
+        data.qualification ?? null,
+        data.mobile ?? null
+      ]
+    );
 
-  return result.insertId;
-}
-
+    return result.insertId;
+  }
 
   async search(doctorId: number, keyword: string) {
 
-  const searchKeyword = `%${keyword}%`;
+    const searchKeyword = `%${keyword}%`;
 
-  const [rows]: any = await pool.query(
-    `
-    SELECT
-      ssm.id,
-      ssm.doctor_id,
-      ssm.staff_type_id,
-      sst.name AS staff_type_name,
-      ssm.name,
-      ssm.qualification,
-      ssm.mobile,
-      ssm.created_at
-    FROM surgery_staff_masters ssm
-    LEFT JOIN surgery_staff_types sst
-      ON sst.id = ssm.staff_type_id
-    WHERE ssm.doctor_id = ?
-      AND (
-        ssm.name LIKE ?
-        OR ssm.mobile LIKE ?
-        OR ssm.qualification LIKE ?
-      )
-    ORDER BY ssm.name ASC
-    `,
-    [
-      doctorId,
-      searchKeyword,
-      searchKeyword,
-      searchKeyword
-    ]
-  );
+    const [rows]: any = await pool.query(
+      `
+      SELECT
+        id,
+        doctor_id,
+        staff_type,
+        name,
+        qualification,
+        mobile,
+        created_at
+      FROM surgery_staff_masters
+      WHERE doctor_id = ?
+        AND (
+          name LIKE ?
+          OR mobile LIKE ?
+          OR qualification LIKE ?
+        )
+      ORDER BY name ASC
+      `,
+      [
+        doctorId,
+        searchKeyword,
+        searchKeyword,
+        searchKeyword
+      ]
+    );
 
-  return rows;
-}
+    return rows;
+  }
 
-async list(doctorId: number) {
+  async list(doctorId: number) {
 
-  const [rows]: any = await pool.query(
-    `
-    SELECT
-      ssm.*,
-      sst.name AS staff_type_name
-    FROM surgery_staff_masters ssm
-    LEFT JOIN surgery_staff_types sst
-      ON sst.id = ssm.staff_type_id
-    WHERE ssm.doctor_id = ?
-    ORDER BY ssm.id DESC
-    `,
-    [doctorId]
-  );
+    const [rows]: any = await pool.query(
+      `
+      SELECT *
+      FROM surgery_staff_masters
+      WHERE doctor_id = ?
+      ORDER BY id DESC
+      `,
+      [doctorId]
+    );
 
-  return rows;
-}
+    return rows;
+  }
 
   async findAll(doctorId: number) {
 
     const [rows]: any = await pool.query(
       `
       SELECT
-        ssm.id,
-        ssm.doctor_id,
-        ssm.staff_type_id,
-        sst.name AS staff_type_name,
-        ssm.name,
-        ssm.qualification,
-        ssm.mobile,
-        ssm.created_at
-      FROM surgery_staff_masters ssm
-      LEFT JOIN surgery_staff_types sst
-        ON sst.id = ssm.staff_type_id
-      WHERE ssm.doctor_id = ?
-      ORDER BY ssm.id DESC
+        id,
+        doctor_id,
+        staff_type,
+        name,
+        qualification,
+        mobile,
+        created_at
+      FROM surgery_staff_masters
+      WHERE doctor_id = ?
+      ORDER BY id DESC
       `,
       [doctorId]
     );
@@ -116,18 +105,15 @@ async list(doctorId: number) {
     const [rows]: any = await pool.query(
       `
       SELECT
-        ssm.id,
-        ssm.doctor_id,
-        ssm.staff_type_id,
-        sst.name AS staff_type_name,
-        ssm.name,
-        ssm.qualification,
-        ssm.mobile,
-        ssm.created_at
-      FROM surgery_staff_masters ssm
-      LEFT JOIN surgery_staff_types sst
-        ON sst.id = ssm.staff_type_id
-      WHERE ssm.id = ?
+        id,
+        doctor_id,
+        staff_type,
+        name,
+        qualification,
+        mobile,
+        created_at
+      FROM surgery_staff_masters
+      WHERE id = ?
       `,
       [id]
     );
@@ -136,32 +122,30 @@ async list(doctorId: number) {
   }
 
   async searchDropdown(
-  doctorId: number,
-  keyword: string
-) {
+    doctorId: number,
+    keyword: string
+  ) {
 
-  const [rows]: any = await pool.query(
-    `
-    SELECT
-      ssm.id,
-      ssm.name AS label,
-      sst.name AS staffType
-    FROM surgery_staff_masters ssm
-    LEFT JOIN surgery_staff_types sst
-      ON sst.id = ssm.staff_type_id
-    WHERE ssm.doctor_id = ?
-      AND ssm.name LIKE ?
-    ORDER BY ssm.name
-    LIMIT 20
-    `,
-    [
-      doctorId,
-      `%${keyword}%`
-    ]
-  );
+    const [rows]: any = await pool.query(
+      `
+      SELECT
+        id,
+        name AS label,
+        staff_type
+      FROM surgery_staff_masters
+      WHERE doctor_id = ?
+        AND name LIKE ?
+      ORDER BY name
+      LIMIT 20
+      `,
+      [
+        doctorId,
+        `%${keyword}%`
+      ]
+    );
 
-  return rows;
-}
+    return rows;
+  }
 
   async update(id: number, data: any) {
 
@@ -169,14 +153,14 @@ async list(doctorId: number) {
       `
       UPDATE surgery_staff_masters
       SET
-        staff_type_id = ?,
+        staff_type = ?,
         name = ?,
         qualification = ?,
         mobile = ?
       WHERE id = ?
       `,
       [
-        data.staffTypeId,
+        data.staffType,
         data.name,
         data.qualification ?? null,
         data.mobile ?? null,
@@ -195,4 +179,32 @@ async list(doctorId: number) {
       [id]
     );
   }
+  async listByStaffType(
+    doctorId: number,
+    staffType: number
+) {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            id,
+            doctor_id,
+            staff_type,
+            name,
+            qualification,
+            mobile,
+            created_at
+        FROM surgery_staff_masters
+        WHERE doctor_id = ?
+          AND staff_type = ?
+        ORDER BY name ASC
+        `,
+        [
+            doctorId,
+            staffType
+        ]
+    );
+
+    return rows;
+}
 }

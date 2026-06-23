@@ -1,94 +1,130 @@
 import { SurgeryStaffRepository } from "./surgeryStaff.repository";
+import { ApiResponse } from "../../utils/apiResponse";
 
 export class SurgeryStaffService {
 
   private repository =
     new SurgeryStaffRepository();
 
- async create(data: any) {
+  async create(data: any) {
   try {
 
     const id = await this.repository.create(data);
 
-    return {
-  success: true,
-  message: "Staff created successfully",
-  data: {
-    id,
-    doctorId: data.doctorId,
-    staffTypeId: data.staffTypeId,
-    name: data.name,
-    qualification: data.qualification,
-    mobile: data.mobile
-  }
-};
+    return ApiResponse.success(
+      {
+        id,
+        doctorId: data.doctorId,
+        staffType: data.staffType,
+        name: data.name,
+        qualification: data.qualification,
+        mobile: data.mobile
+      },
+      "Staff created successfully"
+    );
 
   } catch (error: any) {
 
-    return {
-      success: false,
-      message: error.message,
-      data: null
-    };
+    return ApiResponse.error(
+      error.message
+    );
+
   }
 }
 
-async search(doctorId: number, keyword: string) {
+  async search(doctorId: number, keyword: string) {
 
   const staffs = await this.repository.search(
     doctorId,
     keyword
   );
 
-  return {
-    success: true,
-    message: "Staff search completed",
-    data: staffs
-  };
+  return ApiResponse.success(
+    staffs,
+    "Staff search completed"
+  );
 }
 
-async list(doctorId: number) {
+  async list(doctorId: number) {
 
   const data =
     await this.repository.list(doctorId);
 
-  return {
-    success: true,
-    message: "Staff fetched successfully",
-    data
-  };
-}
+  return ApiResponse.success(
+    data,
+    "Staff fetched successfully"
+  );
 
+}
 
   async getAll(doctorId: number) {
 
-    return this.repository.findAll(
-      doctorId
-    );
-  }
+  const data =
+    await this.repository.findAll(doctorId);
 
-  async getById(id: number) {
+  return ApiResponse.success(
+    data,
+    "Staff fetched successfully"
+  );
 
-    return this.repository.findById(id);
-  }
+}
 
-  async update(id: number, data: any) {
+async getById(id: number) {
 
-    await this.repository.update(id, data);
+  const data =
+    await this.repository.findById(id);
 
-    return {
-      message:
-        "Staff updated successfully"
-    };
-  }
+  return ApiResponse.success(
+    data,
+    "Staff fetched successfully"
+  );
+
+}
+
+async update(id: number, data: any) {
+
+  await this.repository.update(id, data);
+
+  return ApiResponse.success(
+    {
+      id,
+      doctorId: data.doctorId,
+      staffType: data.staffType,
+      name: data.name,
+      qualification: data.qualification,
+      mobile: data.mobile
+    },
+    "Staff updated successfully"
+  );
+
+}
 
   async delete(id: number) {
 
-    await this.repository.delete(id);
+  await this.repository.delete(id);
 
-    return {
-      message:
-        "Staff deleted successfully"
-    };
-  }
+  return ApiResponse.success(
+    null,
+    "Staff deleted successfully"
+  );
+
+}
+
+async listByStaffType(
+  doctorId: number,
+  staffType: number
+) {
+
+  const data =
+    await this.repository.listByStaffType(
+      doctorId,
+      staffType
+    );
+
+  return ApiResponse.success(
+    data,
+    "Staff fetched successfully"
+  );
+
+}
 }
