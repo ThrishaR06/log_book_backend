@@ -45,7 +45,6 @@ new Elysia({
  ({ query }) =>
  controller.list(
    Number(query.doctorId),
-   Number(query.categoryId)
  )
 )
 

@@ -7,15 +7,15 @@ export class IncisionService {
 
   async create(data: any) {
 
-    const id =
-      await this.repository.create(data);
+  const incision =
+    await this.repository.create(data);
 
-    return {
-      success: true,
-      message: "Incision created successfully",
-      data: { id }
-    };
-  }
+  return {
+    success: true,
+    message: "Incision created successfully",
+    data: incision
+  };
+}
 
   async getAll(doctorId: number) {
 

@@ -4,25 +4,37 @@ export class PositionRepository {
 
 async create(data: any) {
 
-  const [result]: any = await pool.query(
-    `
-    INSERT INTO position_masters
-    (
-      doctor_id,
-      category_id,
-      position_name
-    )
-    VALUES
-    (?, ?, ?)
-    `,
-    [
-      data.doctorId,
-      data.categoryId,
-      data.positionName
-    ]
-  );
+ const [result]: any = await pool.query(
+  `
+  INSERT INTO position_masters
+  (
+    doctor_id,
+    position_name
+  )
+  VALUES
+  (?, ?)
+  `,
+  [
+    data.doctorId,
+    data.positionName
+  ]
+);
 
-  return result.insertId;
+  const insertId = result.insertId;
+
+const [rows]: any = await pool.query(
+  `
+  SELECT
+    id,
+    doctor_id AS doctorId,
+    position_name AS positionName
+  FROM position_masters
+  WHERE id = ?
+  `,
+  [insertId]
+);
+
+return rows[0];
 }
 
   async findAll(doctorId: number) {

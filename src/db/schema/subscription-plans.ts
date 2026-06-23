@@ -1,23 +1,42 @@
 import {
-    mysqlTable,
-    bigint,
-    varchar,
-    timestamp,
+  mysqlTable,
+  bigint,
+  varchar,
+  timestamp,
+  decimal,
+  text,
+  tinyint,
 } from "drizzle-orm/mysql-core";
 
 export const subscriptionPlans = mysqlTable("subscription_plans", {
-    id: bigint("id", { mode: "number" })
-        .primaryKey()
-        .autoincrement(),
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .autoincrement(),
 
-    name: varchar("name", { length: 50 })
-        .notNull(),
+  name: varchar("name", { length: 100 })
+    .notNull(),
 
-    durationDays: bigint("duration_days", { mode: "number" }),
+  description: text("description"),
 
-    amount: bigint("amount", { mode: "number" })
-        .notNull(),
+  amount: decimal("amount", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
 
-    createdAt: timestamp("created_at")
-        .defaultNow(),
+  durationDays: bigint("duration_days", {
+    mode: "number",
+  }).notNull(),
+
+  cashfreePlanId: varchar("cashfree_plan_id", {
+    length: 100,
+  }),
+
+  isActive: tinyint("is_active")
+    .default(1),
+
+  createdAt: timestamp("created_at")
+    .defaultNow(),
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow(),
 });

@@ -20,7 +20,11 @@ const [result]: any = await pool.query(
   ]
 );
 
-return result.insertId;
+return {
+    id: result.insertId,
+    doctorId: data.doctorId,
+    incisionName: data.incisionName
+  };
 }
 
   async findAll(doctorId: number) {

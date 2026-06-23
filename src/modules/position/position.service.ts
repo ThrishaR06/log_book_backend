@@ -7,14 +7,15 @@ export class PositionService {
 
   async create(data: any) {
 
-    const id =
-      await this.repository.create(data);
+     const position = await this.repository.create(data);
 
-    return {
-      success: true,
-      message: "Position created successfully",
-      data: { id }
-    };
+
+    
+   return {
+    success: true,
+    message: "Position created successfully",
+    data: position
+  };
   }
 
   async getAll(doctorId: number) {
