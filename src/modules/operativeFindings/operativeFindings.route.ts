@@ -7,6 +7,9 @@ import {
   updateOperativeFindingsSchema
 } from "./operativeFindings.validation";
 
+import { authMiddleware }
+from "../../middleware/auth.middleware";
+
 const controller =
   new OperativeFindingsController();
 
@@ -21,9 +24,17 @@ export const operativeFindingsRoutes =
 
   "/",
 
-  ({ body }) =>
+  async (context) => {
 
-    controller.create(body),
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.create(context);
+  },
 
   {
 
@@ -37,9 +48,17 @@ export const operativeFindingsRoutes =
 
   "/",
 
-  () =>
+  async (context) => {
 
-    controller.getAll()
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.getAll(context);
+  }
 
 )
 
@@ -47,13 +66,17 @@ export const operativeFindingsRoutes =
 
   "/search",
 
-  ({ query }) =>
+  async (context) => {
 
-    controller.search(
+    const auth =
+      await authMiddleware(context);
 
-      String(query.keyword || "")
+    if (auth) {
+      return auth;
+    }
 
-    )
+    return controller.search(context);
+  }
 
 )
 
@@ -61,15 +84,20 @@ export const operativeFindingsRoutes =
 
   "/:id",
 
-  ({ params, body }) =>
+  async (context) => {
 
-    controller.update(
+    const auth =
+      await authMiddleware(context);
 
-      params.id,
+    if (auth) {
+      return auth;
+    }
 
-      body
-
-    ),
+    return controller.update(
+      context.params.id,
+      context
+    );
+  },
 
   {
 
@@ -83,12 +111,18 @@ export const operativeFindingsRoutes =
 
   "/:id",
 
-  ({ params }) =>
+  async (context) => {
 
-    controller.delete(
+    const auth =
+      await authMiddleware(context);
 
-      params.id
+    if (auth) {
+      return auth;
+    }
 
-    )
+    return controller.delete(
+      context.params.id
+    );
+  }
 
 );

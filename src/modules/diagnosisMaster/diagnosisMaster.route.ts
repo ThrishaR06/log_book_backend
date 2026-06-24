@@ -9,6 +9,9 @@ import {
 }
 from "./diagnosisMaster.validation";
 
+import { authMiddleware }
+from "../../middleware/auth.middleware";
+
 const controller =
   new DiagnosisMasterController();
 
@@ -19,8 +22,17 @@ export const diagnosisMasterRoutes =
 
 .post(
   "/",
-  ({ body }) =>
-    controller.create(body),
+  async (context) => {
+
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.create(context);
+  },
   {
     body: createDiagnosisSchema
   }
@@ -28,25 +40,50 @@ export const diagnosisMasterRoutes =
 
 .get(
   "/",
-  () =>
-    controller.getAll()
+  async (context) => {
+
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.getAll(context);
+  }
 )
 
 .get(
   "/search",
-  ({ query }) =>
-    controller.search(
-      String(query.keyword || "")
-    )
+  async (context) => {
+
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.search(context);
+  }
 )
 
 .put(
   "/:id",
-  ({ params, body }) =>
-    controller.update(
-      params.id,
-      body
-    ),
+  async (context) => {
+
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.update(
+      context.params.id,
+      context
+    );
+  },
   {
     body: updateDiagnosisSchema
   }
@@ -54,8 +91,17 @@ export const diagnosisMasterRoutes =
 
 .delete(
   "/:id",
-  ({ params }) =>
-    controller.delete(
-      params.id
-    )
+  async (context) => {
+
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.delete(
+      context.params.id
+    );
+  }
 );

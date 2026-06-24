@@ -117,4 +117,27 @@ export class ProcedureDetailsRepository {
     return rows;
   }
 
+  async validateDoctorCategory(
+  doctorId: number,
+  categoryId: number
+) {
+
+  const [rows]: any = await pool.query(
+    `
+    SELECT
+      id
+    FROM categories
+    WHERE id = ?
+      AND doctor_id = ?
+    LIMIT 1
+    `,
+    [
+      categoryId,
+      doctorId
+    ]
+  );
+
+  return rows.length > 0;
+}
+
 }

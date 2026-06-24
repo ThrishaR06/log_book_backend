@@ -3,6 +3,7 @@ import {
   bigint,
   varchar,
   timestamp,
+   int,
 } from "drizzle-orm/mysql-core";
 
 export const surgeryStaffMasters = mysqlTable(
@@ -16,10 +17,8 @@ export const surgeryStaffMasters = mysqlTable(
       mode: "number",
     }).notNull(),
 
-    staffTypeId: bigint("staff_type_id", {
-      mode: "number",
-    }).notNull(),
-
+    staffType: int("staff_type").notNull(),
+    
     name: varchar("name", {
       length: 255,
     }).notNull(),

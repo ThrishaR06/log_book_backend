@@ -21,3 +21,27 @@ export const updateOperativeFindingsSchema = t.Object({
   })
 
 });
+
+// ==========================
+// GET ALL
+// ==========================
+export const getAllOperativeFindingsSchema =
+  t.Object({
+
+    categoryId: t.Numeric()
+
+  });
+
+// ==========================
+// SEARCH
+// ==========================
+export const searchOperativeFindingsSchema =
+  t.Object({
+
+    categoryId: t.Numeric(),
+
+    keyword: t.String({
+      minLength: 1
+    })
+
+  });

@@ -1,5 +1,4 @@
-import { SurgeryStaffService }
-from "./surgeryStaff.service";
+import { SurgeryStaffService } from "./surgeryStaff.service";
 
 export class SurgeryStaffController {
 
@@ -9,6 +8,7 @@ export class SurgeryStaffController {
   create(body: any) {
 
     return this.service.create(body);
+
   }
 
   getAll(doctorId: number) {
@@ -16,11 +16,13 @@ export class SurgeryStaffController {
     return this.service.getAll(
       doctorId
     );
+
   }
 
   getById(id: number) {
 
     return this.service.getById(id);
+
   }
 
   update(id: number, body: any) {
@@ -29,30 +31,41 @@ export class SurgeryStaffController {
       id,
       body
     );
+
   }
 
   delete(id: number) {
 
     return this.service.delete(id);
+
   }
 
   search(
-  doctorId: number,
-  keyword: string
-) {
-  return this.service.search(
-    doctorId,
-    keyword
-  );
-}
+    doctorId: number,
+    keyword: string
+  ) {
+    return this.service.search(
+      doctorId,
+      keyword
+    );
+  }
 
-list(
-  doctorId: number,
-  categoryId: number
+  list(
+    doctorId: number,
+  ) {
+    return this.service.list(
+      doctorId
+    );
+  }
+  listByStaffType(
+    doctorId: number,
+    staffType: number
 ) {
-  return this.service.list(
-    doctorId,
-    categoryId
-  );
+
+    return this.service.listByStaffType(
+        doctorId,
+        staffType
+    );
+
 }
 }

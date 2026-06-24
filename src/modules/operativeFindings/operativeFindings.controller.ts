@@ -5,23 +5,35 @@ export class OperativeFindingsController {
   private service =
     new OperativeFindingsService();
 
-  create(body: any) {
+  create({ body, store }: any) {
 
-    return this.service.create(body);
-
-  }
-
-  getAll() {
-
-    return this.service.getAll();
+    return this.service.create({
+      ...body,
+      doctorId: store.user.id
+    });
 
   }
 
-  update(id: string, body: any) {
+  getAll({ query, store }: any) {
+
+    return this.service.getAll({
+      doctorId: store.user.id,
+      categoryId: Number(query.categoryId)
+    });
+
+  }
+
+  update(
+    id: string,
+    { body, store }: any
+  ) {
 
     return this.service.update(
       Number(id),
-      body
+      {
+        ...body,
+        doctorId: store.user.id
+      }
     );
 
   }
@@ -34,9 +46,13 @@ export class OperativeFindingsController {
 
   }
 
-  search(keyword: string) {
+  search({ query, store }: any) {
 
-    return this.service.search(keyword);
+    return this.service.search({
+      keyword: String(query.keyword || ""),
+      doctorId: store.user.id,
+      categoryId: Number(query.categoryId)
+    });
 
   }
 

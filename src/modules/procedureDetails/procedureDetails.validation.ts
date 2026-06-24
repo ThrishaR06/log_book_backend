@@ -21,3 +21,27 @@ export const updateProcedureDetailsSchema = t.Object({
   })
 
 });
+
+// ==========================
+// GET ALL
+// ==========================
+export const getAllProcedureDetailsSchema =
+  t.Object({
+
+    categoryId: t.Numeric()
+
+  });
+
+// ==========================
+// SEARCH
+// ==========================
+export const searchProcedureDetailsSchema =
+  t.Object({
+
+    categoryId: t.Numeric(),
+
+    keyword: t.String({
+      minLength: 1
+    })
+
+  });
