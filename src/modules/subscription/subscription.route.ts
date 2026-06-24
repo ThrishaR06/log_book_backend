@@ -19,7 +19,7 @@ export const subscriptionRoutes = new Elysia({
 
 // GET SUBSCRIPTION PLANS
 .get(
-    "/subscription-plans",
+    "/plans",
     () => controller.getPlans()
 )
 
@@ -83,7 +83,7 @@ export const subscriptionRoutes = new Elysia({
 // MY SUBSCRIPTION
 // ==========================
 .get(
-    "/my-subscription",
+    "/me",
     async (context) => {
 
         const auth = await authMiddleware(context);
@@ -94,7 +94,9 @@ export const subscriptionRoutes = new Elysia({
 
         const store = context.store as any;
 
-        return controller.mySubscription(store.user.id);
+        return controller.mySubscription(
+            store.user.id
+        );
 
     }
 )
