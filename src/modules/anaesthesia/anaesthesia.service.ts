@@ -57,13 +57,17 @@ export class AnaesthesiaService {
   }
 
   async update(id: number, data: any) {
-    await this.repository.update(id, data);
+  await this.repository.update(id, data);
 
-    return {
-      success: true,
-      message: "Anaesthesia updated successfully"
-    };
-  }
+  const updatedData =
+    await this.repository.findById(id);
+
+  return {
+    success: true,
+    message: "Anaesthesia updated successfully",
+    data: updatedData
+  };
+}
 
   async delete(id: number) {
     await this.repository.delete(id);

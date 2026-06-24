@@ -60,18 +60,17 @@ export class AnaesthesiaRepository {
   }
 
   async findById(id: number) {
+  const [rows]: any = await pool.query(
+    `
+    SELECT *
+    FROM anaesthesia_masters
+    WHERE id = ?
+    `,
+    [id]
+  );
 
-    const [rows]: any = await pool.query(
-      `
-      SELECT *
-      FROM anaesthesia_masters
-      WHERE id = ?
-      `,
-      [id]
-    );
-
-    return rows[0] || null;
-  }
+  return rows[0];
+}
 
   async update(id: number, data: any) {
   await pool.query(
@@ -86,6 +85,8 @@ export class AnaesthesiaRepository {
     ]
   );
 }
+
+
 
   async delete(id: number) {
 
