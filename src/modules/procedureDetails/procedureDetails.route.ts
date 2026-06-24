@@ -1,11 +1,18 @@
 import { Elysia } from "elysia";
 
-import { ProcedureDetailsController } from "./procedureDetails.controller";
+import { ProcedureDetailsController }
+from "./procedureDetails.controller";
 
 import {
   createProcedureDetailsSchema,
-  updateProcedureDetailsSchema
-} from "./procedureDetails.validation";
+  updateProcedureDetailsSchema,
+  getAllProcedureDetailsSchema,
+  searchProcedureDetailsSchema
+}
+from "./procedureDetails.validation";
+
+import { authMiddleware }
+from "../../middleware/auth.middleware";
 
 const controller =
   new ProcedureDetailsController();
@@ -21,9 +28,17 @@ export const procedureDetailsRoutes =
 
   "/",
 
-  ({ body }) =>
+  async (context) => {
 
-    controller.create(body),
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.create(context);
+  },
 
   {
 
@@ -37,9 +52,21 @@ export const procedureDetailsRoutes =
 
   "/",
 
-  () =>
+  async (context) => {
 
-    controller.getAll()
+    const auth =
+      await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.getAll(context);
+  },
+
+  {
+    query: getAllProcedureDetailsSchema
+  }
 
 )
 
@@ -47,13 +74,21 @@ export const procedureDetailsRoutes =
 
   "/search",
 
-  ({ query }) =>
+  async (context) => {
 
-    controller.search(
+    const auth =
+      await authMiddleware(context);
 
-      String(query.keyword || "")
+    if (auth) {
+      return auth;
+    }
 
-    )
+    return controller.search(context);
+  },
+
+  {
+    query: searchProcedureDetailsSchema
+  }
 
 )
 
@@ -61,15 +96,20 @@ export const procedureDetailsRoutes =
 
   "/:id",
 
-  ({ params, body }) =>
+  async (context) => {
 
-    controller.update(
+    const auth =
+      await authMiddleware(context);
 
-      params.id,
+    if (auth) {
+      return auth;
+    }
 
-      body
-
-    ),
+    return controller.update(
+      context.params.id,
+      context
+    );
+  },
 
   {
 
@@ -83,12 +123,18 @@ export const procedureDetailsRoutes =
 
   "/:id",
 
-  ({ params }) =>
+  async (context) => {
 
-    controller.delete(
+    const auth =
+      await authMiddleware(context);
 
-      params.id
+    if (auth) {
+      return auth;
+    }
 
-    )
+    return controller.delete(
+      context.params.id
+    );
+  }
 
 );

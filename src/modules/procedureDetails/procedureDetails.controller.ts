@@ -5,29 +5,55 @@ export class ProcedureDetailsController {
   private service =
     new ProcedureDetailsService();
 
-  create(body: any) {
-    return this.service.create(body);
+  create({ body, store }: any) {
+
+    return this.service.create({
+      ...body,
+      doctorId: store.user.id
+    });
+
   }
 
-  getAll() {
-    return this.service.getAll();
+  getAll({ query, store }: any) {
+
+    return this.service.getAll({
+      doctorId: store.user.id,
+      categoryId: Number(query.categoryId)
+    });
+
   }
 
-  update(id: string, body: any) {
+  update(
+    id: string,
+    { body, store }: any
+  ) {
+
     return this.service.update(
       Number(id),
-      body
+      {
+        ...body,
+        doctorId: store.user.id
+      }
     );
+
   }
 
   delete(id: string) {
+
     return this.service.delete(
       Number(id)
     );
+
   }
 
-  search(keyword: string) {
-    return this.service.search(keyword);
+  search({ query, store }: any) {
+
+    return this.service.search({
+      keyword: String(query.keyword || ""),
+      doctorId: store.user.id,
+      categoryId: Number(query.categoryId)
+    });
+
   }
 
 }
