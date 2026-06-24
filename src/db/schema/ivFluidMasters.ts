@@ -13,6 +13,9 @@ export const ivFluidMasters = mysqlTable("iv_fluid_masters", {
 
     doctorId: bigint("doctor_id", { mode: "number" })
         .notNull(),
+        categoryId: bigint("category_id", {
+    mode: "number",
+}).notNull(),
 
     fluidName: varchar("fluid_name", {
         length: 255,

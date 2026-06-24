@@ -1,52 +1,81 @@
 import { WoundCareMasterService } from "./woundCare.service";
+import { ApiResponse } from "../../utils/apiResponse";
 
 export class WoundCareMasterController {
 
     static async create({ body, store }: any) {
 
-        return await WoundCareMasterService.create({
-            doctorId: store.user.id,
-            categoryId: body.categoryId,
-            woundInstruction: body.woundInstruction,
-        });
+        const result =
+            await WoundCareMasterService.create({
+                doctorId: store.user.id,
+                categoryId: body.categoryId,
+                woundInstruction: body.woundInstruction,
+            });
+
+        return ApiResponse.success(
+            result,
+            "Wound care master created successfully."
+        );
 
     }
 
     static async getAll({ query, store }: any) {
 
-        return await WoundCareMasterService.getAll(
-            store.user.id,
-            Number(query.categoryId)
+        const result =
+            await WoundCareMasterService.getAll(
+                store.user.id,
+                Number(query.categoryId)
+            );
+
+        return ApiResponse.success(
+            result,
+            "Wound care masters fetched successfully."
         );
 
     }
 
     static async search({ query, store }: any) {
 
-        return await WoundCareMasterService.search(
-            store.user.id,
-            Number(query.categoryId),
-            query.keyword
+        const result =
+            await WoundCareMasterService.search(
+                store.user.id,
+                Number(query.categoryId),
+                query.keyword
+            );
+
+        return ApiResponse.success(
+            result,
+            "Wound care masters fetched successfully."
         );
 
     }
 
     static async update({ params, body, store }: any) {
 
-        return await WoundCareMasterService.update(
+        await WoundCareMasterService.update(
             Number(params.id),
             store.user.id,
             body
+        );
+
+        return ApiResponse.success(
+            null,
+            "Wound care master updated successfully."
         );
 
     }
 
     static async delete({ params, query, store }: any) {
 
-        return await WoundCareMasterService.delete(
+        await WoundCareMasterService.delete(
             Number(params.id),
             store.user.id,
             Number(query.categoryId)
+        );
+
+        return ApiResponse.success(
+            null,
+            "Wound care master deleted successfully."
         );
 
     }

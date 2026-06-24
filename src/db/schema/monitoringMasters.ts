@@ -16,6 +16,9 @@ export const monitoringMasters = mysqlTable(
         doctorId: bigint("doctor_id", {
             mode: "number",
         }).notNull(),
+        categoryId: bigint("category_id", {
+    mode: "number",
+}),
 
         monitoringInstruction: text(
             "monitoring_instruction"
