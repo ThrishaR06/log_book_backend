@@ -1,54 +1,87 @@
 import { DiagnosisMasterService }
 from "./diagnosisMaster.service";
 
+import { ApiResponse }
+from "../../utils/apiResponse";
+
 export class DiagnosisMasterController {
 
   private service =
     new DiagnosisMasterService();
 
-  create({ body, store }: any) {
+  async create({ body, store }: any) {
 
-    return this.service.create({
-      ...body,
-      doctorId: store.user.id
-    });
+    const result =
+      await this.service.create({
+        ...body,
+        doctorId: store.user.id
+      });
+
+    return ApiResponse.success(
+      result,
+      "Diagnosis master created successfully."
+    );
   }
 
-  getAll({ query, store }: any) {
+  async getAll({ query, store }: any) {
 
-    return this.service.getAll({
-      doctorId: store.user.id,
-      categoryId: Number(query.categoryId)
-    });
+    const result =
+      await this.service.getAll({
+        doctorId: store.user.id,
+        categoryId: Number(query.categoryId)
+      });
+
+    return ApiResponse.success(
+      result,
+      "Diagnosis masters fetched successfully."
+    );
   }
 
-  update(
+  async update(
     id: string,
     { body, store }: any
   ) {
 
-    return this.service.update(
-      Number(id),
-      {
-        ...body,
-        doctorId: store.user.id
-      }
+    const result =
+      await this.service.update(
+        Number(id),
+        {
+          ...body,
+          doctorId: store.user.id
+        }
+      );
+
+    return ApiResponse.success(
+      result,
+      "Diagnosis master updated successfully."
     );
   }
 
-  delete(id: string) {
+  async delete(id: string) {
 
-    return this.service.delete(
-      Number(id)
+    const result =
+      await this.service.delete(
+        Number(id)
+      );
+
+    return ApiResponse.success(
+      result,
+      "Diagnosis master deleted successfully."
     );
   }
 
-  search({ query, store }: any) {
+  async search({ query, store }: any) {
 
-    return this.service.search({
-      keyword: String(query.keyword || ""),
-      doctorId: store.user.id,
-      categoryId: Number(query.categoryId)
-    });
+    const result =
+      await this.service.search({
+        keyword: String(query.keyword || ""),
+        doctorId: store.user.id,
+        categoryId: Number(query.categoryId)
+      });
+
+    return ApiResponse.success(
+      result,
+      "Diagnosis masters fetched successfully."
+    );
   }
 }

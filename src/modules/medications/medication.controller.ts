@@ -32,9 +32,10 @@ export class MedicationController {
     // =========================
     // SEARCH
     // =========================
-    static async search({ query }: any) {
+    static async search({ query, store }: any) {
 
     return await MedicationService.search(
+        store.user.id,
         Number(query.categoryId),
         query.keyword
     );
@@ -42,23 +43,26 @@ export class MedicationController {
     // =========================
     // UPDATE
     // =========================
-    static async update({ params, body }: any) {
+    static async update({ params, body, store }: any) { 
 
         return await MedicationService.update(
-            Number(params.id),
-            body
-        );
+    Number(params.id),
+    store.user.id,
+    body
+);
 
     }
 
     // =========================
     // DELETE
     // =========================
-    static async delete({ params }: any) {
+    static async delete({ params, query, store }: any) {
 
         return await MedicationService.delete(
-            Number(params.id)
-        );
+    Number(params.id),
+    store.user.id,
+    Number(query.categoryId)
+);
 
     }
 
