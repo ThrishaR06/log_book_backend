@@ -7,7 +7,7 @@ export class SurgeryCaseRepository {
     const [result]: any =
       await pool.query(
         `
-        INSERT INTO surgery_cases
+        INSERT INTO operative_records
         (
           surgery_id,
 
@@ -199,7 +199,7 @@ async findById(id: number) {
   const [rows]: any = await pool.query(
     `
     SELECT *
-    FROM surgery_cases
+    FROM operative_records
     WHERE id = ?
     `,
     [id]

@@ -4,8 +4,14 @@ import {
     varchar,
 } from "drizzle-orm/mysql-core";
 
+import { bigint } from "drizzle-orm/mysql-core";
+
 export const doctors = mysqlTable("doctors", {
     id: int("id").primaryKey().autoincrement(),
+
+    roleId: bigint("role_id", {
+  mode: "number",
+}),
 
     password: varchar("password", { length: 255 }).notNull(),
 

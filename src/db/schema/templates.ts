@@ -7,52 +7,50 @@ import {
   json,
 } from "drizzle-orm/mysql-core";
 
-export const templates = mysqlTable("templates", {
-  id: bigint("id", { mode: "number" })
-    .primaryKey()
-    .autoincrement(),
+export const templates = mysqlTable(
+  "procedure_note_templates",
+  {
+    id: bigint("id", {
+      mode: "number",
+    })
+      .primaryKey()
+      .autoincrement(),
 
-  doctorId: bigint("doctor_id", {
-    mode: "number",
-  }).notNull(),
+    doctorId: bigint("doctor_id", {
+      mode: "number",
+    }).notNull(),
 
-  categoryId: bigint("category_id", {
-    mode: "number",
-  }).notNull(),
+    categoryId: bigint("category_id", {
+      mode: "number",
+    }).notNull(),
 
-  templateName: varchar("template_name", {
-  length: 255,
-}).notNull(),
+    procedureName: varchar(
+      "procedure_name",
+      {
+        length: 255,
+      }
+    ),
 
-  // Procedure Name
-  procedureName: varchar("procedure_name", {
-    length: 255,
-  }).notNull(),
+    diagnosisTemplate: text(
+      "diagnosis_template"
+    ),
 
-  // Template Content
-  diagnosisTemplate: text("diagnosis_template"),
+    intraoperativeFindings: text(
+      "intraoperative_findings"
+    ),
 
-  intraoperativeFindings: text(
-    "intraoperative_findings"
-  ),
+    procedureDetailsTemplate: text(
+      "procedure_details_template"
+    ),
 
-  procedureDetailsTemplate: text(
-    "procedure_details_template"
-  ),
+    createdAt: timestamp(
+      "created_at"
+    ).defaultNow(),
 
-  // Optional (keep if currently used)
-  description: text("description"),
-
-  operativeNotes: text("operative_notes"),
-
-  postOpOrders: text("post_op_orders"),
-
-  financeData: json("finance_data"),
-
-  createdAt: timestamp("created_at")
-    .defaultNow(),
-
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
+    updatedAt: timestamp(
+      "updated_at"
+    )
+      .defaultNow()
+      .onUpdateNow(),
+  }
+);

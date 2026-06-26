@@ -26,7 +26,7 @@ export class AdminController {
             {
                 id: result.id,
                 email: result.email,
-                role: result.role,
+                 roleId: result.roleId,
             },
             "Admin login successful"
         );

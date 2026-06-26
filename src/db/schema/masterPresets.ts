@@ -6,7 +6,7 @@ import {
     timestamp
 } from "drizzle-orm/mysql-core";
 
-export const masterPresets = mysqlTable("master_presets", {
+export const masterPresets = mysqlTable("text_preset_masters", {
     id: bigint("id", { mode: "number" })
         .primaryKey()
         .autoincrement(),
@@ -22,7 +22,8 @@ export const masterPresets = mysqlTable("master_presets", {
         length: 100
     }).notNull(),
 
-    content: text("content").notNull(),
+    presetText: text("preset_text")
+            .notNull(),
 
     createdAt: timestamp("created_at")
         .defaultNow(),

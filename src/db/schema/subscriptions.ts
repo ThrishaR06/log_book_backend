@@ -8,7 +8,7 @@ import {
     timestamp
 } from "drizzle-orm/mysql-core";
 
-export const subscriptions = mysqlTable("subscriptions", {
+export const subscriptions = mysqlTable("doctor_subscriptions", {
 
     id: bigint("id", { mode: "number" })
         .primaryKey()
@@ -21,8 +21,6 @@ export const subscriptions = mysqlTable("subscriptions", {
         .notNull(),
 
     orderId: varchar("order_id", { length: 100 }),
-
-    paymentId: varchar("payment_id", { length: 100 }),
 
     paymentStatus: mysqlEnum("payment_status", [
         "PENDING",

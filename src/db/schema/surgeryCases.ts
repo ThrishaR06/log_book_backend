@@ -7,14 +7,56 @@ import {
   boolean,
   timestamp,
   json,
+  date,
+  time,
 } from "drizzle-orm/mysql-core";
 
-export const surgeryCases = mysqlTable("surgery_cases", {
+export const surgeryCases = mysqlTable("operative_records", {
   id: bigint("id", { mode: "number" })
     .primaryKey()
     .autoincrement(),
 
   surgeryId: bigint("surgery_id", { mode: "number" }).notNull(),
+
+   // Patient Details
+  patientName: varchar("patient_name", {
+    length: 255,
+  }),
+
+  age: varchar("age", {
+    length: 20,
+  }),
+
+  sex: varchar("sex", {
+    length: 20,
+  }),
+
+  uhidNo: varchar("uhid_no", {
+    length: 100,
+  }),
+
+  bloodGroup: varchar("blood_group", {
+    length: 20,
+  }),
+
+  // Case Details
+  caseNumber: varchar("case_number", {
+    length: 100,
+  }),
+
+  caseDate: date("case_date"),
+
+  startTime: time("start_time"),
+
+  endTime: time("end_time"),
+
+  duration: varchar("duration", {
+    length: 50,
+  }),
+
+  surgeon: varchar("surgeon", {
+    length: 255,
+  }),
 
   anaesthesiaId: bigint("anaesthesia_id", { mode: "number" }),
 

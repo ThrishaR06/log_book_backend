@@ -86,7 +86,7 @@ export class AdminService {
             success: true,
             id: admin[0].id,
             email: admin[0].email,
-            role: admin[0].role,
+            roleId: admin[0].roleId,
             sessionId,
             token,
         };

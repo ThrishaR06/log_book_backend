@@ -24,10 +24,9 @@ export const admins = mysqlTable("admins", {
     })
         .notNull(),
 
-    role: varchar("role", {
-        length: 50,
-    })
-        .notNull(),
+    roleId: bigint("role_id", {
+  mode: "number",
+}),
 
     status: varchar("status", {
         length: 20,
