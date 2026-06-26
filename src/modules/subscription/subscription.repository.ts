@@ -73,7 +73,7 @@ export class SubscriptionRepository {
 
         const [result]: any = await pool.query(
             `
-            INSERT INTO subscriptions
+            INSERT INTO doctor_subscriptions
             (
                 doctor_id,
                 plan_id,
@@ -96,7 +96,7 @@ export class SubscriptionRepository {
         const [rows]: any = await pool.query(
             `
             SELECT *
-            FROM subscriptions
+            FROM doctor_subscriptions
             WHERE id = ?
             `,
             [result.insertId]
@@ -113,7 +113,7 @@ export class SubscriptionRepository {
         const [rows]: any = await pool.query(
             `
             SELECT *
-            FROM subscriptions
+            FROM doctor_subscriptions
             WHERE order_id = ?
             LIMIT 1
             `,
@@ -127,9 +127,8 @@ export class SubscriptionRepository {
 
     await pool.query(
         `
-        UPDATE subscriptions
+        UPDATE doctor_subscriptions
         SET
-            payment_id = ?,
             payment_status = ?,
             transaction_id = ?,
             payment_method = ?,
@@ -139,7 +138,6 @@ export class SubscriptionRepository {
         WHERE order_id = ?
         `,
         [
-            data.paymentId,
             data.paymentStatus,
             data.transactionId,
             data.paymentMethod,
@@ -158,7 +156,7 @@ async updatePaymentFailed(
 
     await pool.query(
         `
-        UPDATE subscriptions
+        UPDATE doctor_subscriptions
         SET
             payment_status = ?,
             updated_at = NOW()
@@ -182,7 +180,7 @@ async findPlanBySubscription(orderId: string) {
 
             p.duration_days
 
-        FROM subscriptions s
+        FROM doctor_subscriptions s
 
         INNER JOIN subscription_plans p
 
@@ -201,14 +199,13 @@ async findPlanBySubscription(orderId: string) {
     // ==========================
     // UPDATE PAYMENT SUCCESS
     // ==========================
-    async updatePayment(data: any) {
+    /* async updatePayment(data: any) {
 
         await pool.query(
             `
-            UPDATE subscriptions
+            UPDATE doctor_subscriptions
             SET
                 payment_status = ?,
-                payment_id = ?,
                 transaction_id = ?,
                 payment_method = ?,
                 start_date = ?,
@@ -217,7 +214,6 @@ async findPlanBySubscription(orderId: string) {
             `,
             [
                 data.paymentStatus,
-                data.paymentId,
                 data.transactionId,
                 data.paymentMethod,
                 data.startDate,
@@ -225,7 +221,7 @@ async findPlanBySubscription(orderId: string) {
                 data.orderId
             ]
         );
-    }
+    } */
 
     // ==========================
     // UPDATE PAYMENT FAILED
@@ -237,7 +233,7 @@ async findPlanBySubscription(orderId: string) {
 
         await pool.query(
             `
-            UPDATE subscriptions
+            UPDATE doctor_subscriptions
             SET payment_status = ?
             WHERE order_id = ?
             `,
@@ -258,17 +254,16 @@ async findPlanBySubscription(orderId: string) {
             INSERT INTO payment_logs
             (
                 order_id,
-                payment_id,
                 payment_status,
                 request_data,
                 response_data
             )
             VALUES
-            (?, ?, ?, ?, ?)
+            (?, ?, ?, ?)
             `,
             [
                 data.orderId,
-                data.paymentId,
+                data.transactionId,
                 data.paymentStatus,
                 JSON.stringify(data.requestData),
                 JSON.stringify(data.responseData)
@@ -281,7 +276,7 @@ async findPlanBySubscription(orderId: string) {
     const [rows]: any = await pool.query(
         `
         SELECT *
-        FROM subscriptions
+        FROM doctor_subscriptions
         WHERE doctor_id = ?
         ORDER BY id DESC
         LIMIT 1
@@ -298,7 +293,7 @@ async subscriptionHistory(doctorId: number) {
     const [rows]: any = await pool.query(
         `
         SELECT *
-        FROM subscriptions
+        FROM doctor_subscriptions
         WHERE doctor_id = ?
         ORDER BY id DESC
         `,
@@ -326,7 +321,7 @@ async subscriptionHistory(doctorId: number) {
 
                 p.duration_days
 
-            FROM subscriptions s
+            FROM doctor_subscriptions s
 
             INNER JOIN subscription_plans p
 
@@ -363,7 +358,7 @@ async subscriptionHistory(doctorId: number) {
 
                 p.name
 
-            FROM subscriptions s
+            FROM doctor_subscriptions s
 
             INNER JOIN subscription_plans p
 

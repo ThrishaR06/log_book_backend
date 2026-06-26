@@ -43,6 +43,7 @@ import { followUpImagingMasterRoutes } from "./modules/followUpImagingMaster/fol
 import { surgeryStaffTypeRoutes } from "./modules/surgeryStaffType/surgeryStaffType.route";
 import { subscriptionRoutes } from "./modules/subscription/subscription.route";
 import { specialInstructionMasterRoutes } from "./modules/specialInstructionMasters/specialInstruction.route";
+import {clinicalPresetsRoutes}from "./modules/clinicalPresets/clinicalPresets.routes";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
 import { specimensMasterRoutes } from "./modules/specimens-master/specimensMaster.route";
@@ -102,4 +103,5 @@ export const app = new Elysia()
     .use(followUpMasterRoutes)
     .use(followUpImagingMasterRoutes)
     .use(surgeryStaffTypeRoutes)
-    .use(subscriptionRoutes);
+    .use(subscriptionRoutes)
+    .use(clinicalPresetsRoutes);

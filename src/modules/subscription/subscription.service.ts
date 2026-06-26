@@ -231,8 +231,6 @@ if (!doctor.email_address) {
 
             orderId: data.orderId,
 
-            paymentId: order.cf_order_id,
-
             paymentStatus: "SUCCESS",
 
             transactionId: order.cf_order_id,
@@ -335,8 +333,6 @@ if (!doctor.email_address) {
         await this.repository.updatePaymentSuccess({
 
             orderId,
-
-            paymentId: data.data.payment.cf_payment_id,
 
             paymentStatus: "SUCCESS",
 

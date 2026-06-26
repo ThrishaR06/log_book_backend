@@ -10,6 +10,6 @@ export const verifyPaymentSchema = t.Object({
 
 export const webhookSchema = t.Object({
     orderId: t.String(),
-    paymentId: t.Optional(t.String()),
+   transactionId: t.Optional(t.String()),
     paymentStatus: t.String()
 });
