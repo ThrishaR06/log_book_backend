@@ -1,22 +1,24 @@
 import { t } from "elysia";
+import { Elysia } from "elysia";
 
-export const createSurgeryCaseSchem = t.Object({
+export const updateSurgeryCaseSchema = t.Object({
 
-  surgeryId: t.String(),
- patientName: t.String(),
-age: t.String(),
-sex: t.String(),
-uhidNo: t.String(),
-bloodGroup: t.String(),
+  surgeryId: t.Optional(t.String()),
 
-caseNumber: t.String(),
-caseDate: t.String(),
+  patientName: t.Optional(t.String()),
+  age: t.Optional(t.String()),
+  sex: t.Optional(t.String()),
+  uhidNo: t.Optional(t.String()),
+  bloodGroup: t.Optional(t.String()),
 
-startTime: t.String(),
-endTime: t.String(),
-duration: t.String(),
+  caseNumber: t.Optional(t.String()),
+  caseDate: t.Optional(t.String()),
 
-surgeon: t.String(),
+  startTime: t.Optional(t.String()),
+  endTime: t.Optional(t.String()),
+  duration: t.Optional(t.String()),
+
+  surgeon: t.Optional(t.String()),
 
   anaesthesiaId: t.Optional(t.String()),
   positionId: t.Optional(t.String()),
@@ -35,7 +37,6 @@ surgeon: t.String(),
   additionalNotes: t.Optional(t.String()),
 
   ivFluidIds: t.Optional(t.Any()),
-
   medicationIds: t.Optional(t.Any()),
 
   monitoring: t.Optional(t.String()),
@@ -48,9 +49,9 @@ surgeon: t.String(),
   followUp: t.Optional(t.String()),
   followUpImaging: t.Optional(t.String()),
 
-preOpImages: t.Optional(t.Any()),
-intraOpImages: t.Optional(t.Any()),
-postOpImages: t.Optional(t.Any()),
+  preOpImages: t.Optional(t.Any()),
+  intraOpImages: t.Optional(t.Any()),
+  postOpImages: t.Optional(t.Any()),
 
   doctorFee: t.Optional(t.String()),
   doctorPaymentMode: t.Optional(t.String()),
@@ -65,8 +66,8 @@ postOpImages: t.Optional(t.Any()),
   implantDetails: t.Optional(t.String()),
 
   implantPaidByHospital: t.Optional(t.String()),
-
   implantReceivedFromHospital: t.Optional(t.String()),
 
   totalAmount: t.Optional(t.String())
+
 });

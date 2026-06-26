@@ -1,4 +1,8 @@
 import { pool } from "../../db";
+import { db } from "../../db";
+import { surgeryCases } from "../../db/schema/surgeryCases";
+import { media } from "../../db/schema/media.schema";
+import { eq } from "drizzle-orm";
 
 export class SurgeryCaseRepository {
 
@@ -245,5 +249,222 @@ async findById(id: number) {
       : row.post_op_images;
 
   return row;
+}
+
+async getAllByDoctorId(doctorId: number) {
+
+  const [rows]: any = await pool.query(
+    `
+    SELECT
+      o.*
+    FROM operative_records o
+    INNER JOIN surgeries s
+      ON s.id = o.surgery_id
+    WHERE s.doctor_id = ?
+    ORDER BY o.created_at DESC
+    `,
+    [doctorId]
+  );
+
+  return rows.map((row: any) => {
+
+    row.staff_ids =
+      typeof row.staff_ids === "string"
+        ? JSON.parse(row.staff_ids)
+        : row.staff_ids;
+
+    row.surgery_procedure =
+      typeof row.surgery_procedure === "string"
+        ? JSON.parse(row.surgery_procedure)
+        : row.surgery_procedure;
+
+    row.iv_fluid_ids =
+      typeof row.iv_fluid_ids === "string"
+        ? JSON.parse(row.iv_fluid_ids)
+        : row.iv_fluid_ids;
+
+    row.medication_ids =
+      typeof row.medication_ids === "string"
+        ? JSON.parse(row.medication_ids)
+        : row.medication_ids;
+
+    row.pre_op_images =
+      typeof row.pre_op_images === "string"
+        ? JSON.parse(row.pre_op_images)
+        : row.pre_op_images;
+
+    row.intra_op_images =
+      typeof row.intra_op_images === "string"
+        ? JSON.parse(row.intra_op_images)
+        : row.intra_op_images;
+
+    row.post_op_images =
+      typeof row.post_op_images === "string"
+        ? JSON.parse(row.post_op_images)
+        : row.post_op_images;
+
+    return row;
+  });
+}
+
+async update(
+    id: number,
+    data: any
+) {
+
+    await db
+        .update(surgeryCases)
+        .set({
+
+            surgeryId: data.surgeryId,
+
+            patientName: data.patientName,
+            age: data.age,
+            sex: data.sex,
+            uhidNo: data.uhidNo,
+            bloodGroup: data.bloodGroup,
+
+            caseNumber: data.caseNumber,
+            caseDate: data.caseDate,
+
+            startTime: data.startTime,
+            endTime: data.endTime,
+            duration: data.duration,
+
+            surgeon: data.surgeon,
+
+            anaesthesiaId: data.anaesthesiaId,
+            positionId: data.positionId,
+            incisionId: data.incisionId,
+
+            staffIds: data.staffIds || [],
+
+            surgeryProcedure: data.surgeryProcedure || {},
+
+            diagnosis: data.diagnosis,
+
+            operativeFindings: data.operativeFindings,
+
+            procedureDetails: data.procedureDetails,
+
+            bloodLoss: data.bloodLoss,
+
+            specimens: data.specimens,
+
+            additionalNotes: data.additionalNotes,
+
+            ivFluidIds: data.ivFluidIds || [],
+
+            medicationIds: data.medicationIds || [],
+
+            monitoring: data.monitoring,
+
+            diet: data.diet,
+
+            drainManagement: data.drainManagement,
+
+            woundCare: data.woundCare,
+
+            specialInstructions: data.specialInstructions,
+
+            followUp: data.followUp,
+
+            followUpImaging: data.followUpImaging,
+
+            preOpImages: data.preOpImages || [],
+
+            intraOpImages: data.intraOpImages || [],
+
+            postOpImages: data.postOpImages || [],
+
+            doctorFee: data.doctorFee,
+
+            doctorPaymentMode: data.doctorPaymentMode,
+
+            doctorRemarks: data.doctorRemarks,
+
+            assistantFee: data.assistantFee,
+
+            assistantPaymentMode: data.assistantPaymentMode,
+
+            assistantRemarks: data.assistantRemarks,
+
+            implantFee: data.implantFee,
+
+            implantPaymentMode: data.implantPaymentMode,
+
+            implantDetails: data.implantDetails,
+
+            implantPaidByHospital:
+                data.implantPaidByHospital,
+
+            implantReceivedFromHospital:
+                data.implantReceivedFromHospital,
+
+            totalAmount: data.totalAmount,
+        })
+        .where(eq(surgeryCases.id, id));
+
+    return await db.query.surgeryCases.findFirst({
+
+        where: (sc, { eq }) =>
+            eq(sc.id, id),
+
+        with: {
+            media: true,
+        },
+    });
+
+}
+async getDoctorInfoByCaseId(caseId: number) {
+
+  const [rows]: any = await pool.query(
+    `
+    SELECT
+      d.id,
+      d.full_name AS name,
+      s.id AS surgeryId
+    FROM operative_records oc
+    INNER JOIN surgeries s
+      ON s.id = oc.surgery_id
+    INNER JOIN doctors d
+      ON d.id = s.doctor_id
+    WHERE oc.id = ?
+    `,
+    [caseId]
+  );
+
+  if (!rows.length) {
+    throw new Error("Surgery case not found");
+  }
+
+  return rows[0];
+}
+
+async delete(id: number) {
+
+    await db
+        .delete(media)
+        .where(
+            eq(
+                media.surgeryCaseId,
+                id
+            )
+        );
+
+    await db
+        .delete(surgeryCases)
+        .where(
+            eq(
+                surgeryCases.id,
+                id
+            )
+        );
+
+    return {
+        success: true,
+        message: "Surgery case deleted successfully"
+    };
+
 }
 }

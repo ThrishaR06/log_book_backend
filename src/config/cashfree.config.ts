@@ -1,4 +1,4 @@
-import { Cashfree } from "cashfree-pg";
+import { Cashfree } from "cashfree-pg/dist/esm/index.js";
 
 Cashfree.XClientId = process.env.CASHFREE_APP_ID!;
 Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY!;
