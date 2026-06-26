@@ -7,7 +7,6 @@ import { hospitalRoutes } from "./modules/hospitals/hospital.routes";
 import { doctorRoutes } from "./modules/doctors/doctor.routes";
 import { templateRoutes } from "./modules/templates/template.routes";
 import { surgeryRoutes } from "./modules/surgeries/surgery.routes";
-import { dashboardRoutes } from "./modules/dashboard/dashboard.routes";
 import { reportRoutes } from "./modules/reports/reports.routes";
 import { adminRoutes } from "./modules/admin/admin.routes";
 import { exportRoutes } from "./modules/exports/export.routes";
@@ -56,20 +55,19 @@ export const app = new Elysia()
             credentials: true,
             methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         })
-    )
+    ) 
     .use(cookie())
     .use(
         staticPlugin({
             assets: "uploads",
             prefix: "/uploads",
         })
-    )
+    ) 
     .use(hospitalRoutes)
     .use(doctorRoutes)
     .use(subscriptionRoutes)
     .use(templateRoutes)
     .use(surgeryRoutes)
-    .use(dashboardRoutes)
     .use(reportRoutes)
     .use(adminRoutes)
     .use(exportRoutes)
@@ -91,7 +89,7 @@ export const app = new Elysia()
     .use(surgeryClinicalSelectionsRoutes)
     .use(surgeryImagesRoutes)
     .use(surgeryFinanceRoutes)
-    .use(surgeryCaseRoutes)
+    
     .use(diagnosisMasterRoutes)
     .use(operativeFindingsRoutes)
     .use(procedureDetailsRoutes)
@@ -104,4 +102,6 @@ export const app = new Elysia()
     .use(followUpImagingMasterRoutes)
     .use(surgeryStaffTypeRoutes)
     .use(subscriptionRoutes)
-    .use(clinicalPresetsRoutes);
+    .use(clinicalPresetsRoutes)
+    
+    .use(surgeryCaseRoutes);
