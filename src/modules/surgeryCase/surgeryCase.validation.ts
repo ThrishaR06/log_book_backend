@@ -8,6 +8,7 @@ age: t.String(),
 sex: t.String(),
 uhidNo: t.String(),
 bloodGroup: t.String(),
+hospital:t.String(),
 
 caseNumber: t.String(),
 caseDate: t.String(),

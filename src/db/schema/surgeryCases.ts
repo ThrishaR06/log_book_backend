@@ -39,6 +39,10 @@ export const surgeryCases = mysqlTable("operative_records", {
     length: 20,
   }),
 
+  hospital: varchar("hospital", {
+  length: 255,
+}),
+
   // Case Details
   caseNumber: varchar("case_number", {
     length: 100,

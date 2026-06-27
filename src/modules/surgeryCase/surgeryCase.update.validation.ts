@@ -10,6 +10,7 @@ export const updateSurgeryCaseSchema = t.Object({
   sex: t.Optional(t.String()),
   uhidNo: t.Optional(t.String()),
   bloodGroup: t.Optional(t.String()),
+  hospital: t.String(),
 
   caseNumber: t.Optional(t.String()),
   caseDate: t.Optional(t.String()),

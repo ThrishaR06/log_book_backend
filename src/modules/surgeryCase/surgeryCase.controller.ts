@@ -81,6 +81,7 @@ export class SurgeryCaseController {
     body.sex = body.sex || null;
     body.uhidNo = body.uhidNo || null;
     body.bloodGroup = body.bloodGroup || null;
+    body.hospital = body.hospital || null;
     body.caseNumber = body.caseNumber || null;
     body.caseDate = body.caseDate || null;
     body.startTime = body.startTime || null;
