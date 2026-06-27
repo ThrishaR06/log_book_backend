@@ -45,6 +45,7 @@ export class SurgeryCaseService {
     sex: data.sex,
     uhidNo: data.uhidNo,
     bloodGroup: data.bloodGroup,
+    hospital: data.hospital,
 
     caseNumber: data.caseNumber,
     caseDate: data.caseDate,
@@ -293,6 +294,9 @@ async update(id: number, data: any) {
 
   if (data.bloodGroup !== undefined)
     updateData.bloodGroup = data.bloodGroup;
+  
+  if(data.hospital !== undefined)
+    updateData.hospital = data.hospital;
 
   // Case Details
   if (data.caseNumber !== undefined)
