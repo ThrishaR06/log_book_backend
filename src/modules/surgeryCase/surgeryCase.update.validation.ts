@@ -3,7 +3,6 @@ import { Elysia } from "elysia";
 
 export const updateSurgeryCaseSchema = t.Object({
 
-  surgeryId: t.Optional(t.String()),
 
   patientName: t.Optional(t.String()),
   age: t.Optional(t.String()),

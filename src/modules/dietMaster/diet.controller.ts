@@ -14,7 +14,7 @@ export class DietMasterController {
 
         return ApiResponse.success(
             result,
-            "Diet master created successfully."
+            
         );
 
     }
@@ -52,18 +52,15 @@ export class DietMasterController {
 
     static async update({ params, body, store }: any) {
 
-        await DietMasterService.update(
-            Number(params.id),
-            store.user.id,
-            body
-        );
+    const result = await DietMasterService.update(
+        Number(params.id),
+        store.user.id,
+        body
+    );
 
-        return ApiResponse.success(
-            null,
-            "Diet master updated successfully."
-        );
+    return result;
 
-    }
+}
 
     static async delete({ params, query, store }: any) {
 

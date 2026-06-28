@@ -145,9 +145,17 @@ export class DrainManagementMasterService {
             )
         );
 
-    return {
-        message: "Drain Management updated successfully",
-    };
+    const [updatedDrainManagement] = await db
+    .select()
+    .from(drainManagementMasters)
+    .where(
+        and(
+            eq(drainManagementMasters.id, id),
+            eq(drainManagementMasters.doctorId, doctorId)
+        )
+    );
+
+return updatedDrainManagement;
 }
 
     static async delete(

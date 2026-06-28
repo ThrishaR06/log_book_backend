@@ -59,18 +59,30 @@ return {
   async update(id: number, data: any) {
 
     await pool.query(
-      `
-      UPDATE incision_masters
-      SET
-        incision_name = ?
-      WHERE id = ?
-      `,
-      [
-        data.incisionName,
-        id
-      ]
+        `
+        UPDATE incision_masters
+        SET incision_name = ?
+        WHERE id = ?
+        `,
+        [
+            data.incisionName,
+            id
+        ]
     );
-  }
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT *
+        FROM incision_masters
+        WHERE id = ?
+        `,
+        [id]
+    );
+
+    console.log("REPOSITORY =", rows[0]);
+
+    return rows[0];
+}
 
   async delete(id: number) {
 

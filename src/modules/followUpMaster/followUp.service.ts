@@ -132,22 +132,27 @@ export class FollowUpMasterService {
         };
     }
 
-    await db
-        .update(followUpMasters)
-        .set({
-            categoryId: body.categoryId,
-            followUpInstruction: body.followUpInstruction,
-        })
-        .where(
-            and(
-                eq(followUpMasters.id, id),
-                eq(followUpMasters.doctorId, doctorId)
-            )
-        );
+    const updateResult = await db
+    .update(followUpMasters)
+    .set({
+        categoryId: body.categoryId,
+        followUpInstruction: body.followUpInstruction,
+    })
+    .where(
+        and(
+            eq(followUpMasters.id, id),
+            eq(followUpMasters.doctorId, doctorId)
+        )
+    );
 
-    return {
-        message: "Follow Up updated successfully",
-    };
+const [updatedFollowUp] = await db
+    .select()
+    .from(followUpMasters)
+    .where(eq(followUpMasters.id, id));
+
+console.log(updatedFollowUp);
+
+return updatedFollowUp;
 }
 
     static async delete(

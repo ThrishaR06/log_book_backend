@@ -48,13 +48,16 @@ return {
 
   async update(id: number, data: any) {
 
-    await this.repository.update(id, data);
+    const updatedIncision =
+        await this.repository.update(id, data);
+
 
     return {
-      success: true,
-      message: "Incision updated successfully"
+        success: true,
+        message: "Incision updated successfully",
+        data: updatedIncision
     };
-  }
+}
 
   async delete(id: number) {
 

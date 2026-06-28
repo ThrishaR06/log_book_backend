@@ -2,13 +2,15 @@ import { SurgeryCaseRepository } from "./surgeryCase.repository";
 import { db } from "../../db";
 import { surgeryCases } from "../../db/schema/surgeryCases";
 import { media as mediaTable } from "../../db/schema/media.schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";;
 import { inArray } from "drizzle-orm";
-import { surgeries } from "../../db/schema/surgeries";
+import { redis } from "../../config/redis";
 export class SurgeryCaseService {
   private repository = new SurgeryCaseRepository();
 
   async create(data: any) {
+
+    
     console.log("CREATE PAYLOAD:", data);
 
     // ✅ NORMALIZE MEDIA
@@ -33,12 +35,13 @@ export class SurgeryCaseService {
 
     return await db.transaction(async (tx) => {
 
+
       // STEP 1: CREATE SURGERY CASE
       const result = await tx
         .insert(surgeryCases)
         .values({
 
-            surgeryId: data.surgeryId,
+            doctorId: data.doctorId,
 
     patientName: data.patientName,
     age: data.age,
@@ -105,7 +108,7 @@ totalAmount: data.totalAmount,
         })
         .$returningId();
 
-      const caseId = Number(result[0]?.id || result[0]);
+      const caseId = Number(result[0]?.surgeryId || result[0]);
 
       console.log("CASE CREATED:", caseId);
 
@@ -163,18 +166,17 @@ await tx
     intraOpImages: intraOpIds,
     postOpImages: postOpIds,
   })
-  .where(eq(surgeryCases.id, caseId));
+  .where(eq(surgeryCases.surgeryId, caseId));
 
-        console.log("👉 MEDIA INSERT SUCCESS");
       }
 
       // STEP 3: RETURN FULL DATA
       const surgeryCase = await tx.query.surgeryCases.findFirst({
-        where: (sc, { eq }) => eq(sc.id, caseId),
-        with: {
-          media: true,
-        },
-      });
+  where: (sc, { eq }) => eq(sc.surgeryId, caseId),
+  with: {
+    media: true,
+  },
+});
 
       return {
         success: true,
@@ -183,19 +185,24 @@ await tx
       };
     });
   }
+async getAllByDoctorId(doctorId: number) {
 
-  async getDoctorId(surgeryId: number) {
-    return await this.repository.getDoctorIdBySurgeryId(surgeryId);
-  }
+    return await db
+        .select()
+        .from(surgeryCases)
+        .where(
+            eq(
+                surgeryCases.doctorId,
+                doctorId
+            )
+        );
 
-  async getDoctorInfo(surgeryId: number) {
-  return await this.repository.getDoctorInfoBySurgeryId(surgeryId);
 }
 
   async getById(id: number) {
 
   const data = await db.query.surgeryCases.findFirst({
-    where: (sc, { eq }) => eq(sc.id, id),
+    where: (sc, { eq }) => eq(sc.surgeryId, id),
   });
 
   if (!data) {
@@ -262,18 +269,6 @@ await tx
     };
   }
 
- async getAllByDoctorId(doctorId:number){
-
-return await db
-.select()
-.from(surgeryCases)
-.innerJoin(
-surgeries,
-eq(surgeryCases.surgeryId,surgeries.id)
-)
-.where(eq(surgeries.doctorId,doctorId));
-
-}
 
 async update(id: number, data: any) {
 
@@ -436,7 +431,7 @@ async update(id: number, data: any) {
   await db
     .update(surgeryCases)
     .set(updateData)
-    .where(eq(surgeryCases.id, id));
+    .where(eq(surgeryCases.surgeryId, id));
 
   return {
     success: true,
@@ -453,7 +448,7 @@ await db
 
 await db
 .delete(surgeryCases)
-.where(eq(surgeryCases.id,id));
+.where(eq(surgeryCases.surgeryId, id));
 
 return{
 success:true,
@@ -466,6 +461,10 @@ async getDoctorInfoByCaseId(caseId:number){
 
     return this.repository.getDoctorInfoByCaseId(caseId);
 
+}
+
+async getDoctorById(id: number) {
+    return this.repository.getDoctorById(id);
 }
 
 }
