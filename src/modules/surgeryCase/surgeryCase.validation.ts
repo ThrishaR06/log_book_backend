@@ -2,8 +2,7 @@ import { t } from "elysia";
 
 export const createSurgeryCaseSchem = t.Object({
 
-  surgeryId: t.String(),
- patientName: t.String(),
+patientName: t.String(),
 age: t.String(),
 sex: t.String(),
 uhidNo: t.String(),

@@ -162,10 +162,20 @@ export class FollowUpImagingMasterService {
             )
         );
 
-    return {
-        message:
-            "Follow Up Imaging updated successfully",
-    };
+    const [updatedFollowUpImaging] = await db
+    .select()
+    .from(followUpImagingMasters)
+    .where(
+        and(
+            eq(followUpImagingMasters.id, id),
+            eq(
+                followUpImagingMasters.doctorId,
+                doctorId
+            )
+        )
+    );
+
+return updatedFollowUpImaging;
 }
 
     static async delete(

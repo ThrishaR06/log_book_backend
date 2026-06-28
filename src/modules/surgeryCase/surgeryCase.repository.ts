@@ -12,12 +12,12 @@ export class SurgeryCaseRepository {
       await pool.query(
         `
         INSERT INTO operative_records
-        (
-          surgery_id,
+(
+    doctor_id,
 
-          anaesthesia_id,
-          position_id,
-          incision_id,
+    anaesthesia_id,
+    position_id,
+    incision_id,
 
           staff_ids,
 
@@ -67,8 +67,9 @@ export class SurgeryCaseRepository {
         )
         VALUES
         (
-          ?,?,?,?,
-          ?,?,
+ ?,
+ ?,?,?,
+ ?,?,
           ?,?,?,
           ?,?,?,
           ?,?,
@@ -84,8 +85,7 @@ export class SurgeryCaseRepository {
         )
         `,
         [
-
-          data.surgeryId,
+data.doctorId,
 
           data.anaesthesiaId ?? null,
           data.positionId ?? null,
@@ -158,45 +158,7 @@ export class SurgeryCaseRepository {
 
     return result.insertId;
   }
-  async getDoctorIdBySurgeryId(surgeryId: number) {
-
-    const [rows]: any = await pool.query(
-        `
-        SELECT doctor_id
-        FROM surgeries
-        WHERE id = ?
-        `,
-        [surgeryId]
-    );
-
-    if (!rows.length) {
-        throw new Error("Surgery not found");
-    }
-
-    return rows[0].doctor_id;
-}
-
-async getDoctorInfoBySurgeryId(surgeryId: number) {
-
-  const [rows]: any = await pool.query(
-    `
-    SELECT
-      d.id,
-      d.full_name AS name
-    FROM surgeries s
-    INNER JOIN doctors d
-      ON d.id = s.doctor_id
-    WHERE s.id = ?
-    `,
-    [surgeryId]
-  );
-
-  if (!rows.length) {
-    throw new Error("Surgery not found");
-  }
-
-  return rows[0];
-}
+  
 
 async findById(id: number) {
 
@@ -204,7 +166,7 @@ async findById(id: number) {
     `
     SELECT *
     FROM operative_records
-    WHERE id = ?
+    WHERE surgery_id = ?
     `,
     [id]
   );
@@ -254,17 +216,14 @@ async findById(id: number) {
 async getAllByDoctorId(doctorId: number) {
 
   const [rows]: any = await pool.query(
-    `
-    SELECT
-      o.*
-    FROM operative_records o
-    INNER JOIN surgeries s
-      ON s.id = o.surgery_id
-    WHERE s.doctor_id = ?
-    ORDER BY o.created_at DESC
-    `,
-    [doctorId]
-  );
+`
+SELECT *
+FROM operative_records
+WHERE doctor_id = ?
+ORDER BY created_at DESC
+`,
+[doctorId]
+);
 
   return rows.map((row: any) => {
 
@@ -316,7 +275,6 @@ async update(
         .update(surgeryCases)
         .set({
 
-            surgeryId: data.surgeryId,
 
             patientName: data.patientName,
             age: data.age,
@@ -403,12 +361,12 @@ async update(
 
             totalAmount: data.totalAmount,
         })
-        .where(eq(surgeryCases.id, id));
+        .where(eq(surgeryCases.surgeryId, id));
 
     return await db.query.surgeryCases.findFirst({
 
         where: (sc, { eq }) =>
-            eq(sc.id, id),
+            eq(sc.surgeryId, id),
 
         with: {
             media: true,
@@ -416,23 +374,40 @@ async update(
     });
 
 }
+
+async getDoctorById(id: number) {
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            id,
+            full_name
+        FROM doctors
+        WHERE id = ?
+        `,
+        [id]
+    );
+
+    if (!rows.length) {
+        throw new Error("Doctor not found");
+    }
+
+    return rows[0];
+}
 async getDoctorInfoByCaseId(caseId: number) {
 
   const [rows]: any = await pool.query(
-    `
-    SELECT
-      d.id,
-      d.full_name AS name,
-      s.id AS surgeryId
-    FROM operative_records oc
-    INNER JOIN surgeries s
-      ON s.id = oc.surgery_id
-    INNER JOIN doctors d
-      ON d.id = s.doctor_id
-    WHERE oc.id = ?
-    `,
-    [caseId]
-  );
+`
+SELECT
+d.id,
+d.full_name AS name,
+oc.surgery_id AS surgeryId
+FROM operative_records oc
+INNER JOIN doctors d
+ON d.id = oc.doctor_id
+WHERE oc.surgery_id = ?
+`,
+[caseId]
+);
 
   if (!rows.length) {
     throw new Error("Surgery case not found");
@@ -456,7 +431,7 @@ async delete(id: number) {
         .delete(surgeryCases)
         .where(
             eq(
-                surgeryCases.id,
+                surgeryCases.surgeryId,
                 id
             )
         );

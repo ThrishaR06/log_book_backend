@@ -127,24 +127,32 @@ if (!category) {
     };
 }
 
-        await db
-            .update(ivFluidMasters)
-            .set({
-    categoryId: body.categoryId,
-    fluidName: body.fluidName,
-    defaultRate: body.defaultRate,
-    notes: body.notes,
-})
-            .where(
-                and(
-                    eq(ivFluidMasters.id, id),
-                    eq(ivFluidMasters.doctorId, doctorId)
-                )
-            );
+       await db
+    .update(ivFluidMasters)
+    .set({
+        categoryId: body.categoryId,
+        fluidName: body.fluidName,
+        defaultRate: body.defaultRate,
+        notes: body.notes,
+    })
+    .where(
+        and(
+            eq(ivFluidMasters.id, id),
+            eq(ivFluidMasters.doctorId, doctorId)
+        )
+    );
 
-        return {
-            message: "IV Fluid updated successfully",
-        };
+const [updatedIvFluid] = await db
+    .select()
+    .from(ivFluidMasters)
+    .where(
+        and(
+            eq(ivFluidMasters.id, id),
+            eq(ivFluidMasters.doctorId, doctorId)
+        )
+    );
+
+return updatedIvFluid;
     }
 
     static async delete(

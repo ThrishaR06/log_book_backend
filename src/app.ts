@@ -6,10 +6,7 @@ import { staticPlugin } from "@elysiajs/static";
 import { hospitalRoutes } from "./modules/hospitals/hospital.routes";
 import { doctorRoutes } from "./modules/doctors/doctor.routes";
 import { templateRoutes } from "./modules/templates/template.routes";
-import { surgeryRoutes } from "./modules/surgeries/surgery.routes";
-import { reportRoutes } from "./modules/reports/reports.routes";
 import { adminRoutes } from "./modules/admin/admin.routes";
-import { exportRoutes } from "./modules/exports/export.routes";
 import { notificationRoutes } from "./modules/notifications/notification.routes";
 import { masterPresetRoutes } from "./modules/master-presets/masterPreset.route";
 
@@ -44,6 +41,7 @@ import { subscriptionRoutes } from "./modules/subscription/subscription.route";
 import { specialInstructionMasterRoutes } from "./modules/specialInstructionMasters/specialInstruction.route";
 import {clinicalPresetsRoutes}from "./modules/clinicalPresets/clinicalPresets.routes";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.route";
+//import "./config/redis";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
 import { specimensMasterRoutes } from "./modules/specimens-master/specimensMaster.route";
@@ -52,7 +50,7 @@ import { additionalNotesMasterRoutes } from "./modules/additional-notes-master/a
 export const app = new Elysia()
     .use(
         cors({
-            origin: true,
+            origin: ["http://localhost:5173"],
             credentials: true,
             methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         })
@@ -68,10 +66,7 @@ export const app = new Elysia()
     .use(doctorRoutes)
     .use(subscriptionRoutes)
     .use(templateRoutes)
-    .use(surgeryRoutes)
-    .use(reportRoutes)
     .use(adminRoutes)
-    .use(exportRoutes)
     .use(notificationRoutes)
     .use(masterPresetRoutes)
     .use(categoryRoutes)
@@ -103,7 +98,6 @@ export const app = new Elysia()
     .use(followUpMasterRoutes)
     .use(followUpImagingMasterRoutes)
     .use(surgeryStaffTypeRoutes)
-    .use(subscriptionRoutes)
     .use(clinicalPresetsRoutes)
     
     .use(surgeryCaseRoutes);

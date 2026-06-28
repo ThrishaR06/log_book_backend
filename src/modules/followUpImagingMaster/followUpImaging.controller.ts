@@ -53,18 +53,19 @@ export class FollowUpImagingMasterController {
 
     static async update({ params, body, store }: any) {
 
+    const result =
         await FollowUpImagingMasterService.update(
             Number(params.id),
             store.user.id,
             body
         );
 
-        return ApiResponse.success(
-            null,
-            "Follow-up imaging master updated successfully."
-        );
+    return ApiResponse.success(
+        result,
+        "Follow-up imaging master updated successfully."
+    );
 
-    }
+}
 
     static async delete({ params, query, store }: any) {
 

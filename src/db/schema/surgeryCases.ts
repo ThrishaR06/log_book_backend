@@ -12,11 +12,18 @@ import {
 } from "drizzle-orm/mysql-core";
 
 export const surgeryCases = mysqlTable("operative_records", {
-  id: bigint("id", { mode: "number" })
-    .primaryKey()
-    .autoincrement(),
+  surgeryId: bigint("surgery_id", {
+  mode: "number",
+})
+.primaryKey()
+.autoincrement(),
 
-  surgeryId: bigint("surgery_id", { mode: "number" }).notNull(),
+ doctorId: bigint("doctor_id", {
+    mode: "number",
+}).notNull(),
+  
+
+
 
    // Patient Details
   patientName: varchar("patient_name", {

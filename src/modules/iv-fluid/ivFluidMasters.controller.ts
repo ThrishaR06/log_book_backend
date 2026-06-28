@@ -58,7 +58,6 @@ export class IvFluidMasterController {
         );
 
         return ApiResponse.success(
-            null,
             "IV fluid master updated successfully."
         );
     }

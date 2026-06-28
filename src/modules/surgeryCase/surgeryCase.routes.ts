@@ -11,126 +11,76 @@ export const surgeryCaseRoutes = new Elysia({
 })
 
 .post(
-    "/",
-    async (context) => {
+  "/",
+  async (context) => {
 
-        const auth = await authMiddleware(context);
+    const auth = await authMiddleware(context);
 
-        if (auth) {
-            return auth;
-        }
-
-        return controller.create(context);
-
-    },
-    {
-        body: createSurgeryCaseSchem
+    if (auth) {
+      return auth;
     }
-)
-.get(
-"/",
-async(context)=>{
 
-const auth=await authMiddleware(context);
+    return controller.create(context);
 
-if(auth){
-
-return auth;
-
-}
-
-return controller.getAll(context);
-
-}
-)
-
-.put(
-"/:id",
-async(context)=>{
-
-const auth=await authMiddleware(context);
-
-if(auth){
-
-return auth;
-
-}
-
-return controller.update(context);
-
-},
-{
-body:createSurgeryCaseSchem
-}
-)
-
-.delete(
-"/:id",
-async(context)=>{
-
-const auth=await authMiddleware(context);
-
-if(auth){
-
-return auth;
-
-}
-
-return controller.delete(context);
-
-}
+  },
+  {
+    body: createSurgeryCaseSchem
+  }
 )
 
 .get(
-    "/",
-    async (context) => {
+  "/",
+  async (context) => {
 
-        const auth =
-            await authMiddleware(context);
+    const auth = await authMiddleware(context);
 
-        if (auth) {
-            return auth;
-        }
-
-        return controller.getAll(context);
-
+    if (auth) {
+      return auth;
     }
+
+    return controller.getAll(context);
+
+  }
 )
 
-.put(
-    "/:id",
-    async (context) => {
+.get(
+  "/:id",
+  async ({ params }) => {
 
-        const auth =
-            await authMiddleware(context);
-
-        if (auth) {
-            return auth;
-        }
-
-        return controller.update(context);
-
-    },
-    {
-        body: updateSurgeryCaseSchema
-    }
-)
-.delete(
-    "/:id",
-    async (context) => {
-
-        const auth =
-            await authMiddleware(context);
-
-        if (auth) {
-            return auth;
-        }
-
-        return controller.delete(context);
-
-    }
-)
-
-  .get("/:id", async ({ params }) => {
     return controller.getById(params);
-  });
+
+  }
+)
+
+.put(
+  "/:id",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.update(context);
+
+  },
+  {
+    body: updateSurgeryCaseSchema
+  }
+)
+
+.delete(
+  "/:id",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.delete(context);
+
+  }
+);

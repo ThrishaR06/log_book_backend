@@ -225,6 +225,13 @@ static async updateProfile(
     }
 
     await db .update(doctors) .set({ fullName: body.fullName, phone: body.phone, emailAddress: body.emailAddress, designation: body.designation, speciality: body.speciality, regNo: body.regNo, primaryHospital: body.primaryHospital, dob: body.dob, updatedAt: new Date().toISOString() }) .where(eq(doctors.id, doctorId));
+
+const [updatedDoctor] = await db
+    .select()
+    .from(doctors)
+    .where(eq(doctors.id, doctorId));
+
+return updatedDoctor;
 }
 
 }

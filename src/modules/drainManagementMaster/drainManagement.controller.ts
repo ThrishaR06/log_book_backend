@@ -52,18 +52,19 @@ export class DrainManagementMasterController {
 
     static async update({ params, body, store }: any) {
 
+    const result =
         await DrainManagementMasterService.update(
             Number(params.id),
             store.user.id,
             body
         );
 
-        return ApiResponse.success(
-            null,
-            "Drain management master updated successfully."
-        );
+    return ApiResponse.success(
+        result,
+        "Drain management master updated successfully."
+    );
 
-    }
+}
 
     static async delete({ params, query, store }: any) {
 

@@ -2,6 +2,7 @@ import { db } from "../../db";
 import { dietMasters } from "../../db/schema/dietMasters";
 import { eq, and, like } from "drizzle-orm";
 import { categories } from "../../db/schema/categories";
+import { ApiResponse } from "../../utils/apiResponse";
 export class DietMasterService {
 
     static async create(data: any) {
@@ -144,9 +145,20 @@ export class DietMasterService {
             )
         );
 
-    return {
-        message: "Diet updated successfully",
-    };
+        const [updatedDiet] = await db
+        .select()
+        .from(dietMasters)
+        .where(
+            and(
+                eq(dietMasters.id, id),
+                eq(dietMasters.doctorId, doctorId)
+            )
+        );
+
+    return ApiResponse.success(
+    updatedDiet,
+    "Diet updated successfully."
+);
 }
     static async delete(
     id: number,

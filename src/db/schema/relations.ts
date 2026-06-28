@@ -21,7 +21,7 @@ export const surgeryCasesRelations = relations(surgeryCases, ({ many }) => ({
 export const mediaRelations = relations(media, ({ one }) => ({
   surgeryCase: one(surgeryCases, {
     fields: [media.surgeryCaseId],
-    references: [surgeryCases.id],
+    references: [surgeryCases.surgeryId],
   }),
 }));
 

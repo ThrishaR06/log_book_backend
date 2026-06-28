@@ -52,18 +52,19 @@ export class FollowUpMasterController {
 
     static async update({ params, body, store }: any) {
 
+    const result =
         await FollowUpMasterService.update(
             Number(params.id),
             store.user.id,
             body
         );
 
-        return ApiResponse.success(
-            null,
-            "Follow-up master updated successfully."
-        );
+    return ApiResponse.success(
+        result,
+        "Follow-up master updated successfully."
+    );
 
-    }
+}
 
     static async delete({ params, query, store }: any) {
 
