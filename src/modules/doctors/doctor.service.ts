@@ -7,6 +7,7 @@ import { subscriptions } from "../../db/schema/subscriptions";
 import { subscriptionPlans } from "../../db/schema/subscription-plans";
 import { sessions } from "../../db/schema/sessions";
 import { v4 as uuid } from "uuid";
+import { uploadToS3 } from "../../utils/s3Upload";
 
 export class DoctorService {
 
@@ -26,6 +27,7 @@ export class DoctorService {
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
   const result = await db.insert(doctors).values({
+    roleId: 2,
     password: hashedPassword,
     phone: data.phone,
     fullName: data.fullName,
@@ -34,6 +36,7 @@ export class DoctorService {
     speciality: data.speciality,
     regNo: data.regNo,
     primaryHospital: data.primaryHospital,
+    createdAt: new Date().toISOString(),
   });
 
   const doctorId = result[0].insertId;
@@ -224,7 +227,17 @@ static async updateProfile(
         throw new Error("Doctor not found");
     }
 
-    await db .update(doctors) .set({ fullName: body.fullName, phone: body.phone, emailAddress: body.emailAddress, designation: body.designation, speciality: body.speciality, regNo: body.regNo, primaryHospital: body.primaryHospital, dob: body.dob, updatedAt: new Date().toISOString() }) .where(eq(doctors.id, doctorId));
+    let profileImage = doctor.profileImage;
+
+if (body.profileImage) {
+    profileImage = await uploadToS3(
+        body.profileImage,
+        "profile",
+        doctor.fullName
+    );
+}
+
+    await db .update(doctors) .set({ fullName: body.fullName, phone: body.phone, emailAddress: body.emailAddress, designation: body.designation, speciality: body.speciality, regNo: body.regNo, primaryHospital: body.primaryHospital, dob: body.dob, profileImage: profileImage, updatedAt: new Date().toISOString() }) .where(eq(doctors.id, doctorId));
 
 const [updatedDoctor] = await db
     .select()

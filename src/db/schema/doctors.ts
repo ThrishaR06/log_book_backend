@@ -30,9 +30,13 @@ export const doctors = mysqlTable("doctors", {
     primaryHospital: varchar("primary_hospital", { length: 255 }).notNull(),
 
     // KEEP THESE
-    hospitalId: int("hospital_id"),
+    
 
     dob: varchar("dob", { length: 50 }),
+
+    profileImage: varchar("profile_image", {
+    length: 500,
+}),
 
     createdAt: varchar("created_at", { length: 50 }),
 
