@@ -174,7 +174,6 @@ static async updateDoctor(
             speciality: data.speciality,
             regNo: data.regNo,
             primaryHospital: data.primaryHospital,
-            hospitalId: data.hospitalId,
             dob: data.dob,
         })
         .where(
