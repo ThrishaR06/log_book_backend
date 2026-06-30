@@ -7,7 +7,7 @@ import { subscriptions } from "../../db/schema/subscriptions";
 import { subscriptionPlans } from "../../db/schema/subscription-plans";
 import { sessions } from "../../db/schema/sessions";
 import { v4 as uuid } from "uuid";
-import { uploadToS3 } from "../../utils/s3Upload";
+import {uploadToS3,getSignedFileUrl,} from "../../utils/s3Upload";
 
 export class DoctorService {
 
@@ -341,6 +341,9 @@ static async updateProfile(
             ne(doctors.id, doctorId)
         )
     );
+    if (existingEmail.length > 0) {
+    throw new Error("Email already exists");
+}
 
     // Check duplicate phone
 const existingPhone = await db
@@ -376,19 +379,30 @@ if (existingRegNo.length > 0) {
     let profileImage = doctor.profileImage;
 
 if (body.profileImage) {
-    profileImage = await uploadToS3(
+    const uploaded = await uploadToS3(
         body.profileImage,
         "profile",
         doctor.fullName
     );
+
+    profileImage = uploaded.key;
 }
 
     await db .update(doctors) .set({ fullName: body.fullName, phone: body.phone, emailAddress: body.emailAddress, designation: body.designation, speciality: body.speciality, regNo: body.regNo, primaryHospital: body.primaryHospital, dob: body.dob, profileImage: profileImage, updatedAt: new Date().toISOString() }) .where(eq(doctors.id, doctorId));
 
 const [updatedDoctor] = await db
-    .select()
-    .from(doctors)
-    .where(eq(doctors.id, doctorId));
+.select()
+.from(doctors)
+.where(eq(doctors.id, doctorId));
+
+if (updatedDoctor.profileImage) {
+
+    updatedDoctor.profileImage =
+        await getSignedFileUrl(
+            updatedDoctor.profileImage
+        );
+
+}
 
 return updatedDoctor;
  }catch(error:any){

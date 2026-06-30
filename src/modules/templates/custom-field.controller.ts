@@ -35,7 +35,7 @@ export class CustomFieldController {
 
     try {
 
-      await CustomFieldService.update(
+      const data = await CustomFieldService.update(
         Number(params.id),
         {
           doctorId: store.user.id,
@@ -46,9 +46,10 @@ export class CustomFieldController {
       );
 
       return {
-        success: true,
-        message: "Custom field updated successfully",
-      };
+  success: true,
+  message: "Custom field updated successfully",
+  data,
+};
 
     } catch (error: any) {
 
