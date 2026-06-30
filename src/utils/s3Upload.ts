@@ -1,14 +1,31 @@
 import {
     PutObjectCommand,
+    GetObjectCommand,
 } from "@aws-sdk/client-s3";
 
 import { s3 } from "../config/s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 function slugify(name: string) {
     return name
         .trim()
         .toLowerCase()
         .replace(/\s+/g, "-");
+}
+export async function getSignedFileUrl(key: string) {
+
+    const command = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: key,
+    });
+
+    return await getSignedUrl(
+        s3,
+        command,
+        {
+            expiresIn: 3600,
+        }
+    );
 }
 
 export async function uploadToS3(
@@ -40,5 +57,9 @@ console.log("S3 KEY =", key);
         })
     );
 
-    return key;
+    return {
+    key,
+    url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+};
+
 }

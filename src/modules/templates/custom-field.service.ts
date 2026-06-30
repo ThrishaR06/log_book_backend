@@ -39,34 +39,46 @@ export class CustomFieldService {
 
   }
 
-  static async update(
-    id: number,
-    data: any,
-  ) {
+static async update(
+  id: number,
+  data: any,
+) {
 
-    try {
+  try {
 
-      await db
-        .update(templateCustomFields)
-        .set({
-          fieldLabel: data.fieldLabel,
-          fieldType: data.fieldType,
-          fieldOptions: data.fieldOptions,
-        })
-        .where(
-          eq(
-            templateCustomFields.id,
-            id
-          )
-        );
+    await db
+      .update(templateCustomFields)
+      .set({
+        fieldLabel: data.fieldLabel,
+        fieldType: data.fieldType,
+        fieldOptions: data.fieldOptions,
+      })
+      .where(
+        eq(
+          templateCustomFields.id,
+          id
+        )
+      );
 
-    } catch (error) {
+    const [updated] = await db
+      .select()
+      .from(templateCustomFields)
+      .where(
+        eq(
+          templateCustomFields.id,
+          id
+        )
+      );
 
-      throw error;
+    return updated;
 
-    }
+  } catch (error) {
+
+    throw error;
 
   }
+
+}
 
   static async delete(id: number) {
 

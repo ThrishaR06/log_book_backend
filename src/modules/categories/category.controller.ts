@@ -116,4 +116,31 @@ static async delete({ params, store }: any) {
 
 }
 
+static async search({ query, store }: any) {
+
+    try {
+
+        const data =
+            await CategoryService.searchCategories(
+                store.user.id,
+                query.keyword
+            );
+
+        return ApiResponse.success(
+            data,
+            "Categories fetched successfully."
+        );
+
+    } catch (error: any) {
+
+        console.error("SEARCH CATEGORY ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to search categories."
+        );
+
+    }
+
+}
+
 }

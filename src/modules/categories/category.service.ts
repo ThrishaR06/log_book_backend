@@ -1,6 +1,6 @@
 import { db } from "../../db";
 import { categories } from "../../db/schema/categories";
-import { eq, and } from "drizzle-orm";
+import { eq, and, like } from "drizzle-orm";
 
 export class CategoryService {
 
@@ -75,6 +75,23 @@ static async deleteCategory(
     return {
         message: "Category deleted successfully",
     };
+}
+
+static async searchCategories(
+    doctorId: number,
+    keyword: string
+) {
+
+    return await db
+        .select()
+        .from(categories)
+        .where(
+            and(
+                eq(categories.doctorId, doctorId),
+                like(categories.name, `%${keyword}%`)
+            )
+        );
+
 }
 
 }

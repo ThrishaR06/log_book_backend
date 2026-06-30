@@ -28,6 +28,18 @@ export const categoryRoutes = new Elysia({
         ],
     }
 )
+
+.get(
+    "/search",
+    CategoryController.search,
+    {
+        beforeHandle: [
+            authMiddleware,
+            roleGuard("doctor"),
+        ],
+    }
+)
+
 .put(
     "/:id",
     CategoryController.update,
