@@ -6,6 +6,7 @@ import { categories } from "../../db/schema/categories";
 export class MonitoringMasterService {
 
     static async create(data: any) {
+        try{
 
     const [category] = await db
         .select()
@@ -36,12 +37,20 @@ export class MonitoringMasterService {
         id: result[0].insertId,
         ...data,
     };
+} catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to create monitoring master."
+        );
+
+    }
+
 }
 
     static async getAll(
     doctorId: number,
     categoryId: number
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -69,13 +78,21 @@ export class MonitoringMasterService {
                 eq(monitoringMasters.categoryId, categoryId)
             )
         );
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to fetch monitoring masters."
+        );
+
+    }
+
 }
 
     static async search(
     doctorId: number,
     categoryId: number,
     keyword: string
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -107,13 +124,21 @@ export class MonitoringMasterService {
                 )
             )
         );
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to search monitoring masters."
+        );
+
+    }
+
 }
 
     static async update(
     id: number,
     doctorId: number,
     body: any
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -148,6 +173,14 @@ export class MonitoringMasterService {
     return {
         message: "Monitoring updated successfully",
     };
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to update monitoring master."
+        );
+
+    }
+
 }
 
     static async delete(
@@ -155,7 +188,7 @@ export class MonitoringMasterService {
     doctorId: number,
     categoryId: number
 ) {
-
+ try{
     const [category] = await db
         .select()
         .from(categories)
@@ -186,5 +219,13 @@ export class MonitoringMasterService {
     return {
         message: "Monitoring deleted successfully",
     };
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to delete monitoring master."
+        );
+
+    }
+
 }
 }

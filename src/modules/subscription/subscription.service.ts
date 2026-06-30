@@ -19,10 +19,12 @@ export class SubscriptionService {
 
     private repository = new SubscriptionRepository();
 
-    // ==========================
-    // GET ALL SUBSCRIPTION PLANS
-    // ==========================
-    async getPlans() {
+   // ==========================
+// GET ALL SUBSCRIPTION PLANS
+// ==========================
+async getPlans() {
+
+    try {
 
         const data = await this.repository.getPlans();
 
@@ -31,7 +33,18 @@ export class SubscriptionService {
             message: "Subscription plans fetched successfully",
             data
         };
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message,
+            data: null
+        };
+
     }
+
+}
 
     // ==========================
     // CREATE ORDER
@@ -368,10 +381,14 @@ if (!doctor.email_address) {
 
 }
 
-    // ==========================
-    // MY SUBSCRIPTION
-    // ==========================
-    async mySubscription(doctorId: number) {
+   // ==========================
+// MY SUBSCRIPTION
+// ==========================
+async mySubscription(
+    doctorId: number
+) {
+
+    try {
 
         const data =
             await this.repository.getCurrentSubscription(
@@ -384,29 +401,54 @@ if (!doctor.email_address) {
             data
         };
 
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message,
+            data: null
+        };
+
     }
 
-    // ==========================
-    // SUBSCRIPTION HISTORY
-    // ==========================
-    async subscriptionHistory(
+}
+   // ==========================
+// SUBSCRIPTION HISTORY
+// ==========================
+async subscriptionHistory(
     doctorId: number
 ) {
 
-    const data =
-        await this.repository.subscriptionHistory(
-            doctorId
-        );
+    try {
 
-    return {
+        const data =
+            await this.repository.subscriptionHistory(
+                doctorId
+            );
 
-        success: true,
+        return {
 
-        message: "Subscription history fetched successfully",
+            success: true,
 
-        data
+            message: "Subscription history fetched successfully",
 
-    };
+            data
+
+        };
+
+    } catch (error: any) {
+
+        return {
+
+            success: false,
+
+            message: error.message,
+
+            data: null
+
+        };
+
+    }
 
 }
 }

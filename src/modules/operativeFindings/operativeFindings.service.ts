@@ -23,7 +23,10 @@ export class OperativeFindingsService {
 
       const id = await this.repository.create(body);
 
-      return this.repository.findById(id);
+      return this.repository.findById(
+  id,
+  body.doctorId
+);
 
     } catch (error: any) {
       return {
@@ -50,7 +53,10 @@ export class OperativeFindingsService {
         };
       }
 
-      return await this.repository.findAll();
+      return await this.repository.findAll(
+  data.doctorId,
+  data.categoryId
+);
 
     } catch (error: any) {
       return {
@@ -77,9 +83,16 @@ export class OperativeFindingsService {
         };
       }
 
-      await this.repository.update(id, body);
+      await this.repository.update(
+  id,
+  body.doctorId,
+  body
+);
 
-      return this.repository.findById(id);
+    return this.repository.findById(
+  id,
+  body.doctorId
+);
 
     } catch (error: any) {
       return {
@@ -90,10 +103,16 @@ export class OperativeFindingsService {
     }
   }
 
-  async delete(id: number) {
+  async delete(
+  id: number,
+  doctorId: number
+) {
     try {
 
-      await this.repository.delete(id);
+      await this.repository.delete(
+  id,
+  doctorId
+);
 
       return {
         success: true,
@@ -126,9 +145,10 @@ export class OperativeFindingsService {
       }
 
       return await this.repository.search(
-        data.keyword
-      );
-
+  data.keyword,
+  data.doctorId,
+  data.categoryId
+);
     } catch (error: any) {
       return {
         success: false,

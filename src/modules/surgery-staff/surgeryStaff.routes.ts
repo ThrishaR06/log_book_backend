@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 
 import { SurgeryStaffController } from "./surgeryStaff.controller";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 import {
   createSurgeryStaffSchema
@@ -15,72 +16,127 @@ export const surgeryStaffRoutes =
   })
 
   .post(
-    "/",
-    ({ body }) =>
-      controller.create(body),
-    {
-      body: createSurgeryStaffSchema
+  "/",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
     }
-  )
 
-  .get(
-    "/doctor/:doctorId",
-    ({ params }) =>
-      controller.getAll(
-        Number(params.doctorId)
-      )
-  )
+    return controller.create(context);
 
-  .get(
-    "/search",
-    ({ query }) =>
-      controller.search(
-        Number(query.doctorId),
-        String(query.keyword || "")
-      )
-  )
-
-  .get(
-    "/list",
-    ({ query }) =>
-      controller.list(
-        Number(query.doctorId)
-      )
-  )
-
-  .get(
-    "/by-type",
-    ({ query }) =>
-        controller.listByStaffType(
-            Number(query.doctorId),
-            Number(query.staffType)
-        )
+  },
+  {
+    body: createSurgeryStaffSchema
+  }
 )
 
   .get(
-    "/:id",
-    ({ params }) =>
-      controller.getById(
-        Number(params.id)
-      )
-  )
+  "/",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.getAll(context);
+
+  }
+)
+
+  .get(
+  "/search",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.search(context);
+
+  }
+)
+
+  .get(
+  "/list",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.list(context);
+
+  }
+)
+
+  .get(
+  "/by-type",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.listByStaffType(context);
+
+  }
+)
+
+  .get(
+  "/:id",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.getById(context);
+
+  }
+)
 
   .put(
-    "/:id",
-    ({ params, body }) =>
-      controller.update(
-        Number(params.id),
-        body
-      ),
-    {
-      body: createSurgeryStaffSchema
+  "/:id",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
     }
-  )
+
+    return controller.update(context);
+
+  },
+  {
+      body: createSurgeryStaffSchema
+  }
+)
 
   .delete(
-    "/:id",
-    ({ params }) =>
-      controller.delete(
-        Number(params.id)
-      )
-  );
+  "/:id",
+  async (context) => {
+
+    const auth = await authMiddleware(context);
+
+    if (auth) {
+      return auth;
+    }
+
+    return controller.delete(context);
+
+  }
+);

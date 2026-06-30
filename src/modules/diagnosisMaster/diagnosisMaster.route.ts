@@ -101,7 +101,8 @@ export const diagnosisMasterRoutes =
     }
 
     return controller.delete(
-      context.params.id
-    );
+    context.params.id,
+    (context.store as any).user.id
+);
   }
 );

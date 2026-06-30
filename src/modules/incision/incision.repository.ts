@@ -42,27 +42,34 @@ return {
     return rows;
   }
 
-  async findById(id: number) {
-
+  async findById(
+    id: number,
+    doctorId: number
+) {
     const [rows]: any = await pool.query(
-      `
-      SELECT *
-      FROM incision_masters
-      WHERE id = ?
-      `,
-      [id]
+        `
+        SELECT *
+        FROM incision_masters
+        WHERE id = ?
+        AND doctor_id = ?
+        `,
+        [
+            id,
+            doctorId
+        ]
     );
 
     return rows[0] || null;
-  }
+}
 
   async update(id: number, data: any) {
 
     await pool.query(
         `
-        UPDATE incision_masters
-        SET incision_name = ?
-        WHERE id = ?
+       UPDATE incision_masters
+SET incision_name=?
+WHERE id=?
+AND doctor_id=?
         `,
         [
             data.incisionName,
@@ -73,8 +80,9 @@ return {
     const [rows]: any = await pool.query(
         `
         SELECT *
-        FROM incision_masters
-        WHERE id = ?
+FROM incision_masters
+WHERE id = ?
+AND doctor_id = ?
         `,
         [id]
     );
@@ -84,16 +92,22 @@ return {
     return rows[0];
 }
 
-  async delete(id: number) {
-
+ async delete(
+    id: number,
+    doctorId: number
+) {
     await pool.query(
-      `
-      DELETE FROM incision_masters
-      WHERE id = ?
-      `,
-      [id]
+        `
+        DELETE FROM incision_masters
+        WHERE id = ?
+        AND doctor_id = ?
+        `,
+        [
+            id,
+            doctorId
+        ]
     );
-  }
+}
 
   async search(
     doctorId: number,
@@ -122,8 +136,9 @@ return {
 const [rows]: any = await pool.query(
   `
   SELECT *
-  FROM incision_masters
-  WHERE doctor_id = ?
+FROM incision_masters
+WHERE id = ?
+AND doctor_id = ?
   ORDER BY id DESC
   `,
   [doctorId]

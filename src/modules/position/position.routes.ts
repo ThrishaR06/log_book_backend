@@ -5,72 +5,120 @@ import {
   updatePositionSchema
 } from "./position.validation";
 
-const controller =
-new PositionController();
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { roleGuard } from "../../middleware/role.middleware";
 
-export const positionRoutes =
-new Elysia({
+const controller = new PositionController();
+
+export const positionRoutes = new Elysia({
   prefix: "/positions"
 })
 
 .post(
   "/",
-  ({ body }) =>
-    controller.create(body),
+  ({ body, store }: any ) =>
+    controller.create({
+      ...body,
+      doctorId: store.user.id
+    }),
   {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ],
     body: createPositionSchema
   }
 )
 
 .get(
-  "/doctor/:doctorId",
-  ({ params }) =>
+  "/",
+  ({ store }:any) =>
     controller.getAll(
-      Number(params.doctorId)
-    )
+      store.user.id
+    ),
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
 )
 
 .get(
   "/search",
-  ({ query }) =>
+  ({ query, store }:any) =>
     controller.search(
-      Number(query.doctorId),
+      store.user.id,
       String(query.keyword || "")
-    )
+    ),
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
 )
+
 .get(
- "/list",
- ({query}) =>
- controller.list(
-   Number(query.doctorId),
-   Number(query.categoryId)
- )
+  "/list",
+  ({ query, store }:any) =>
+    controller.list(
+      store.user.id,
+      Number(query.categoryId)
+    ),
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
 )
 
 .get(
   "/:id",
-  ({ params }) =>
+  ({ params, store }:any) =>
     controller.getById(
-      Number(params.id)
-    )
+      Number(params.id),
+      store.user.id
+    ),
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
 )
 
 .put(
   "/:id",
-  ({ params, body }) =>
+  ({ params, body, store }:any) =>
     controller.update(
       Number(params.id),
-      body
+      {
+        ...body,
+        doctorId: store.user.id
+      }
     ),
   {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ],
     body: updatePositionSchema
   }
 )
 
 .delete(
   "/:id",
-  ({ params }) =>
+  ({ params, store }:any) =>
     controller.delete(
-      Number(params.id)
-    )
+      Number(params.id),
+      store.user.id
+    ),
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
 );

@@ -6,6 +6,7 @@ import { categories } from "../../db/schema/categories";
 export class DrainManagementMasterService {
 
     static async create(data: any) {
+        try{
 
     const [category] = await db
         .select()
@@ -36,12 +37,19 @@ export class DrainManagementMasterService {
         id: result[0].insertId,
         ...data,
     };
-}
+}catch (error: any) {
+
+        console.error("CREATE DRAIN MANAGEMENT SERVICE ERROR =", error);
+
+        throw error;
+
+    }}
 
     static async getAll(
     doctorId: number,
     categoryId: number
 ) {
+    try{
 
     const [category] = await db
         .select()
@@ -69,13 +77,21 @@ export class DrainManagementMasterService {
                 eq(drainManagementMasters.categoryId, categoryId)
             )
         );
+}catch (error: any) {
+
+        console.error("GET ALL DRAIN MANAGEMENT SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
     static async search(
     doctorId: number,
     categoryId: number,
     keyword: string
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -107,6 +123,14 @@ export class DrainManagementMasterService {
                 )
             )
         );
+}catch (error: any) {
+
+        console.error("SEARCH DRAIN MANAGEMENT SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
     static async update(
@@ -114,6 +138,7 @@ export class DrainManagementMasterService {
     doctorId: number,
     body: any
 ) {
+    try{
 
     const [category] = await db
         .select()
@@ -156,6 +181,14 @@ export class DrainManagementMasterService {
     );
 
 return updatedDrainManagement;
+}catch (error: any) {
+
+        console.error("UPDATE DRAIN MANAGEMENT SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
     static async delete(
@@ -163,6 +196,7 @@ return updatedDrainManagement;
     doctorId: number,
     categoryId: number
 ) {
+    try{
 
     const [category] = await db
         .select()
@@ -194,6 +228,14 @@ return updatedDrainManagement;
     return {
         message: "Drain Management deleted successfully",
     };
+}catch (error: any) {
+
+        console.error("DELETE DRAIN MANAGEMENT SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
 }

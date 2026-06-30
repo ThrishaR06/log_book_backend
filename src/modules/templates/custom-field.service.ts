@@ -5,68 +5,102 @@ import { templateCustomFields } from "../../db/schema/templateCustomFields";
 export class CustomFieldService {
 
   static async create(data: any) {
-  const result = await db
-    .insert(templateCustomFields)
-    .values({
-      templateId: data.templateId,
-      fieldLabel: data.fieldLabel,
-      fieldType: data.fieldType,
-      fieldOptions: data.fieldOptions,
-    });
 
-  const insertedId = result[0]?.insertId;
+    try {
 
-  const [created] = await db
-    .select()
-    .from(templateCustomFields)
-    .where(eq(templateCustomFields.id, insertedId));
+      const result = await db
+        .insert(templateCustomFields)
+        .values({
+          templateId: data.templateId,
+          fieldLabel: data.fieldLabel,
+          fieldType: data.fieldType,
+          fieldOptions: data.fieldOptions,
+        });
 
-  return created;
-}
+      const insertedId = result[0]?.insertId;
+
+      const [created] = await db
+        .select()
+        .from(templateCustomFields)
+        .where(
+          eq(
+            templateCustomFields.id,
+            insertedId
+          )
+        );
+
+      return created;
+
+    } catch (error) {
+
+      throw error;
+
+    }
+
+  }
 
   static async update(
     id: number,
     data: any,
   ) {
 
-    await db
-      .update(templateCustomFields)
-      .set({
-        fieldLabel: data.fieldLabel,
-        fieldType: data.fieldType,
-        fieldOptions: data.fieldOptions,
-      })
-      .where(
-        eq(
-          templateCustomFields.id,
-          id
-        )
-      );
+    try {
+
+      await db
+        .update(templateCustomFields)
+        .set({
+          fieldLabel: data.fieldLabel,
+          fieldType: data.fieldType,
+          fieldOptions: data.fieldOptions,
+        })
+        .where(
+          eq(
+            templateCustomFields.id,
+            id
+          )
+        );
+
+    } catch (error) {
+
+      throw error;
+
+    }
+
   }
 
   static async delete(id: number) {
 
-    const result = await db
-      .delete(templateCustomFields)
-      .where(
-        eq(
-          templateCustomFields.id,
-          id
-        )
-      );
+    try {
 
-    if (
-      result[0]?.affectedRows === 0
-    ) {
+      const result = await db
+        .delete(templateCustomFields)
+        .where(
+          eq(
+            templateCustomFields.id,
+            id
+          )
+        );
+
+      if (
+        result[0]?.affectedRows === 0
+      ) {
+        return {
+          success: false,
+          message: "Custom field not found",
+        };
+      }
+
       return {
-        success: false,
-        message: "Custom field not found",
+        success: true,
+        message: "Custom field deleted successfully",
       };
+
+    } catch (error) {
+
+      throw error;
+
     }
 
-    return {
-      success: true,
-      message: "Custom field deleted successfully",
-    };
   }
+
 }

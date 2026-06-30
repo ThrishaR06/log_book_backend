@@ -7,7 +7,6 @@ import { hospitalRoutes } from "./modules/hospitals/hospital.routes";
 import { doctorRoutes } from "./modules/doctors/doctor.routes";
 import { templateRoutes } from "./modules/templates/template.routes";
 import { adminRoutes } from "./modules/admin/admin.routes";
-import { notificationRoutes } from "./modules/notifications/notification.routes";
 import { masterPresetRoutes } from "./modules/master-presets/masterPreset.route";
 
 import { categoryRoutes } from "./modules/categories/category.route";
@@ -67,7 +66,6 @@ export const app = new Elysia()
     .use(subscriptionRoutes)
     .use(templateRoutes)
     .use(adminRoutes)
-    .use(notificationRoutes)
     .use(masterPresetRoutes)
     .use(categoryRoutes)
     .use(masterCategoryRoutes)

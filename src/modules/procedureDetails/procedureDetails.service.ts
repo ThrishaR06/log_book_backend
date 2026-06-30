@@ -7,6 +7,8 @@ export class ProcedureDetailsService {
 
   async create(body: any) {
 
+  try {
+
     const isValid =
       await this.repository.validateDoctorCategory(
         body.doctorId,
@@ -25,9 +27,21 @@ export class ProcedureDetailsService {
 
     return this.repository.findById(id);
 
+  } catch (error: any) {
+
+    return {
+      success: false,
+      message: error.message,
+      data: null
+    };
+
   }
 
+}
+
   async getAll(data: any) {
+
+  try {
 
     const isValid =
       await this.repository.validateDoctorCategory(
@@ -42,11 +56,23 @@ export class ProcedureDetailsService {
       };
     }
 
-    return this.repository.findAll();
+    return await this.repository.findAll();
+
+  } catch (error: any) {
+
+    return {
+      success: false,
+      message: error.message,
+      data: null
+    };
 
   }
 
-  async update(id: number, body: any) {
+}
+
+ async update(id: number, body: any) {
+
+  try {
 
     const isValid =
       await this.repository.validateDoctorCategory(
@@ -66,22 +92,65 @@ export class ProcedureDetailsService {
       body
     );
 
-    return this.repository.findById(id);
+    return await this.repository.findById(id);
 
-  }
-
-  async delete(id: number) {
-
-    await this.repository.delete(id);
+  } catch (error: any) {
 
     return {
-      success: true,
-      message: "Procedure Details deleted successfully"
+      success: false,
+      message: error.message,
+      data: null
     };
 
   }
 
+}
+
+ async delete(
+    id: number,
+    doctorId: number
+) {
+
+    try {
+
+        const isValid =
+            await this.repository
+                .validateDoctorProcedureDetails(
+                    id,
+                    doctorId
+                );
+
+        if (!isValid) {
+
+            return {
+                success: false,
+                message: "Procedure Details not found."
+            };
+
+        }
+
+        await this.repository.delete(id);
+
+        return {
+            success: true,
+            message: "Procedure Details deleted successfully"
+        };
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message,
+            data: null
+        };
+
+    }
+
+}
+
   async search(data: any) {
+
+  try {
 
     const isValid =
       await this.repository.validateDoctorCategory(
@@ -96,10 +165,20 @@ export class ProcedureDetailsService {
       };
     }
 
-    return this.repository.search(
+    return await this.repository.search(
       data.keyword
     );
 
+  } catch (error: any) {
+
+    return {
+      success: false,
+      message: error.message,
+      data: null
+    };
+
   }
+
+}
 
 }

@@ -6,15 +6,44 @@ export class PostOpOrdersController {
   private service =
     new PostOpOrdersService();
 
-  create(body: any) {
-    return this.service.create(body);
+  async create(body: any) {
+
+    try {
+
+      return await this.service.create(body);
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
+
   }
 
-  getBySurgeryId(
-    surgeryId: number
+  async getBySurgeryId(
+    surgeryId: number,
+    doctorId: number
   ) {
-    return this.service.getBySurgeryId(
-      surgeryId
-    );
+
+    try {
+
+      return await this.service.getBySurgeryId(
+        surgeryId,
+        doctorId
+      );
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
+
   }
+
 }

@@ -1,6 +1,8 @@
 import { Elysia } from "elysia";
 
 import { IncisionController } from "./incision.controller";
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { roleGuard } from "../../middleware/role.middleware";
 
 import {
   createIncisionSchema,
@@ -16,62 +18,108 @@ new Elysia({
 })
 
 .post(
-  "/",
-  ({ body }) =>
-    controller.create(body),
-  {
-    body: createIncisionSchema
-  }
+    "/",
+   ({ body, store }: any) =>
+        controller.create({
+            ...body,
+            doctorId: store.user.id
+        }),
+    {
+        beforeHandle: [
+            authMiddleware,
+            roleGuard("doctor")
+        ],
+        body: createIncisionSchema
+    }
 )
 
 .get(
-  "/doctor/:doctorId",
-  ({ params }) =>
-    controller.getAll(
-      Number(params.doctorId)
-    )
+    "/",
+   ({ store }: any) =>
+        controller.getAll(
+            store.user.id
+        ),
+    {
+        beforeHandle: [
+            authMiddleware,
+            roleGuard("doctor")
+        ]
+    }
 )
 
 .get(
-  "/search",
-  ({ query }) =>
-    controller.search(
-      Number(query.doctorId),
-      String(query.keyword || "")
-    )
+    "/search",
+    ({ query, store }:any) =>
+        controller.search(
+            store.user.id,
+            String(query.keyword || "")
+        ),
+    {
+        beforeHandle: [
+            authMiddleware,
+            roleGuard("doctor")
+        ]
+    }
 )
 .get(
- "/list",
- ({ query }) =>
- controller.list(
-   Number(query.doctorId),
- )
+    "/list",
+    ({ store }:any) =>
+        controller.list(
+            store.user.id
+        ),
+    {
+        beforeHandle: [
+            authMiddleware,
+            roleGuard("doctor")
+        ]
+    }
 )
 
 .get(
-  "/:id",
-  ({ params }) =>
-    controller.getById(
-      Number(params.id)
-    )
+    "/:id",
+    ({ params, store }: any) =>
+        controller.getById(
+            Number(params.id),
+            store.user.id
+        ),
+    {
+        beforeHandle: [
+            authMiddleware,
+            roleGuard("doctor")
+        ]
+    }
 )
 
 .put(
-  "/:id",
-  ({ params, body }) =>
-    controller.update(
-      Number(params.id),
-      body
-    ),
-  {
-    body: updateIncisionSchema
-  }
+    "/:id",
+    ({ params, body, store }:any) =>
+        controller.update(
+            Number(params.id),
+            {
+                ...body,
+                doctorId: store.user.id
+            }
+        ),
+    {
+        beforeHandle:[
+            authMiddleware,
+            roleGuard("doctor")
+        ],
+        body:updateIncisionSchema
+    }
 )
 
 .delete(
-  "/:id",
-  ({ params }) =>
-    controller.delete(
-      Number(params.id)
-    )
+    "/:id",
+    ({ params, store }:any) =>
+        controller.delete(
+            Number(params.id),
+            store.user.id
+        ),
+    {
+        beforeHandle:[
+            authMiddleware,
+            roleGuard("doctor")
+        ]
+    }
 );

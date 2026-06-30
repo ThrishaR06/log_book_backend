@@ -121,20 +121,22 @@ export const procedureDetailsRoutes =
 
 .delete(
 
-  "/:id",
+    "/:id",
 
-  async (context) => {
+    async (context) => {
 
-    const auth =
-      await authMiddleware(context);
+        const auth =
+            await authMiddleware(context);
 
-    if (auth) {
-      return auth;
+        if (auth) {
+            return auth;
+        }
+
+        return controller.delete(
+            context.params.id,
+            context
+        );
+
     }
-
-    return controller.delete(
-      context.params.id
-    );
-  }
 
 );

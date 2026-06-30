@@ -11,6 +11,7 @@ export class MedicationService {
     // CREATE
     // =========================
     static async create(data: any) {
+        try{
 
     const [category] = await db
         .select()
@@ -46,6 +47,14 @@ export class MedicationService {
         created,
         "Medication master created successfully."
     );
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to create medication master."
+        );
+
+    }
+
 }
 
     // =========================
@@ -54,7 +63,7 @@ export class MedicationService {
     static async getAll(
     doctorId: number,
     categoryId: number
-) {
+) {  try{
 
     const [category] = await db
         .select()
@@ -84,6 +93,14 @@ export class MedicationService {
         data,
         "Medication masters fetched successfully."
     );
+} catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to fetch medication masters."
+        );
+
+    }
+
 }
 
     // =========================
@@ -93,7 +110,7 @@ export class MedicationService {
     doctorId: number,
     categoryId: number,
     keyword: string
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -127,6 +144,14 @@ export class MedicationService {
         data,
         "Medication search completed."
     );
+} catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to search medication masterss"
+        );
+
+    }
+
 }
     // =========================
     // UPDATE
@@ -135,7 +160,7 @@ export class MedicationService {
     id: number,
     doctorId: number,
     data: any
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -176,6 +201,14 @@ export class MedicationService {
         updated,
         "Medication master updated successfully."
     );
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to update medication master."
+        );
+
+    }
+
 }
 
     // =========================
@@ -185,7 +218,7 @@ export class MedicationService {
     id: number,
     doctorId: number,
     categoryId: number
-) {
+) { try{
 
     const [category] = await db
         .select()
@@ -226,5 +259,13 @@ export class MedicationService {
         existing,
         "Medication master deleted successfully."
     );
+}catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to delete medication master."
+        );
+
+    }
+
 }
 }

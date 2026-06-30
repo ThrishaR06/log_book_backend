@@ -5,6 +5,8 @@ export class SpecialInstructionMasterController {
 
     static async create({ body, store }: any) {
 
+    try {
+
         const result =
             await SpecialInstructionMasterService.create({
                 doctorId: store.user.id,
@@ -17,9 +19,19 @@ export class SpecialInstructionMasterController {
             "Special instruction master created successfully."
         );
 
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to create special instruction."
+        );
+
     }
 
-    static async getAll({ query, store }: any) {
+}
+
+  static async getAll({ query, store }: any) {
+
+    try {
 
         const result =
             await SpecialInstructionMasterService.getAll(
@@ -32,9 +44,19 @@ export class SpecialInstructionMasterController {
             "Special instruction masters fetched successfully."
         );
 
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to fetch special instructions."
+        );
+
     }
 
-    static async search({ query, store }: any) {
+}
+
+   static async search({ query, store }: any) {
+
+    try {
 
         const result =
             await SpecialInstructionMasterService.search(
@@ -48,9 +70,19 @@ export class SpecialInstructionMasterController {
             "Special instruction masters fetched successfully."
         );
 
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to search special instructions."
+        );
+
     }
 
-    static async update({ params, body, store }: any) {
+}
+
+   static async update({ params, body, store }: any) {
+
+    try {
 
         await SpecialInstructionMasterService.update(
             Number(params.id),
@@ -63,9 +95,19 @@ export class SpecialInstructionMasterController {
             "Special instruction master updated successfully."
         );
 
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to update special instruction."
+        );
+
     }
 
-    static async delete({ params, query, store }: any) {
+}
+
+  static async delete({ params, query, store }: any) {
+
+    try {
 
         await SpecialInstructionMasterService.delete(
             Number(params.id),
@@ -78,6 +120,14 @@ export class SpecialInstructionMasterController {
             "Special instruction master deleted successfully."
         );
 
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to delete special instruction."
+        );
+
     }
+
+}
 
 }

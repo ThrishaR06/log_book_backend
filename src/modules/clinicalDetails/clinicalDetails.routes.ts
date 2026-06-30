@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { ClinicalDetailsController }
 from "./clinicalDetails.controller";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 const controller =
 new ClinicalDetailsController();
@@ -29,32 +30,52 @@ new Elysia({
 })
 
 .post(
-  "/",
-  ({ body }) =>
-    controller.create(body),
-  {
-    body:
-      clinicalDetailsSchema
-  }
+    "/",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.create(context);
+
+    },
+    {
+        body: clinicalDetailsSchema
+    }
 )
 
 .get(
-  "/surgery/:surgeryId",
-  ({ params }) =>
-    controller.getBySurgeryId(
-      Number(params.surgeryId)
-    )
+    "/surgery/:surgeryId",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.getBySurgeryId(context);
+
+    }
 )
 
 .put(
-  "/surgery/:surgeryId",
-  ({ params, body }) =>
-    controller.update(
-      Number(params.surgeryId),
-      body
-    ),
-  {
-    body:
-      clinicalDetailsSchema
-  }
+    "/surgery/:surgeryId",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.update(context);
+
+    },
+    {
+        body: clinicalDetailsSchema
+    }
 );

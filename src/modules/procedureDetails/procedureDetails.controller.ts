@@ -8,6 +8,8 @@ export class ProcedureDetailsController {
 
   async create({ body, store }: any) {
 
+  try {
+
     const result =
       await this.service.create({
         ...body,
@@ -19,9 +21,19 @@ export class ProcedureDetailsController {
       "Procedure details master created successfully."
     );
 
+  } catch (error: any) {
+
+    return ApiResponse.error(
+      error.message || "Failed to create procedure details."
+    );
+
   }
 
+}
+
   async getAll({ query, store }: any) {
+
+  try {
 
     const result =
       await this.service.getAll({
@@ -34,12 +46,22 @@ export class ProcedureDetailsController {
       "Procedure details masters fetched successfully."
     );
 
+  } catch (error: any) {
+
+    return ApiResponse.error(
+      error.message || "Failed to fetch procedure details."
+    );
+
   }
 
-  async update(
-    id: string,
-    { body, store }: any
-  ) {
+}
+
+ async update(
+  id: string,
+  { body, store }: any
+) {
+
+  try {
 
     const result =
       await this.service.update(
@@ -55,23 +77,48 @@ export class ProcedureDetailsController {
       "Procedure details master updated successfully."
     );
 
-  }
+  } catch (error: any) {
 
-  async delete(id: string) {
-
-    const result =
-      await this.service.delete(
-        Number(id)
-      );
-
-    return ApiResponse.success(
-      result,
-      "Procedure details master deleted successfully."
+    return ApiResponse.error(
+      error.message || "Failed to update procedure details."
     );
 
   }
 
+}
+
+ async delete(
+    id: string,
+    { store }: any
+) {
+
+    try {
+
+        const result =
+            await this.service.delete(
+                Number(id),
+                store.user.id
+            );
+
+        return ApiResponse.success(
+            result,
+            "Procedure details master deleted successfully."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to delete procedure details."
+        );
+
+    }
+
+}
+
   async search({ query, store }: any) {
+
+  try {
 
     const result =
       await this.service.search({
@@ -85,6 +132,14 @@ export class ProcedureDetailsController {
       "Procedure details masters fetched successfully."
     );
 
+  } catch (error: any) {
+
+    return ApiResponse.error(
+      error.message || "Failed to search procedure details."
+    );
+
   }
+
+}
 
 }

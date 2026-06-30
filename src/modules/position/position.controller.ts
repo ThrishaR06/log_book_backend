@@ -5,48 +5,137 @@ export class PositionController {
   private service =
     new PositionService();
 
-  create(body: any) {
-    return this.service.create(body);
-  }
+  async create(body: any) {
+    try {
 
-  getAll(doctorId: number) {
+        return await this.service.create(body);
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+}
+
+  getAll(doctorId: number) { try{
     return this.service.getAll(
       doctorId
     );
-  }
+  }catch (error: any) {
 
-  getById(id: number) {
-    return this.service.getById(id);
-  }
+        return {
+            success: false,
+            message: error.message
+        };
 
-  update(id: number, body: any) {
-    return this.service.update(
-      id,
-      body
-    );
-  }
+    }
+}
 
-  delete(id: number) {
-    return this.service.delete(id);
-  }
+ getById(
+    id: number,
+    doctorId: number
+) {
+    try {
 
-  search(
+        return this.service.getById(
+            id,
+            doctorId
+        );
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+}
+
+update(
+    id: number,
+    body: any
+) {
+    try {
+
+        return this.service.update(
+            id,
+            body
+        );
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+}
+
+delete(
+    id: number,
+    doctorId: number
+) {
+    try {
+
+        return this.service.delete(
+            id,
+            doctorId
+        );
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+}
+
+search(
     doctorId: number,
     keyword: string
-  ) {
-    return this.service.search(
-      doctorId,
-      keyword
-    );
-  }
+) {
+    try {
 
-  list(
- doctorId:number,
- categoryId:number
-){
- return this.service.list(
-   doctorId,
-   categoryId
- );
+        return this.service.search(
+            doctorId,
+            keyword
+        );
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+}
+
+list(
+    doctorId: number,
+    categoryId: number
+) {
+    try {
+
+        return this.service.list(
+            doctorId,
+            categoryId
+        );
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
 }
 }

@@ -1,4 +1,6 @@
 import { Elysia } from "elysia";
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { roleGuard } from "../../middleware/role.middleware";
 
 import {
   PostOpOrdersController
@@ -20,18 +22,31 @@ new Elysia({
 
 .post(
   "/",
-  ({ body }) =>
-    controller.create(body),
+  ({ body, store }:any) =>
+    controller.create({
+      ...body,
+      doctorId: store.user.id
+    }),
   {
-    body:
-    createPostOpOrderSchema
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ],
+    body: createPostOpOrderSchema
   }
 )
 
 .get(
   "/surgery/:surgeryId",
-  ({ params }) =>
+  ({ params, store }:any) =>
     controller.getBySurgeryId(
-      Number(params.surgeryId)
-    )
+      Number(params.surgeryId),
+      store.user.id
+    ),
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
 );

@@ -2,49 +2,89 @@ import { CustomFieldService } from "./custom-field.service";
 
 export class CustomFieldController {
 
-  static async create({ body }: any) {
+  static async create({ body, store }: any) {
 
-    const data = await CustomFieldService.create({
-      templateId: Number(body.templateId),
-      fieldLabel: body.fieldLabel,
-      fieldType: body.fieldType,
-      fieldOptions: body.fieldOptions,
-    });
+    try {
 
-    return {
-      success: true,
-      message: "Custom field created successfully",
-      data,
-    };
-  }
-
-  static async update({ params, body }: any) {
-
-    await CustomFieldService.update(
-      Number(params.id),
-      {
+      const data = await CustomFieldService.create({
+        doctorId: store.user.id,
+        templateId: Number(body.templateId),
         fieldLabel: body.fieldLabel,
         fieldType: body.fieldType,
         fieldOptions: body.fieldOptions,
-      }
-    );
+      });
 
-    return {
-      success: true,
-      message: "Custom field updated successfully",
-    };
+      return {
+        success: true,
+        message: "Custom field created successfully",
+        data,
+      };
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message,
+      };
+
+    }
+
   }
 
-  static async delete({ params }: any) {
+  static async update({ params, body, store }: any) {
 
-    const data =
-      await CustomFieldService.delete(
-        Number(params.id)
+    try {
+
+      await CustomFieldService.update(
+        Number(params.id),
+        {
+          doctorId: store.user.id,
+          fieldLabel: body.fieldLabel,
+          fieldType: body.fieldType,
+          fieldOptions: body.fieldOptions,
+        }
       );
 
-    return {
-      success: data.success,
-      message: data.message,
-    };
+      return {
+        success: true,
+        message: "Custom field updated successfully",
+      };
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message,
+      };
+
+    }
+
   }
+
+  static async delete({ params, store }: any) {
+
+    try {
+
+      const data =
+        await CustomFieldService.delete(
+          Number(params.id),
+          store.user.id
+        );
+
+      return {
+        success: data.success,
+        message: data.message,
+      };
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message,
+      };
+
+    }
+
+  }
+
 }

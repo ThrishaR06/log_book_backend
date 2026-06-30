@@ -1,6 +1,6 @@
 import { db } from "../../db";
 import { doctors } from "../../db/schema/doctors";
-import { eq } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { subscriptions } from "../../db/schema/subscriptions";
@@ -12,6 +12,8 @@ import { uploadToS3 } from "../../utils/s3Upload";
 export class DoctorService {
 
   static async register(data: any) {
+    try{
+      
   const existing = await db
     .select()
     .from(doctors)
@@ -23,6 +25,62 @@ export class DoctorService {
       message: "Doctor already exists",
     };
   }
+
+  const phoneExists = await db
+    .select()
+    .from(doctors)
+    .where(eq(doctors.phone, data.phone));
+
+if (phoneExists.length > 0) {
+    return {
+        success: false,
+        message: "Phone number already exists",
+    };
+}
+
+const regNoExists = await db
+    .select()
+    .from(doctors)
+    .where(eq(doctors.regNo, data.regNo));
+
+if (regNoExists.length > 0) {
+    return {
+        success: false,
+        message: "Registration number already exists",
+    };
+}
+if (!/^[0-9]{10}$/.test(data.phone)) {
+    return {
+        success: false,
+        message: "Phone number must be 10 digits",
+    };
+}
+if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.emailAddress)
+) {
+    return {
+        success: false,
+        message: "Invalid email address",
+    };
+}
+if (!data.regNo?.trim()) {
+    return {
+        success: false,
+        message: "Registration number is required",
+    };
+}
+if (!data.fullName?.trim()) {
+    return {
+        success: false,
+        message: "Full name is required",
+    };
+}
+if (!data.password?.trim()) {
+    return {
+        success: false,
+        message: "Password is required",
+    };
+}
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
@@ -70,8 +128,19 @@ await db.insert(subscriptions).values({
     fullName: data.fullName,
     emailAddress: data.emailAddress,
   };
+} catch(error:any){
+
+        console.error("REGISTER SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
+
  static async login(data: any) {
+
+  try{ 
   const doctor = await db
     .select()
     .from(doctors)
@@ -147,6 +216,14 @@ if (subscription.length > 0) {
     token,
     subscription: subscriptionData,
 };
+ }catch(error:any){
+
+        console.error("LOGIN SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
   static async getAll() {
@@ -156,6 +233,7 @@ if (subscription.length > 0) {
 }
 
 static async getById(id: number) {
+  try{
   const doctor = await db
     .select()
     .from(doctors)
@@ -172,10 +250,20 @@ static async getById(id: number) {
     success: true,
     data: doctor[0],
   };
+} catch(error:any){
+
+        console.error("DOCTOR SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
 
 static async logout(sessionId: string) {
+
+  try{
 
     const session = await db.query.sessions.findFirst({
         where: eq(sessions.sessionId, sessionId),
@@ -195,10 +283,19 @@ static async logout(sessionId: string) {
     return {
         success: true,
     };
+ }catch(error:any){
+
+        console.error("logout SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
 
 static async getProfile(doctorId: number) {
+  try{
 
     const doctor = await db
         .select()
@@ -210,6 +307,14 @@ static async getProfile(doctorId: number) {
     }
 
     return doctor[0];
+ }catch(error:any){
+
+        console.error("GET PROFILE SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
 
@@ -218,14 +323,55 @@ static async updateProfile(
     doctorId: number,
     body: any
 ) {
+  try{
 
     const doctor = await db.query.doctors.findFirst({
         where: eq(doctors.id, doctorId),
     });
-
     if (!doctor) {
         throw new Error("Doctor not found");
     }
+
+    const existingEmail = await db
+    .select()
+    .from(doctors)
+    .where(
+        and(
+            eq(doctors.emailAddress, body.emailAddress),
+            ne(doctors.id, doctorId)
+        )
+    );
+
+    // Check duplicate phone
+const existingPhone = await db
+    .select()
+    .from(doctors)
+    .where(
+        and(
+            eq(doctors.phone, body.phone),
+            ne(doctors.id, doctorId)
+        )
+    );
+
+if (existingPhone.length > 0) {
+    throw new Error("Phone number already exists");
+}
+
+const existingRegNo = await db
+    .select()
+    .from(doctors)
+    .where(
+        and(
+            eq(doctors.regNo, body.regNo),
+            ne(doctors.id, doctorId)
+        )
+    );
+
+if (existingRegNo.length > 0) {
+    throw new Error("Registration number already exists");
+}
+
+    
 
     let profileImage = doctor.profileImage;
 
@@ -245,6 +391,14 @@ const [updatedDoctor] = await db
     .where(eq(doctors.id, doctorId));
 
 return updatedDoctor;
+ }catch(error:any){
+
+        console.error("UPDATE PROFILE SERVICE ERROR =", error);
+
+        throw error;
+
+    }
+
 }
 
 }

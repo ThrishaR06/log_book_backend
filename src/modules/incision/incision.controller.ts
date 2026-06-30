@@ -5,41 +5,104 @@ export class IncisionController {
   private service =
     new IncisionService();
 
-  create(body: any) {
-    return this.service.create(body);
-  }
+  async create(body: any) {
+    try {
+        return await this.service.create(body);
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "Failed to create incision"
+        };
+    }
+}
 
-  getAll(doctorId: number) {
-    return this.service.getAll(doctorId);
-  }
+  async getAll(doctorId: number) {
+    try {
+        return await this.service.getAll(doctorId);
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "Failed to fetch incisions"
+        };
+    }
+}
+ async getById(
+    id: number,
+    doctorId: number
+) {
+    try {
 
-  getById(id: number) {
-    return this.service.getById(id);
-  }
+        return await this.service.getById(
+            id,
+            doctorId
+        );
 
-  update(id: number, body: any) {
-    return this.service.update(id, body);
-  }
+    } catch (error: any) {
 
-  delete(id: number) {
-    return this.service.delete(id);
-  }
+        return {
+            success: false,
+            message: error.message || "Failed to fetch incision"
+        };
 
-  search(
+    }
+}
+
+  async update(id: number, body: any) {
+    try {
+        return await this.service.update(id, body);
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "Failed to update incision"
+        };
+    }
+}
+
+ async delete(
+    id: number,
+    doctorId: number
+) {
+    try {
+
+        return await this.service.delete(
+            id,
+            doctorId
+        );
+
+    } catch (error: any) {
+
+        return {
+            success: false,
+            message: error.message || "Failed to delete incision"
+        };
+
+    }
+}
+
+  async search(
     doctorId: number,
     keyword: string
-  ) {
-    return this.service.search(
-      doctorId,
-      keyword
-    );
-  }
-
-  list(
-    doctorId: number
-  ) {
-    return this.service.list(
-      doctorId
-    );
-  }
+) {
+    try {
+        return await this.service.search(
+            doctorId,
+            keyword
+        );
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "Failed to search incisions"
+        };
+    }
+}
+  async list(doctorId: number) {
+    try {
+        return await this.service.list(doctorId);
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "Failed to fetch incisions"
+        };
+    }
+}
 }

@@ -21,8 +21,9 @@ export class ClinicalDetailsService {
   }
 
   async getBySurgeryId(
-    surgeryId: number
-  ) {
+    surgeryId: number,
+    doctorId: number
+) {
 
     const data =
       await this.repository.findBySurgeryId(
@@ -38,8 +39,9 @@ export class ClinicalDetailsService {
 
   async update(
     surgeryId: number,
+    doctorId: number,
     data: any
-  ) {
+) {
 
     await this.repository.update(
       surgeryId,
