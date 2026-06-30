@@ -5,6 +5,8 @@ export class CategoryController {
 
     static async create({ body, store }: any) {
 
+    try {
+
         if (!body.name) {
             return ApiResponse.error("Category name is required");
         }
@@ -16,12 +18,25 @@ export class CategoryController {
             );
 
         return ApiResponse.success(
-    data,
-    "Category created successfully"
-);
+            data,
+            "Category created successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error("CREATE CATEGORY ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to create category."
+        );
+
     }
 
+}
+
     static async getAll({ store }: any) {
+
+    try {
 
         const data =
             await CategoryService.getCategories(
@@ -29,39 +44,76 @@ export class CategoryController {
             );
 
         return ApiResponse.success(data);
+
+    } catch (error: any) {
+
+        console.error("GET CATEGORIES ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to fetch categories."
+        );
+
     }
+
+}
 
     static async update({ params, body, store }: any) {
 
-   if (!body.name) {
-    return ApiResponse.error("Category name is required");
-}
+    try {
 
-    const data =
-        await CategoryService.updateCategory(
-            Number(params.id),
-            store.user.id,
-            body.name
+        if (!body.name) {
+            return ApiResponse.error("Category name is required");
+        }
+
+        const data =
+            await CategoryService.updateCategory(
+                Number(params.id),
+                store.user.id,
+                body.name
+            );
+
+        return ApiResponse.success(
+            data,
+            "Category updated successfully"
         );
 
-    return ApiResponse.success(
-    data,
-    "Category updated successfully"
-);
+    } catch (error: any) {
+
+        console.error("UPDATE CATEGORY ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to update category."
+        );
+
+    }
+
 }
 
 static async delete({ params, store }: any) {
 
-    const data =
-        await CategoryService.deleteCategory(
-            Number(params.id),
-            store.user.id
+    try {
+
+        const data =
+            await CategoryService.deleteCategory(
+                Number(params.id),
+                store.user.id
+            );
+
+        return {
+            success: true,
+            ...data,
+        };
+
+    } catch (error: any) {
+
+        console.error("DELETE CATEGORY ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to delete category."
         );
 
-    return {
-        success: true,
-        ...data,
-    };
+    }
+
 }
 
 }

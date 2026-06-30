@@ -120,9 +120,10 @@ export const operativeFindingsRoutes =
       return auth;
     }
 
-    return controller.delete(
-      context.params.id
-    );
+   return controller.delete(
+    context.params.id,
+    context
+);
   }
 
 );

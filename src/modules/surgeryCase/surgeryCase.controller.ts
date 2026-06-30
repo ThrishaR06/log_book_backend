@@ -114,89 +114,152 @@ export class SurgeryCaseController {
   }
 
   async create(context: any) {
-    console.log(context.store.user);
+    try {
+
+      console.log(context.store.user);
       console.log("Logged In User =", context.store.user);
 
+      const body: any = context.body;
 
-    const body: any = context.body;
+      console.log("BODY =", body);
 
-    console.log("BODY =", body);
+      if (body.preOpImages && !Array.isArray(body.preOpImages)) {
+        body.preOpImages = [body.preOpImages];
+      }
 
-    if (body.preOpImages && !Array.isArray(body.preOpImages)) {
-      body.preOpImages = [body.preOpImages];
+      if (body.intraOpImages && !Array.isArray(body.intraOpImages)) {
+        body.intraOpImages = [body.intraOpImages];
+      }
+
+      if (body.postOpImages && !Array.isArray(body.postOpImages)) {
+        body.postOpImages = [body.postOpImages];
+      }
+
+      const doctor = await this.service.getDoctorById(
+        context.store.user.id
+      );
+
+      body.doctorId = doctor.id;
+
+      await this.prepareBody(body, doctor);
+
+      return this.service.create(body);
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while creating surgery case.",
+      };
+
     }
-
-    if (body.intraOpImages && !Array.isArray(body.intraOpImages)) {
-      body.intraOpImages = [body.intraOpImages];
-    }
-
-    if (body.postOpImages && !Array.isArray(body.postOpImages)) {
-      body.postOpImages = [body.postOpImages];
-    }
-
-    // Logged-in doctor
-    const doctor = await this.service.getDoctorById(
-    context.store.user.id
-);
-
-body.doctorId = doctor.id;
-
-    body.doctorId = doctor.id;
-
-    await this.prepareBody(body, doctor);
-
-    return this.service.create(body);
   }
 
   async getById(params: any) {
-    const id = Number(params.id);
+    try {
 
-    if (!id) {
-      throw new Error("Invalid surgery case id");
+      const id = Number(params.id);
+
+      if (!id) {
+        throw new Error("Invalid surgery case id");
+      }
+
+      return await this.service.getById(id);
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while fetching surgery case.",
+      };
+
     }
-
-    return await this.service.getById(id);
   }
 
   async getAll(context: any) {
-    const doctorId = context.store.user.id;
+    try {
 
-    return this.service.getAllByDoctorId(doctorId);
+      const doctorId = context.store.user.id;
+
+      return this.service.getAllByDoctorId(doctorId);
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while fetching surgery cases.",
+      };
+
+    }
   }
 
   async update(context: any) {
-    const id = Number(context.params.id);
+    try {
 
-    const loggedInDoctorId = context.store.user.id;
+      const id = Number(context.params.id);
 
-    const doctor = await this.service.getDoctorInfoByCaseId(id);
+      const loggedInDoctorId = context.store.user.id;
 
-    if (doctor.id !== loggedInDoctorId) {
-      throw new Error(
-        "You are not allowed to update this surgery case."
-      );
+      const doctor =
+        await this.service.getDoctorInfoByCaseId(id);
+
+      if (doctor.id !== loggedInDoctorId) {
+        throw new Error(
+          "You are not allowed to update this surgery case."
+        );
+      }
+
+      const body = context.body;
+
+      await this.prepareBody(body, doctor);
+
+      return this.service.update(id, body);
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while updating surgery case.",
+      };
+
     }
-
-    const body = context.body;
-
-    await this.prepareBody(body, doctor);
-
-    return this.service.update(id, body);
   }
 
   async delete(context: any) {
-    const id = Number(context.params.id);
+    try {
 
-    const loggedInDoctorId = context.store.user.id;
+      const id = Number(context.params.id);
 
-    const doctor = await this.service.getDoctorInfoByCaseId(id);
+      const loggedInDoctorId = context.store.user.id;
 
-    if (doctor.id !== loggedInDoctorId) {
-      throw new Error(
-        "You are not allowed to delete this surgery case."
-      );
+      const doctor =
+        await this.service.getDoctorInfoByCaseId(id);
+
+      if (doctor.id !== loggedInDoctorId) {
+        throw new Error(
+          "You are not allowed to delete this surgery case."
+        );
+      }
+
+      return this.service.delete(id);
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while deleting surgery case.",
+      };
+
     }
-
-    return this.service.delete(id);
   }
 }

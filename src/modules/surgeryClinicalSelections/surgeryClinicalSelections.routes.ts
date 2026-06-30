@@ -1,14 +1,15 @@
 import { Elysia } from "elysia";
 
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { roleGuard } from "../../middleware/role.middleware";
+
 import {
   SurgeryClinicalSelectionsController
-}
-from "./surgeryClinicalSelections.controller";
+} from "./surgeryClinicalSelections.controller";
 
 import {
   saveClinicalSelectionSchema
-}
-from "./surgeryClinicalSelections.validation";
+} from "./surgeryClinicalSelections.validation";
 
 const controller =
 new SurgeryClinicalSelectionsController();
@@ -21,10 +22,17 @@ new Elysia({
 
 .post(
   "/",
-  ({ body }) =>
-    controller.create(body),
+  ({ body, store }) =>
+    controller.create({
+      body,
+      store
+    }),
   {
-    body:
-      saveClinicalSelectionSchema
+    body: saveClinicalSelectionSchema,
+
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
   }
 );

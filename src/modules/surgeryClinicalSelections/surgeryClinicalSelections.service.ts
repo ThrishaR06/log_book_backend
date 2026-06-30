@@ -8,16 +8,28 @@ export class SurgeryClinicalSelectionsService {
 
   async create(data: any) {
 
-    const id =
-      await this.repository.create(data);
+    try {
 
-    return {
-      success: true,
-      message:
-        "Clinical selections saved successfully",
-      data: {
-        id
-      }
-    };
-  }
+        const id =
+            await this.repository.create(data);
+
+        return {
+            success: true,
+            message:
+                "Clinical selections saved successfully",
+            data: {
+                id
+            }
+        };
+
+    } catch (error: any) {
+
+        throw new Error(
+            error.message ||
+            "Failed to save clinical selections."
+        );
+
+    }
+
+}
 }

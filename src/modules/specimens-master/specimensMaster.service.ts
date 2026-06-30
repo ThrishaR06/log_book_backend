@@ -9,76 +9,87 @@ export class SpecimensMasterService {
     // =========================
     // CREATE
     // =========================
-    static async create({
-        doctorId,
-        categoryId,
-        instruction,
-    }: {
-        doctorId: number;
-        categoryId: number;
-        instruction: string;
-    }) {
+   static async create({
+    doctorId,
+    categoryId,
+    instruction,
+}: {
+    doctorId: number;
+    categoryId: number;
+    instruction: string;
+}) {
 
-        // Verify category belongs to logged-in doctor
-const [category] = await db
-    .select()
-    .from(categories)
-    .where(
-        and(
-            eq(categories.id, categoryId),
-            eq(categories.doctorId, doctorId)
-        )
-    );
+    try {
 
-if (!category) {
-    return ApiResponse.error("Category not found.");
-}
+        const [category] = await db
+            .select()
+            .from(categories)
+            .where(
+                and(
+                    eq(categories.id, categoryId),
+                    eq(categories.doctorId, doctorId)
+                )
+            );
 
-const [result] = await db
-    .insert(specimensMaster)
-    .values({
-        doctorId,
-        categoryId,
-        instruction,
-    })
-    .$returningId();
+        if (!category) {
+            return ApiResponse.error("Category not found.");
+        }
 
-const [data] = await db
-    .select()
-    .from(specimensMaster)
-    .where(eq(specimensMaster.id, result.id));
+        const [result] = await db
+            .insert(specimensMaster)
+            .values({
+                doctorId,
+                categoryId,
+                instruction,
+            })
+            .$returningId();
 
-return ApiResponse.success(
-    data,
-    "Specimen master created successfully."
-);
+        const [data] = await db
+            .select()
+            .from(specimensMaster)
+            .where(eq(specimensMaster.id, result.id));
+
+        return ApiResponse.success(
+            data,
+            "Specimen master created successfully."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to create specimen master."
+        );
+
     }
+
+}
 
     // =========================
     // GET ALL
     // =========================
     static async getAll({
-        doctorId,
-        categoryId,
-    }: {
-        doctorId: number;
-        categoryId: number;
-    }) {
+    doctorId,
+    categoryId,
+}: {
+    doctorId: number;
+    categoryId: number;
+}) {
 
-        // Verify category belongs to logged-in doctor
-const [category] = await db
-    .select()
-    .from(categories)
-    .where(
-        and(
-            eq(categories.id, categoryId),
-            eq(categories.doctorId, doctorId)
-        )
-    );
+    try {
 
-if (!category) {
-    return ApiResponse.error("Category not found.");
-}
+        const [category] = await db
+            .select()
+            .from(categories)
+            .where(
+                and(
+                    eq(categories.id, categoryId),
+                    eq(categories.doctorId, doctorId)
+                )
+            );
+
+        if (!category) {
+            return ApiResponse.error("Category not found.");
+        }
 
         const data = await db
             .select()
@@ -92,21 +103,31 @@ if (!category) {
             .orderBy(desc(specimensMaster.id));
 
         return ApiResponse.success(
-    data,
-    "Specimen masters fetched successfully."
-);
+            data,
+            "Specimen masters fetched successfully."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to fetch specimen masters."
+        );
+
     }
 
+}
     // =========================
     // GET BY ID
     // =========================
-    static async getById({
-        id,
-        doctorId,
-    }: {
-        id: number;
-        doctorId: number;
-    }) {
+   static async getById({
+    id,
+    doctorId,
+}: {
+    id: number;
+    doctorId: number;
+}) {
+
+    try {
 
         const [data] = await db
             .select()
@@ -119,31 +140,42 @@ if (!category) {
             );
 
         if (!data) {
-    return ApiResponse.error(
-        "Specimen master not found."
-    );
-}
+            return ApiResponse.error(
+                "Specimen master not found."
+            );
+        }
 
-return ApiResponse.success(
-    data,
-    "Specimen master fetched successfully."
-);
+        return ApiResponse.success(
+            data,
+            "Specimen master fetched successfully."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to fetch specimen master."
+        );
+
     }
+
+}
 
     // =========================
     // UPDATE
     // =========================
     static async update({
-        id,
-        doctorId,
-        categoryId,
-        instruction,
-    }: {
-        id: number;
-        doctorId: number;
-        categoryId: number;
-        instruction: string;
-    }) {
+    id,
+    doctorId,
+    categoryId,
+    instruction,
+}: {
+    id: number;
+    doctorId: number;
+    categoryId: number;
+    instruction: string;
+}) {
+
+    try {
 
         const [existing] = await db
             .select()
@@ -162,50 +194,60 @@ return ApiResponse.success(
             };
         }
 
-        // Verify category belongs to logged-in doctor
-const [category] = await db
-    .select()
-    .from(categories)
-    .where(
-        and(
-            eq(categories.id, categoryId),
-            eq(categories.doctorId, doctorId)
-        )
-    );
+        const [category] = await db
+            .select()
+            .from(categories)
+            .where(
+                and(
+                    eq(categories.id, categoryId),
+                    eq(categories.doctorId, doctorId)
+                )
+            );
 
-if (!category) {
-    return ApiResponse.error("Category not found.");
-}
+        if (!category) {
+            return ApiResponse.error("Category not found.");
+        }
 
         await db
-    .update(specimensMaster)
-    .set({
-        categoryId,
-        instruction,
-    })
-    .where(eq(specimensMaster.id, id));
+            .update(specimensMaster)
+            .set({
+                categoryId,
+                instruction,
+            })
+            .where(eq(specimensMaster.id, id));
 
-const [data] = await db
-    .select()
-    .from(specimensMaster)
-    .where(eq(specimensMaster.id, id));
+        const [data] = await db
+            .select()
+            .from(specimensMaster)
+            .where(eq(specimensMaster.id, id));
 
-return ApiResponse.success(
-    data,
-    "Specimen master updated successfully."
-);
+        return ApiResponse.success(
+            data,
+            "Specimen master updated successfully."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to update specimen master."
+        );
+
     }
+
+}
 
     // =========================
     // DELETE
     // =========================
     static async delete({
-        id,
-        doctorId,
-    }: {
-        id: number;
-        doctorId: number;
-    }) {
+    id,
+    doctorId,
+}: {
+    id: number;
+    doctorId: number;
+}) {
+
+    try {
 
         const [existing] = await db
             .select()
@@ -228,39 +270,49 @@ return ApiResponse.success(
             .delete(specimensMaster)
             .where(eq(specimensMaster.id, id));
 
-       return ApiResponse.success(
-    existing,
-    "Specimen master deleted successfully."
-);
+        return ApiResponse.success(
+            existing,
+            "Specimen master deleted successfully."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to delete specimen master."
+        );
+
     }
+
+}
 
     // =========================
     // SEARCH
     // =========================
     static async search({
-        doctorId,
-        categoryId,
-        search,
-    }: {
-        doctorId: number;
-        categoryId: number;
-        search: string;
-    }) {
+    doctorId,
+    categoryId,
+    search,
+}: {
+    doctorId: number;
+    categoryId: number;
+    search: string;
+}) {
 
-        // Verify category belongs to logged-in doctor
-const [category] = await db
-    .select()
-    .from(categories)
-    .where(
-        and(
-            eq(categories.id, categoryId),
-            eq(categories.doctorId, doctorId)
-        )
-    );
+    try {
 
-if (!category) {
-    return ApiResponse.error("Category not found.");
-}
+        const [category] = await db
+            .select()
+            .from(categories)
+            .where(
+                and(
+                    eq(categories.id, categoryId),
+                    eq(categories.doctorId, doctorId)
+                )
+            );
+
+        if (!category) {
+            return ApiResponse.error("Category not found.");
+        }
 
         const data = await db
             .select()
@@ -275,8 +327,17 @@ if (!category) {
             .orderBy(desc(specimensMaster.id));
 
         return ApiResponse.success(
-    data,
-    "Specimens search completed."
-);
+            data,
+            "Specimens search completed."
+        );
+
+    } catch (error: any) {
+
+        return ApiResponse.error(
+            error.message || "Failed to search specimen masters."
+        );
+
     }
+
+}
 }

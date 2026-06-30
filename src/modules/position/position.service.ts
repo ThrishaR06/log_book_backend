@@ -6,91 +6,167 @@ export class PositionService {
     new PositionRepository();
 
   async create(data: any) {
+    try {
 
-     const position = await this.repository.create(data);
+        const position =
+            await this.repository.create(data);
 
+        return {
+            success: true,
+            message: "Position created successfully",
+            data: position
+        };
 
-    
-   return {
-    success: true,
-    message: "Position created successfully",
-    data: position
-  };
-  }
+    } catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to create position"
+        );
+
+    }
+}
 
   async getAll(doctorId: number) {
+    try {
 
-    return {
-      success: true,
-      message: "Position fetched successfully",
-      data: await this.repository.findAll(
-        doctorId
-      )
-    };
-  }
+        return {
+            success: true,
+            message: "Position fetched successfully",
+            data: await this.repository.findAll(
+                doctorId
+            )
+        };
 
-  async getById(id: number) {
+    } catch (error: any) {
 
-    return {
-      success: true,
-      message: "Position fetched successfully",
-      data: await this.repository.findById(id)
-    };
-  }
+        throw new Error(
+            error.message || "Failed to fetch positions"
+        );
 
-  async update(id: number, data: any) {
+    }
+}
 
-    await this.repository.update(
-      id,
-      data
-    );
+ async getById(
+    id: number,
+    doctorId: number
+) {
+    try {
 
-    return {
-      success: true,
-      message: "Position updated successfully"
-    };
-  }
+        return {
+            success: true,
+            message: "Position fetched successfully",
+            data: await this.repository.findById(
+                id,
+                doctorId
+            )
+        };
 
-  async delete(id: number) {
+    } catch (error: any) {
 
-    await this.repository.delete(id);
+        throw new Error(
+            error.message || "Failed to fetch position"
+        );
 
-    return {
-      success: true,
-      message: "Position deleted successfully"
-    };
-  }
+    }
+}
+ async update(
+    id: number,
+    data: any
+) {
+    try {
+
+        await this.repository.update(
+            id,
+            data
+        );
+
+        return {
+            success: true,
+            message: "Position updated successfully"
+        };
+
+    } catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to update position"
+        );
+
+    }
+}
+
+ async delete(
+    id: number,
+    doctorId: number
+) {
+    try {
+
+        await this.repository.delete(
+            id,
+            doctorId
+        );
+
+        return {
+            success: true,
+            message: "Position deleted successfully"
+        };
+
+    } catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to delete position"
+        );
+
+    }
+}
 
   async search(
     doctorId: number,
     keyword: string
-  ) {
+) {
+    try {
 
-    return {
-      success: true,
-      message: "Position search completed",
-      data: await this.repository.search(
-        doctorId,
-        keyword
-      )
-    };
-  }
+        return {
+            success: true,
+            message: "Position search completed",
+            data: await this.repository.search(
+                doctorId,
+                keyword
+            )
+        };
 
-  async list(
- doctorId:number,
- categoryId:number
-){
+    } catch (error: any) {
 
- const data =
- await this.repository.list(
-   doctorId,
-   categoryId
- );
+        throw new Error(
+            error.message || "Failed to search positions"
+        );
 
- return {
-   success:true,
-   message:"Positions fetched successfully",
-   data
- };
+    }
+}
+
+async list(
+    doctorId: number,
+    categoryId: number
+) {
+    try {
+
+        const data =
+            await this.repository.list(
+                doctorId,
+                categoryId
+            );
+
+        return {
+            success: true,
+            message: "Positions fetched successfully",
+            data
+        };
+
+    } catch (error: any) {
+
+        throw new Error(
+            error.message || "Failed to fetch positions"
+        );
+
+    }
 }
 }

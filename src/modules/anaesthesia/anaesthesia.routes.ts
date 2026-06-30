@@ -1,77 +1,162 @@
 import { Elysia } from "elysia";
 import { AnaesthesiaController } from "./anaesthesia.controller";
 import {
-  createAnaesthesiaSchema,
-  updateAnaesthesiaSchema
+    createAnaesthesiaSchema,
+    updateAnaesthesiaSchema
 } from "./anaesthesia.validation";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 const controller = new AnaesthesiaController();
 
 export const anaesthesiaRoutes = new Elysia({
-  prefix: "/anaesthesia"
+    prefix: "/anaesthesia"
 })
 
+// ==========================
 // CREATE
+// ==========================
 .post(
-  "/",
-  ({ body }) => controller.create(body),
-  {
-    body: createAnaesthesiaSchema
-  }
-)
+    "/",
+    async (context) => {
 
-// GET ALL BY DOCTOR
-.get(
-  "/doctor/:doctorId",
-  ({ params }) =>
-    controller.getAll(Number(params.doctorId))
-)
+        const auth = await authMiddleware(context);
 
-// SEARCH (FIXED - no categoryId)
-.get(
-  "/search",
-  ({ query }) =>
-    controller.search(
-      Number(query.doctorId),
-      String(query.keyword || "")
-    )
-)
+        if (auth) {
+            return auth;
+        }
 
-// GET BY ID
-.get(
-  "/:id",
-  ({ params }) =>
-    controller.getById(Number(params.id))
-)
+        return controller.create({
+            doctorId: (context.store as any).user.id,
+            anaesthesiaName: context.body.anaesthesiaName
+        });
 
-// UPDATE
-.put(
-  "/:id",
-  ({ params, body }) =>
-    controller.update(Number(params.id), body),
-  {
-    body: updateAnaesthesiaSchema
-  }
-)
-
-// DELETE
-.delete(
-  "/:id",
-  ({ params }) =>
-    controller.delete(Number(params.id))
-)
-.get(
-  "/list",
-  ({ query }) => {
-    const doctorId = Number(query.doctorId);
-
-    if (Number.isNaN(doctorId)) {
-      return {
-        success: false,
-        message: "doctorId must be a valid number"
-      };
+    },
+    {
+        body: createAnaesthesiaSchema
     }
+)
 
-    return controller.getAll(doctorId);
-  }
+// ==========================
+// GET ALL
+// ==========================
+.get(
+    "/",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.getAll(
+            (context.store as any).user.id
+        );
+
+    }
+)
+
+// ==========================
+// SEARCH
+// ==========================
+.get(
+    "/search",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.search(
+            (context.store as any).user.id,
+            String(context.query.keyword || "")
+        );
+
+    }
+)
+
+// ==========================
+// GET BY ID
+// ==========================
+.get(
+    "/:id",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.getById(
+            Number(context.params.id)
+        );
+
+    }
+)
+
+// ==========================
+// UPDATE
+// ==========================
+.put(
+    "/:id",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.update(
+            Number(context.params.id),
+            context.body
+        );
+
+    },
+    {
+        body: updateAnaesthesiaSchema
+    }
+)
+
+// ==========================
+// DELETE
+// ==========================
+.delete(
+    "/:id",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.delete(
+            Number(context.params.id)
+        );
+
+    }
+)
+
+// ==========================
+// LIST
+// ==========================
+.get(
+    "/list",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.getAll(
+            (context.store as any).user.id
+        );
+
+    }
 );

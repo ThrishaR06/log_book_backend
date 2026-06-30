@@ -5,67 +5,149 @@ export class SurgeryStaffController {
   private service =
     new SurgeryStaffService();
 
-  create(body: any) {
+  async create({ body, store }: any) {
+    try {
 
-    return this.service.create(body);
+      return await this.service.create({
+        ...body,
+        doctorId: store.user.id
+      });
 
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
 
-  getAll(doctorId: number) {
+  async getAll({ store }: any) {
+    try {
 
-    return this.service.getAll(
-      doctorId
-    );
+      return await this.service.getAll(
+        store.user.id
+      );
 
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
 
-  getById(id: number) {
+  async getById({ params, store }: any) {
+    try {
 
-    return this.service.getById(id);
+      return await this.service.getById(
+        Number(params.id),
+        store.user.id
+      );
 
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
 
-  update(id: number, body: any) {
+  async update({ params, body, store }: any) {
+    try {
 
-    return this.service.update(
-      id,
-      body
-    );
+      return await this.service.update(
+        Number(params.id),
+        {
+          ...body,
+          doctorId: store.user.id
+        }
+      );
 
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
 
-  delete(id: number) {
+  async delete({ params, store }: any) {
+    try {
 
-    return this.service.delete(id);
+      return await this.service.delete(
+        Number(params.id),
+        store.user.id
+      );
 
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
 
-  search(
-    doctorId: number,
-    keyword: string
-  ) {
-    return this.service.search(
-      doctorId,
-      keyword
-    );
+  async search({ query, store }: any) {
+    try {
+
+      return await this.service.search(
+        store.user.id,
+        String(query.keyword || "")
+      );
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
 
-  list(
-    doctorId: number,
-  ) {
-    return this.service.list(
-      doctorId
-    );
+  async list({ store }: any) {
+    try {
+
+      return await this.service.list(
+        store.user.id
+      );
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
   }
-  listByStaffType(
-    doctorId: number,
-    staffType: number
-) {
 
-    return this.service.listByStaffType(
-        doctorId,
-        staffType
-    );
+  async listByStaffType({ query, store }: any) {
+    try {
 
-}
+      return await this.service.listByStaffType(
+        store.user.id,
+        Number(query.staffType)
+      );
+
+    } catch (error: any) {
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
+  }
+
 }

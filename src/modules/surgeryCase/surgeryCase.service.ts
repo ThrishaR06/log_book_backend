@@ -2,16 +2,116 @@ import { SurgeryCaseRepository } from "./surgeryCase.repository";
 import { db } from "../../db";
 import { surgeryCases } from "../../db/schema/surgeryCases";
 import { media as mediaTable } from "../../db/schema/media.schema";
-import { eq, desc } from "drizzle-orm";;
+import { eq, desc, and } from "drizzle-orm";
 import { inArray } from "drizzle-orm";
 import { redis } from "../../config/redis";
 export class SurgeryCaseService {
   private repository = new SurgeryCaseRepository();
 
-  async create(data: any) {
+  // ===========================
+  // VALIDATE AGE
+  // ===========================
+  private validateAge(age: number) {
+    if (age == null) {
+      return;
+    }
 
-    
+    if (age < 0 || age > 120) {
+      throw new Error("Age should be between 0 and 120.");
+    }
+  }
+
+  // ===========================
+  // VALIDATE BLOOD GROUP
+  // ===========================
+  private validateBloodGroup(bloodGroup: string) {
+    if (!bloodGroup) {
+      return;
+    }
+
+    const validGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+    if (!validGroups.includes(bloodGroup)) {
+      throw new Error("Invalid blood group.");
+    }
+  }
+
+  // ===========================
+  // VALIDATE DATE
+  // ===========================
+  private validateCaseDate(caseDate: string) {
+    if (!caseDate) {
+      return;
+    }
+
+    const selectedDate = new Date(caseDate);
+
+    const today = new Date();
+
+    today.setHours(23, 59, 59, 999);
+
+    if (selectedDate > today) {
+      throw new Error("Future case date is not allowed.");
+    }
+  }
+
+  // ===========================
+  // VALIDATE TIME
+  // ===========================
+  private validateTime(startTime: string, endTime: string) {
+    if (!startTime || !endTime) {
+      return;
+    }
+
+    if (startTime >= endTime) {
+      throw new Error("End time should be greater than start time.");
+    }
+  }
+  private async validateDuplicateCaseNumber(
+    doctorId: number,
+    caseNumber: string,
+    surgeryId?: number,
+  ) {
+    if (!caseNumber) {
+      return;
+    }
+
+    const records = await db
+      .select()
+      .from(surgeryCases)
+      .where(
+        and(
+          eq(surgeryCases.doctorId, doctorId),
+          eq(surgeryCases.caseNumber, caseNumber),
+        ),
+      );
+
+    if (records.length === 0) {
+      return;
+    }
+
+    if (surgeryId && records[0].surgeryId === surgeryId) {
+      return;
+    }
+
+    throw new Error("Case Number already exists.");
+  }
+
+  async create(data: any) {
+    try{
     console.log("CREATE PAYLOAD:", data);
+
+    // VALIDATIONS
+
+    this.validateAge(data.age);
+
+    this.validateBloodGroup(data.bloodGroup);
+
+    this.validateCaseDate(data.caseDate);
+
+    this.validateTime(data.startTime, data.endTime);
+
+    await this.validateDuplicateCaseNumber(data.doctorId, data.caseNumber);
 
     // ✅ NORMALIZE MEDIA
     const media = [
@@ -34,77 +134,72 @@ export class SurgeryCaseService {
     console.log("NORMALIZED MEDIA:", media);
 
     return await db.transaction(async (tx) => {
-
-
       // STEP 1: CREATE SURGERY CASE
       const result = await tx
         .insert(surgeryCases)
         .values({
+          doctorId: data.doctorId,
 
-            doctorId: data.doctorId,
+          patientName: data.patientName,
+          age: data.age,
+          sex: data.sex,
+          uhidNo: data.uhidNo,
+          bloodGroup: data.bloodGroup,
+          hospital: data.hospital,
 
-    patientName: data.patientName,
-    age: data.age,
-    sex: data.sex,
-    uhidNo: data.uhidNo,
-    bloodGroup: data.bloodGroup,
-    hospital: data.hospital,
+          caseNumber: data.caseNumber,
+          caseDate: data.caseDate,
 
-    caseNumber: data.caseNumber,
-    caseDate: data.caseDate,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          duration: data.duration,
 
-    startTime: data.startTime,
-    endTime: data.endTime,
-    duration: data.duration,
-
-    surgeon: data.surgeon,
-            anaesthesiaId: data.anaesthesiaId,
-            positionId: data.positionId,
-            incisionId: data.incisionId,
+          surgeon: data.surgeon,
+          anaesthesiaId: data.anaesthesiaId,
+          positionId: data.positionId,
+          incisionId: data.incisionId,
 
           staffIds: data.staffIds || [],
-surgeryProcedure: data.surgeryProcedure || {},
+          surgeryProcedure: data.surgeryProcedure || {},
 
-operativeFindings: data.operativeFindings,
-procedureDetails: data.procedureDetails,
-diagnosis: data.diagnosis,
+          operativeFindings: data.operativeFindings,
+          procedureDetails: data.procedureDetails,
+          diagnosis: data.diagnosis,
 
-bloodLoss: data.bloodLoss,
-specimens: data.specimens,
-additionalNotes: data.additionalNotes,
+          bloodLoss: data.bloodLoss,
+          specimens: data.specimens,
+          additionalNotes: data.additionalNotes,
 
-ivFluidIds: data.ivFluidIds || [],
-medicationIds: data.medicationIds || [],
+          ivFluidIds: data.ivFluidIds || [],
+          medicationIds: data.medicationIds || [],
 
-monitoring: data.monitoring,
+          monitoring: data.monitoring,
 
-diet: data.diet,
+          diet: data.diet,
 
+          drainManagement: data.drainManagement,
+          woundCare: data.woundCare,
 
+          specialInstructions: data.specialInstructions,
+          followUp: data.followUp,
+          followUpImaging: data.followUpImaging,
 
-drainManagement: data.drainManagement,
-woundCare: data.woundCare,
+          doctorFee: data.doctorFee,
+          doctorPaymentMode: data.doctorPaymentMode,
+          doctorRemarks: data.doctorRemarks,
 
-specialInstructions: data.specialInstructions,
-followUp: data.followUp,
-followUpImaging: data.followUpImaging,
+          assistantFee: data.assistantFee,
+          assistantPaymentMode: data.assistantPaymentMode,
+          assistantRemarks: data.assistantRemarks,
 
-doctorFee: data.doctorFee,
-doctorPaymentMode: data.doctorPaymentMode,
-doctorRemarks: data.doctorRemarks,
+          implantFee: data.implantFee,
+          implantPaymentMode: data.implantPaymentMode,
+          implantDetails: data.implantDetails,
 
-assistantFee: data.assistantFee,
-assistantPaymentMode: data.assistantPaymentMode,
-assistantRemarks: data.assistantRemarks,
+          implantPaidByHospital: data.implantPaidByHospital,
+          implantReceivedFromHospital: data.implantReceivedFromHospital,
 
-implantFee: data.implantFee,
-implantPaymentMode: data.implantPaymentMode,
-implantDetails: data.implantDetails,
-
-implantPaidByHospital: data.implantPaidByHospital,
-implantReceivedFromHospital: data.implantReceivedFromHospital,
-
-totalAmount: data.totalAmount,
+          totalAmount: data.totalAmount,
         })
         .$returningId();
 
@@ -114,17 +209,18 @@ totalAmount: data.totalAmount,
 
       // STEP 2: INSERT MEDIA
       if (media.length > 0) {
-
-        const mediaRows: typeof mediaTable.$inferInsert[] = media.map((m: any) => ({
-          fileName: m.url.split("/").pop() || "image.jpg",
-          s3Key: m.url,
-          mimeType: "image/jpeg",
-          size: 1,
-          isPublic: false,
-          uploadedBy: 1,
-          surgeryCaseId: caseId,
-          mediaType: m.mediaType,
-        }));
+        const mediaRows: (typeof mediaTable.$inferInsert)[] = media.map(
+          (m: any) => ({
+            fileName: m.url.split("/").pop() || "image.jpg",
+            s3Key: m.url,
+            mimeType: "image/jpeg",
+            size: 1,
+            isPublic: false,
+            uploadedBy: 1,
+            surgeryCaseId: caseId,
+            mediaType: m.mediaType,
+          }),
+        );
 
         console.log("CASE ID:", caseId);
         console.log("MEDIA LENGTH:", media.length);
@@ -132,51 +228,47 @@ totalAmount: data.totalAmount,
         console.log("👉 MEDIA INSERT BLOCK ENTERED");
 
         const preOpIds: number[] = [];
-const intraOpIds: number[] = [];
-const postOpIds: number[] = [];
+        const intraOpIds: number[] = [];
+        const postOpIds: number[] = [];
 
-for (const row of mediaRows) {
+        for (const row of mediaRows) {
+          const mediaResult = await tx
+            .insert(mediaTable)
+            .values(row)
+            .$returningId();
 
-  const mediaResult = await tx
-    .insert(mediaTable)
-    .values(row)
-    .$returningId();
+          const mediaId = Number(mediaResult[0]?.id || mediaResult[0]);
 
-  const mediaId = Number(
-    mediaResult[0]?.id || mediaResult[0]
-  );
+          if (row.mediaType === "PRE_OP") {
+            preOpIds.push(mediaId);
+          }
 
-  if (row.mediaType === "PRE_OP") {
-    preOpIds.push(mediaId);
-  }
+          if (row.mediaType === "INTRA_OP") {
+            intraOpIds.push(mediaId);
+          }
 
-  if (row.mediaType === "INTRA_OP") {
-    intraOpIds.push(mediaId);
-  }
+          if (row.mediaType === "POST_OP") {
+            postOpIds.push(mediaId);
+          }
+        }
 
-  if (row.mediaType === "POST_OP") {
-    postOpIds.push(mediaId);
-  }
-}
-
-await tx
-  .update(surgeryCases)
-  .set({
-    preOpImages: preOpIds,
-    intraOpImages: intraOpIds,
-    postOpImages: postOpIds,
-  })
-  .where(eq(surgeryCases.surgeryId, caseId));
-
+        await tx
+          .update(surgeryCases)
+          .set({
+            preOpImages: preOpIds,
+            intraOpImages: intraOpIds,
+            postOpImages: postOpIds,
+          })
+          .where(eq(surgeryCases.surgeryId, caseId));
       }
 
       // STEP 3: RETURN FULL DATA
       const surgeryCase = await tx.query.surgeryCases.findFirst({
-  where: (sc, { eq }) => eq(sc.surgeryId, caseId),
-  with: {
-    media: true,
-  },
-});
+        where: (sc, { eq }) => eq(sc.surgeryId, caseId),
+        with: {
+          media: true,
+        },
+      });
 
       return {
         success: true,
@@ -184,79 +276,81 @@ await tx
         data: surgeryCase,
       };
     });
-  }
-async getAllByDoctorId(doctorId: number) {
+  }catch (error: any) {
 
+    throw new Error(
+      error.message || "Failed to create surgery case."
+    );
+
+  }
+
+}
+  async getAllByDoctorId(doctorId: number) { try{
     return await db
-        .select()
-        .from(surgeryCases)
-        .where(
-            eq(
-                surgeryCases.doctorId,
-                doctorId
-            )
-        );
+      .select()
+      .from(surgeryCases)
+      .where(eq(surgeryCases.doctorId, doctorId));
+  }catch (error: any) {
+
+    throw new Error(
+      error.message || "Failed to get doctor in surgery case."
+    );
+
+  }
 
 }
 
-  async getById(id: number) {
+  async getById(id: number) { 
+    try{
+    const data = await db.query.surgeryCases.findFirst({
+      where: (sc, { eq }) => eq(sc.surgeryId, id),
+    });
 
-  const data = await db.query.surgeryCases.findFirst({
-    where: (sc, { eq }) => eq(sc.surgeryId, id),
-  });
+    if (!data) {
+      throw new Error("Surgery case not found");
+    }
 
-  if (!data) {
-    throw new Error("Surgery case not found");
+    const preOpIds = (data.preOpImages || []) as number[];
+    const intraOpIds = (data.intraOpImages || []) as number[];
+    const postOpIds = (data.postOpImages || []) as number[];
+
+    const mediaIds = [...preOpIds, ...intraOpIds, ...postOpIds];
+
+    const mediaRecords =
+      mediaIds.length > 0
+        ? await db.query.media.findMany({
+            where: (m, { inArray }) => inArray(m.id, mediaIds),
+          })
+        : [];
+
+    const mediaMap = new Map<number, string>();
+
+    mediaRecords.forEach((m) => {
+      mediaMap.set(m.id, this.buildS3Url(m.s3Key));
+    });
+
+    return {
+      ...data,
+
+      preOpImages: preOpIds.map((id) => mediaMap.get(id)),
+
+      intraOpImages: intraOpIds.map((id) => mediaMap.get(id)),
+
+      postOpImages: postOpIds.map((id) => mediaMap.get(id)),
+    };
+  }catch (error: any) {
+
+    throw new Error(
+      error.message || "Failed to get surgery case."
+    );
+
   }
 
-  const preOpIds = (data.preOpImages || []) as number[];
-  const intraOpIds = (data.intraOpImages || []) as number[];
-  const postOpIds = (data.postOpImages || []) as number[];
-
-  const mediaIds = [
-    ...preOpIds,
-    ...intraOpIds,
-    ...postOpIds,
-  ];
-
-  const mediaRecords =
-    mediaIds.length > 0
-      ? await db.query.media.findMany({
-          where: (m, { inArray }) =>
-            inArray(m.id, mediaIds),
-        })
-      : [];
-
-  const mediaMap = new Map<number, string>();
-
-  mediaRecords.forEach((m) => {
-    mediaMap.set(
-      m.id,
-      this.buildS3Url(m.s3Key)
-    );
-  });
-
-  return {
-    ...data,
-
-    preOpImages: preOpIds.map(
-      (id) => mediaMap.get(id)
-    ),
-
-    intraOpImages: intraOpIds.map(
-      (id) => mediaMap.get(id)
-    ),
-
-    postOpImages: postOpIds.map(
-      (id) => mediaMap.get(id)
-    ),
-  };
 }
 
   private buildS3Url(s3Key: string) {
-  return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
-}
-
+    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+  }
 
   private formatResponse(data: any) {
     if (!data?.media) return data;
@@ -269,202 +363,236 @@ async getAllByDoctorId(doctorId: number) {
     };
   }
 
+  async update(id: number, data: any) {
 
-async update(id: number, data: any) {
+    try{
+    this.validateAge(Number(data.age));
 
-  const updateData: any = {};
+    this.validateBloodGroup(data.bloodGroup);
 
-  // Patient Details
-  if (data.patientName !== undefined)
-    updateData.patientName = data.patientName;
+    this.validateCaseDate(data.caseDate);
 
-  if (data.age !== undefined)
-    updateData.age = Number(data.age);
+    this.validateTime(data.startTime, data.endTime);
 
-  if (data.sex !== undefined)
-    updateData.sex = data.sex;
+    await this.validateDuplicateCaseNumber(data.doctorId, data.caseNumber, id);
 
-  if (data.uhidNo !== undefined)
-    updateData.uhidNo = data.uhidNo;
+    const existing = await db.query.surgeryCases.findFirst({
+      where: (table, { eq }) => eq(table.surgeryId, id),
+    });
 
-  if (data.bloodGroup !== undefined)
-    updateData.bloodGroup = data.bloodGroup;
-  
-  if(data.hospital !== undefined)
-    updateData.hospital = data.hospital;
+    if (!existing) {
+      throw new Error("Surgery case not found.");
+    }
 
-  // Case Details
-  if (data.caseNumber !== undefined)
-    updateData.caseNumber = data.caseNumber;
+    const updateData: any = {};
 
-  if (data.caseDate !== undefined)
-    updateData.caseDate = data.caseDate;
+    // Patient Details
+    if (data.patientName !== undefined)
+      updateData.patientName = data.patientName;
 
-  if (data.startTime !== undefined)
-    updateData.startTime = data.startTime;
+    if (data.age !== undefined) updateData.age = Number(data.age);
 
-  if (data.endTime !== undefined)
-    updateData.endTime = data.endTime;
+    if (data.sex !== undefined) updateData.sex = data.sex;
 
-  if (data.duration !== undefined)
-    updateData.duration = data.duration;
+    if (data.uhidNo !== undefined) updateData.uhidNo = data.uhidNo;
 
-  if (data.surgeon !== undefined)
-    updateData.surgeon = data.surgeon;
+    if (data.bloodGroup !== undefined) updateData.bloodGroup = data.bloodGroup;
 
-  // Foreign Keys
-  if (data.anaesthesiaId !== undefined)
-    updateData.anaesthesiaId = Number(data.anaesthesiaId);
+    if (data.hospital !== undefined) updateData.hospital = data.hospital;
 
-  if (data.positionId !== undefined)
-    updateData.positionId = Number(data.positionId);
+    // Case Details
+    if (data.caseNumber !== undefined) updateData.caseNumber = data.caseNumber;
 
-  if (data.incisionId !== undefined)
-    updateData.incisionId = Number(data.incisionId);
+    if (data.caseDate !== undefined) updateData.caseDate = data.caseDate;
 
-  // JSON Fields
-  if (data.staffIds !== undefined)
-    updateData.staffIds =
-      typeof data.staffIds === "string"
-        ? JSON.parse(data.staffIds)
-        : data.staffIds;
+    if (data.startTime !== undefined) updateData.startTime = data.startTime;
 
-  if (data.surgeryProcedure !== undefined)
-    updateData.surgeryProcedure =
-      typeof data.surgeryProcedure === "string"
-        ? JSON.parse(data.surgeryProcedure)
-        : data.surgeryProcedure;
+    if (data.endTime !== undefined) updateData.endTime = data.endTime;
 
-  if (data.ivFluidIds !== undefined)
-    updateData.ivFluidIds =
-      typeof data.ivFluidIds === "string"
-        ? JSON.parse(data.ivFluidIds)
-        : data.ivFluidIds;
+    if (data.duration !== undefined) updateData.duration = data.duration;
 
-  if (data.medicationIds !== undefined)
-    updateData.medicationIds =
-      typeof data.medicationIds === "string"
-        ? JSON.parse(data.medicationIds)
-        : data.medicationIds;
+    if (data.surgeon !== undefined) updateData.surgeon = data.surgeon;
 
-  // Operative Details
-  if (data.diagnosis !== undefined)
-    updateData.diagnosis = data.diagnosis;
+    // Foreign Keys
+    if (data.anaesthesiaId !== undefined)
+      updateData.anaesthesiaId = Number(data.anaesthesiaId);
 
-  if (data.operativeFindings !== undefined)
-    updateData.operativeFindings = data.operativeFindings;
+    if (data.positionId !== undefined)
+      updateData.positionId = Number(data.positionId);
 
-  if (data.procedureDetails !== undefined)
-    updateData.procedureDetails = data.procedureDetails;
+    if (data.incisionId !== undefined)
+      updateData.incisionId = Number(data.incisionId);
 
-  if (data.bloodLoss !== undefined)
-    updateData.bloodLoss = data.bloodLoss;
+    // JSON Fields
+    if (data.staffIds !== undefined)
+      updateData.staffIds =
+        typeof data.staffIds === "string"
+          ? JSON.parse(data.staffIds)
+          : data.staffIds;
 
-  if (data.specimens !== undefined)
-    updateData.specimens = data.specimens;
+    if (data.surgeryProcedure !== undefined)
+      updateData.surgeryProcedure =
+        typeof data.surgeryProcedure === "string"
+          ? JSON.parse(data.surgeryProcedure)
+          : data.surgeryProcedure;
 
-  if (data.additionalNotes !== undefined)
-    updateData.additionalNotes = data.additionalNotes;
+    if (data.ivFluidIds !== undefined)
+      updateData.ivFluidIds =
+        typeof data.ivFluidIds === "string"
+          ? JSON.parse(data.ivFluidIds)
+          : data.ivFluidIds;
 
-  if (data.monitoring !== undefined)
-    updateData.monitoring = data.monitoring;
+    if (data.medicationIds !== undefined)
+      updateData.medicationIds =
+        typeof data.medicationIds === "string"
+          ? JSON.parse(data.medicationIds)
+          : data.medicationIds;
 
-  if (data.diet !== undefined)
-    updateData.diet = data.diet;
+    // Operative Details
+    if (data.diagnosis !== undefined) updateData.diagnosis = data.diagnosis;
 
-  if (data.drainManagement !== undefined)
-    updateData.drainManagement = data.drainManagement;
+    if (data.operativeFindings !== undefined)
+      updateData.operativeFindings = data.operativeFindings;
 
-  if (data.woundCare !== undefined)
-    updateData.woundCare = data.woundCare;
+    if (data.procedureDetails !== undefined)
+      updateData.procedureDetails = data.procedureDetails;
 
-  if (data.specialInstructions !== undefined)
-    updateData.specialInstructions = data.specialInstructions;
+    if (data.bloodLoss !== undefined) updateData.bloodLoss = data.bloodLoss;
 
-  if (data.followUp !== undefined)
-    updateData.followUp = data.followUp;
+    if (data.specimens !== undefined) updateData.specimens = data.specimens;
 
-  if (data.followUpImaging !== undefined)
-    updateData.followUpImaging = data.followUpImaging;
+    if (data.additionalNotes !== undefined)
+      updateData.additionalNotes = data.additionalNotes;
 
-  // Fees
-  if (data.doctorFee !== undefined)
-    updateData.doctorFee = Number(data.doctorFee);
+    if (data.monitoring !== undefined) updateData.monitoring = data.monitoring;
 
-  if (data.doctorPaymentMode !== undefined)
-    updateData.doctorPaymentMode = data.doctorPaymentMode;
+    if (data.diet !== undefined) updateData.diet = data.diet;
 
-  if (data.doctorRemarks !== undefined)
-    updateData.doctorRemarks = data.doctorRemarks;
+    if (data.drainManagement !== undefined)
+      updateData.drainManagement = data.drainManagement;
 
-  if (data.assistantFee !== undefined)
-    updateData.assistantFee = Number(data.assistantFee);
+    if (data.woundCare !== undefined) updateData.woundCare = data.woundCare;
 
-  if (data.assistantPaymentMode !== undefined)
-    updateData.assistantPaymentMode = data.assistantPaymentMode;
+    if (data.specialInstructions !== undefined)
+      updateData.specialInstructions = data.specialInstructions;
 
-  if (data.assistantRemarks !== undefined)
-    updateData.assistantRemarks = data.assistantRemarks;
+    if (data.followUp !== undefined) updateData.followUp = data.followUp;
 
-  if (data.implantFee !== undefined)
-    updateData.implantFee = Number(data.implantFee);
+    if (data.followUpImaging !== undefined)
+      updateData.followUpImaging = data.followUpImaging;
 
-  if (data.implantPaymentMode !== undefined)
-    updateData.implantPaymentMode = data.implantPaymentMode;
+    // Fees
+    if (data.doctorFee !== undefined)
+      updateData.doctorFee = Number(data.doctorFee);
 
-  if (data.implantDetails !== undefined)
-    updateData.implantDetails = data.implantDetails;
+    if (data.doctorPaymentMode !== undefined)
+      updateData.doctorPaymentMode = data.doctorPaymentMode;
 
-  if (data.implantPaidByHospital !== undefined)
-    updateData.implantPaidByHospital =
-      data.implantPaidByHospital === true ||
-      data.implantPaidByHospital === "true";
+    if (data.doctorRemarks !== undefined)
+      updateData.doctorRemarks = data.doctorRemarks;
 
-  if (data.implantReceivedFromHospital !== undefined)
-    updateData.implantReceivedFromHospital =
-      data.implantReceivedFromHospital === true ||
-      data.implantReceivedFromHospital === "true";
+    if (data.assistantFee !== undefined)
+      updateData.assistantFee = Number(data.assistantFee);
 
-  if (data.totalAmount !== undefined)
-    updateData.totalAmount = Number(data.totalAmount);
+    if (data.assistantPaymentMode !== undefined)
+      updateData.assistantPaymentMode = data.assistantPaymentMode;
 
-  await db
-    .update(surgeryCases)
-    .set(updateData)
-    .where(eq(surgeryCases.surgeryId, id));
+    if (data.assistantRemarks !== undefined)
+      updateData.assistantRemarks = data.assistantRemarks;
 
-  return {
-    success: true,
-    message: "Surgery case updated successfully",
-    data: await this.getById(id),
-  };
-}
+    if (data.implantFee !== undefined)
+      updateData.implantFee = Number(data.implantFee);
 
-async delete(id:number){
+    if (data.implantPaymentMode !== undefined)
+      updateData.implantPaymentMode = data.implantPaymentMode;
 
-await db
-.delete(mediaTable)
-.where(eq(mediaTable.surgeryCaseId,id));
+    if (data.implantDetails !== undefined)
+      updateData.implantDetails = data.implantDetails;
 
-await db
-.delete(surgeryCases)
-.where(eq(surgeryCases.surgeryId, id));
+    if (data.implantPaidByHospital !== undefined)
+      updateData.implantPaidByHospital =
+        data.implantPaidByHospital === true ||
+        data.implantPaidByHospital === "true";
 
-return{
-success:true,
-message:"Deleted successfully"
-};
+    if (data.implantReceivedFromHospital !== undefined)
+      updateData.implantReceivedFromHospital =
+        data.implantReceivedFromHospital === true ||
+        data.implantReceivedFromHospital === "true";
+
+    if (data.totalAmount !== undefined)
+      updateData.totalAmount = Number(data.totalAmount);
+
+    await db
+      .update(surgeryCases)
+      .set(updateData)
+      .where(eq(surgeryCases.surgeryId, id));
+
+    return {
+      success: true,
+      message: "Surgery case updated successfully",
+      data: await this.getById(id),
+    };
+  }catch (error: any) {
+
+    throw new Error(
+      error.message || "Failed to update surgery case."
+    );
+
+  }
 
 }
 
-async getDoctorInfoByCaseId(caseId:number){
+  async delete(id: number) {
+    try{
+    const existing = await db.query.surgeryCases.findFirst({
+      where: (table, { eq }) => eq(table.surgeryId, id),
+    });
 
+    if (!existing) {
+      throw new Error("Surgery case not found.");
+    }
+
+    await db.delete(mediaTable).where(eq(mediaTable.surgeryCaseId, id));
+
+    await db.delete(surgeryCases).where(eq(surgeryCases.surgeryId, id));
+
+    return {
+      success: true,
+      message: "Deleted successfully",
+    };
+  }catch (error: any) {
+
+    throw new Error(
+      error.message || "Failed to delete surgery case."
+    );
+
+  }
+
+}
+
+  async getDoctorInfoByCaseId(caseId: number) {
+    try{
     return this.repository.getDoctorInfoByCaseId(caseId);
+  }catch (error: any) {
+
+    throw new Error(
+      error.message || "Failed to get surgery case."
+    );
+
+  }
 
 }
 
-async getDoctorById(id: number) {
+  async getDoctorById(id: number) {
+    try{
     return this.repository.getDoctorById(id);
-}
+  }catch (error: any) {
 
+    throw new Error(
+      error.message || "Failed to create surgery case."
+    );
+
+  }
+
+}
 }

@@ -18,6 +18,16 @@ export const templateRoutes = new Elysia({ prefix: "/templates" })
   .get("/", TemplateController.getAll, {
     beforeHandle: [authMiddleware, roleGuard("doctor")],
   })
+  .get(
+  "/list",
+  TemplateController.getAllTemplateList,
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor"),
+    ],
+  }
+)
 
   .get("/categories", TemplateController.getCategories, {
     beforeHandle: [authMiddleware, roleGuard("doctor")],
@@ -43,8 +53,35 @@ export const templateRoutes = new Elysia({ prefix: "/templates" })
     beforeHandle: [authMiddleware, roleGuard("doctor")],
   })
 
-  .post("/custom-fields", CustomFieldController.create)
+.post(
+  "/custom-fields",
+  CustomFieldController.create,
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
+)
 
-  .put("/custom-fields/:id", CustomFieldController.update)
+.put(
+  "/custom-fields/:id",
+  CustomFieldController.update,
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
+)
 
-  .delete("/custom-fields/:id", CustomFieldController.delete);
+.delete(
+  "/custom-fields/:id",
+  CustomFieldController.delete,
+  {
+    beforeHandle: [
+      authMiddleware,
+      roleGuard("doctor")
+    ]
+  }
+);

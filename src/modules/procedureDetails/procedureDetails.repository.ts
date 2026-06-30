@@ -140,4 +140,30 @@ export class ProcedureDetailsRepository {
   return rows.length > 0;
 }
 
+async validateDoctorProcedureDetails(
+    id: number,
+    doctorId: number
+) {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            pdm.id
+        FROM procedure_details_master pdm
+        INNER JOIN categories c
+            ON c.id = pdm.category_id
+        WHERE pdm.id = ?
+        AND c.doctor_id = ?
+        LIMIT 1
+        `,
+        [
+            id,
+            doctorId
+        ]
+    );
+
+    return rows.length > 0;
+
+}
+
 }

@@ -5,6 +5,8 @@ export class AdminController {
 
     static async login(context: any) {
 
+    try {
+
         const { body, cookie } = context;
 
         const result = await AdminService.login(body);
@@ -26,13 +28,26 @@ export class AdminController {
             {
                 id: result.id,
                 email: result.email,
-                 roleId: result.roleId,
+                roleId: result.roleId,
             },
             "Admin login successful"
         );
+
+    } catch (error: any) {
+
+        console.error("ADMIN LOGIN ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to login"
+        );
+
     }
 
+}
+
     static async logout({ cookie }: any) {
+
+    try {
 
         const sessionId = cookie?.auth?.value;
 
@@ -50,96 +65,216 @@ export class AdminController {
             {},
             "Logout successful"
         );
+
+    } catch (error: any) {
+
+        console.error("ADMIN LOGOUT ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to logout"
+        );
+
     }
+
+}
 
     static async doctors() {
 
-    const data =
-        await AdminService.getDoctors();
+    try {
 
-    return ApiResponse.success(
-        data,
-        "Doctors fetched successfully"
-    );
+        const data =
+            await AdminService.getDoctors();
+
+        return ApiResponse.success(
+            data,
+            "Doctors fetched successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error("GET DOCTORS ERROR =", error);
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to fetch doctors"
+        );
+
+    }
+
 }
 
-   static async doctorById({
-    params,
-}: any) {
+   static async doctorById({ params }: any) {
 
-    const data =
-        await AdminService.getDoctorById(
+    try {
+
+        const data =
+            await AdminService.getDoctorById(
+                Number(params.id)
+            );
+
+        return ApiResponse.success(
+            data,
+            "Doctor fetched successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error(
+            "GET DOCTOR BY ID ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to fetch doctor"
+        );
+
+    }
+
+}
+
+static async deleteDoctor({ params }: any) {
+
+    try {
+
+        await AdminService.deleteDoctor(
             Number(params.id)
         );
 
-    return ApiResponse.success(
-        data,
-        "Doctor fetched successfully"
-    );
-}
+        return ApiResponse.success(
+            {},
+            "Doctor deleted successfully"
+        );
 
-static async deleteDoctor({
-    params,
-}: any) {
+    } catch (error: any) {
 
-    await AdminService.deleteDoctor(
-        Number(params.id)
-    );
+        console.error(
+            "DELETE DOCTOR ERROR =",
+            error
+        );
 
-    return ApiResponse.success(
-        {},
-        "Doctor deleted successfully"
-    );
+        return ApiResponse.error(
+            error.message ||
+            "Failed to delete doctor"
+        );
+
+    }
+
 }
 
 static async updateDoctor(context: any) {
 
-    const data =
-        await AdminService.updateDoctor(
-            Number(context.params.id),
-            context.body
+    try {
+
+        const data =
+            await AdminService.updateDoctor(
+                Number(context.params.id),
+                context.body
+            );
+
+        return ApiResponse.success(
+            data,
+            "Doctor updated successfully"
         );
 
-    return ApiResponse.success(
-        data,
-        "Doctor updated successfully"
-    );
+    } catch (error: any) {
+
+        console.error(
+            "UPDATE DOCTOR ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to update doctor"
+        );
+
+    }
+
 }
 static async subscriptions() {
 
-    const data =
-        await AdminService.getAllSubscriptions();
+    try {
 
-    return ApiResponse.success(
-        data,
-        "Subscriptions fetched successfully"
-    );
+        const data =
+            await AdminService.getAllSubscriptions();
+
+        return ApiResponse.success(
+            data,
+            "Subscriptions fetched successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error(
+            "GET SUBSCRIPTIONS ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to fetch subscriptions"
+        );
+
+    }
+
 }
 
-static async doctorSubscription({
-    params
-}: any) {
+static async doctorSubscription({ params }: any) {
 
-    const data =
-        await AdminService
-            .getDoctorSubscription(
+    try {
+
+        const data =
+            await AdminService.getDoctorSubscription(
                 Number(params.id)
             );
 
-    return ApiResponse.success(
-        data,
-        "Subscription fetched successfully"
-    );
+        return ApiResponse.success(
+            data,
+            "Subscription fetched successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error(
+            "GET DOCTOR SUBSCRIPTION ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to fetch subscription"
+        );
+
+    }
+
 }
 static async plans() {
 
-    const data =
-        await AdminService.getPlans();
+    try {
 
-    return ApiResponse.success(
-        data,
-        "Plans fetched successfully"
-    );
+        const data =
+            await AdminService.getPlans();
+
+        return ApiResponse.success(
+            data,
+            "Plans fetched successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error(
+            "GET PLANS ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to fetch plans"
+        );
+
+    }
+
 }
 
 static async createPlan(context: any) {

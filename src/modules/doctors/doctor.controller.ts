@@ -3,76 +3,111 @@ import { ApiResponse } from "../../utils/apiResponse";
 
 export class DoctorController {
 
-  static async register({ body }: any) {
- const data = await DoctorService.register(body);
+ static async register({ body }: any) {
 
-if (data?.success === false) {
-    return ApiResponse.error(data.message);
-}
+    try {
 
-return ApiResponse.success(
-    data,
-    "Doctor registered successfully"
-);
+        const data = await DoctorService.register(body);
+
+        if (data?.success === false) {
+            return ApiResponse.error(data.message);
+        }
+
+        return ApiResponse.success(
+            data,
+            "Doctor registered successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error("REGISTER DOCTOR ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to register doctor"
+        );
+
+    }
+
 }
 
    static async login({ body, cookie }: any) {
 
-    const data = await DoctorService.login(body);
+    try {
 
-    if (data?.success === false) {
-        return ApiResponse.error(data.message);
+        const data = await DoctorService.login(body);
+
+        if (data?.success === false) {
+            return ApiResponse.error(data.message);
+        }
+
+        cookie.auth.set({
+            value: data.sessionId,
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 7,
+            path: "/",
+        });
+
+        return ApiResponse.success(
+            {
+                id: data.id,
+                fullName: data.fullName,
+                emailAddress: data.emailAddress,
+                subscription: data.subscription,
+            },
+            "Doctor login successful"
+        );
+
+    } catch (error: any) {
+
+        console.error("LOGIN DOCTOR ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Login failed"
+        );
+
     }
 
-    // ✅ Store session id in HttpOnly Cookie
-    cookie.auth.set({
-        value: data.sessionId,
-
-        httpOnly: true,
-
-        secure: false, // Change to true in production (HTTPS)
-
-        sameSite: "lax",
-
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-
-        path: "/",
-    });
-
-    return ApiResponse.success(
-        {
-            id: data.id,
-            fullName: data.fullName,
-            emailAddress: data.emailAddress,
-            subscription: data.subscription,
-        },
-        "Doctor login successful"
-    );
 }
 
 static async logout({ cookie }: any) {
 
-    const sessionId = cookie.auth.value;
+    try {
 
-    if (!sessionId) {
+        const sessionId = cookie.auth.value;
+
+        if (!sessionId) {
+            return {
+                success: false,
+                message: "No active session",
+            };
+        }
+
+        const result = await DoctorService.logout(sessionId);
+
+        if (!result.success) {
+            return result;
+        }
+
+        cookie.auth.remove();
+
+        return {
+            success: true,
+            message: "Logged out successfully",
+        };
+
+    } catch (error: any) {
+
+        console.error("LOGOUT ERROR =", error);
+
         return {
             success: false,
-            message: "No active session",
+            message: error.message || "Logout failed",
         };
+
     }
 
-    const result = await DoctorService.logout(sessionId);
-
-    if (!result.success) {
-        return result;
-    }
-
-    cookie.auth.remove();
-
-    return {
-        success: true,
-        message: "Logged out successfully",
-    };
 }
 
     static async profile({ user }: any) {
@@ -80,28 +115,58 @@ static async logout({ cookie }: any) {
 }
 
 static async getAll({ user }: any) {
-  const data = await DoctorService.getAll();
 
- return ApiResponse.success(
-    {
-        requestedBy: user,
-        doctors: data,
-    },
-    "Doctors fetched successfully"
-);
+    try {
+
+        const data = await DoctorService.getAll();
+
+        return ApiResponse.success(
+            {
+                requestedBy: user,
+                doctors: data,
+            },
+            "Doctors fetched successfully"
+        );
+
+    } catch (error: any) {
+
+        console.error("GET ALL DOCTORS ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to fetch doctors"
+        );
+
+    }
+
 }
 
 static async getById({ params }: any) {
-  const data = await DoctorService.getById(Number(params.id));
 
-  if (data.success === false) {
-    return ApiResponse.error(data.message);
-}
+    try {
 
-return ApiResponse.success(
-    data.data,
-    data.message
-);
+        const data = await DoctorService.getById(
+            Number(params.id)
+        );
+
+        if (data.success === false) {
+            return ApiResponse.error(data.message);
+        }
+
+        return ApiResponse.success(
+            data.data,
+            data.message
+        );
+
+    } catch (error: any) {
+
+        console.error("GET DOCTOR BY ID ERROR =", error);
+
+        return ApiResponse.error(
+            error.message || "Failed to fetch doctor"
+        );
+
+    }
+
 }
 
 static async getProfile({ store }: any) {

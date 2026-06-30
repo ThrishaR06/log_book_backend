@@ -83,6 +83,30 @@ export class DiagnosisMasterRepository {
     );
   }
 
+  async validateDiagnosisOwner(
+    id: number,
+    doctorId: number
+) {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT dm.id
+        FROM diagnosis_master dm
+        INNER JOIN categories c
+            ON c.id = dm.category_id
+        WHERE dm.id = ?
+          AND c.doctor_id = ?
+        LIMIT 1
+        `,
+        [
+            id,
+            doctorId
+        ]
+    );
+
+    return rows.length > 0;
+}
+
   async delete(id: number) {
 
     await pool.query(

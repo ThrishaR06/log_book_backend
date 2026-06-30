@@ -4,6 +4,7 @@ import { ApiResponse } from "../../utils/apiResponse";
 export class FollowUpMasterController {
 
     static async create({ body, store }: any) {
+    try {
 
         const result =
             await FollowUpMasterService.create({
@@ -17,9 +18,23 @@ export class FollowUpMasterController {
             "Follow-up master created successfully."
         );
 
-    }
+    } catch (error: any) {
 
-    static async getAll({ query, store }: any) {
+        console.error(
+            "FOLLOW UP MASTER CREATE ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to create follow-up master."
+        );
+
+    }
+}
+
+   static async getAll({ query, store }: any) {
+    try {
 
         const result =
             await FollowUpMasterService.getAll(
@@ -32,9 +47,23 @@ export class FollowUpMasterController {
             "Follow-up masters fetched successfully."
         );
 
-    }
+    } catch (error: any) {
 
-    static async search({ query, store }: any) {
+        console.error(
+            "FOLLOW UP MASTER GET ALL ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to fetch follow-up masters."
+        );
+
+    }
+}
+
+   static async search({ query, store }: any) {
+    try {
 
         const result =
             await FollowUpMasterService.search(
@@ -48,25 +77,52 @@ export class FollowUpMasterController {
             "Follow-up masters fetched successfully."
         );
 
-    }
+    } catch (error: any) {
 
-    static async update({ params, body, store }: any) {
-
-    const result =
-        await FollowUpMasterService.update(
-            Number(params.id),
-            store.user.id,
-            body
+        console.error(
+            "FOLLOW UP MASTER SEARCH ERROR =",
+            error
         );
 
-    return ApiResponse.success(
-        result,
-        "Follow-up master updated successfully."
-    );
+        return ApiResponse.error(
+            error.message ||
+            "Failed to search follow-up masters."
+        );
 
+    }
+}
+   static async update({ params, body, store }: any) {
+    try {
+
+        const result =
+            await FollowUpMasterService.update(
+                Number(params.id),
+                store.user.id,
+                body
+            );
+
+        return ApiResponse.success(
+            result,
+            "Follow-up master updated successfully."
+        );
+
+    } catch (error: any) {
+
+        console.error(
+            "FOLLOW UP MASTER UPDATE ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to update follow-up master."
+        );
+
+    }
 }
 
-    static async delete({ params, query, store }: any) {
+   static async delete({ params, query, store }: any) {
+    try {
 
         await FollowUpMasterService.delete(
             Number(params.id),
@@ -79,6 +135,18 @@ export class FollowUpMasterController {
             "Follow-up master deleted successfully."
         );
 
-    }
+    } catch (error: any) {
 
+        console.error(
+            "FOLLOW UP MASTER DELETE ERROR =",
+            error
+        );
+
+        return ApiResponse.error(
+            error.message ||
+            "Failed to delete follow-up master."
+        );
+
+    }
+}
 }

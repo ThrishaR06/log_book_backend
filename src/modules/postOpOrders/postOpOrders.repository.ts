@@ -149,4 +149,28 @@ export class PostOpOrdersRepository {
         )
     };
   }
+
+  async validateDoctorSurgery(
+    doctorId: number,
+    surgeryId: number
+) {
+
+    const [rows]: any =
+        await pool.query(
+            `
+            SELECT id
+            FROM surgery_cases
+            WHERE id = ?
+            AND doctor_id = ?
+            LIMIT 1
+            `,
+            [
+                surgeryId,
+                doctorId
+            ]
+        );
+
+    return rows.length > 0;
+
+}
 }

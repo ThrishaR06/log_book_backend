@@ -52,15 +52,22 @@ return rows[0];
     return rows;
   }
 
-  async findById(id: number) {
+  async findById(
+    id:number,
+    doctorId:number
+) {
 
     const [rows]: any = await pool.query(
       `
       SELECT *
-      FROM position_masters
-      WHERE id = ?
+FROM position_masters
+WHERE id = ?
+AND doctor_id = ?
       `,
-      [id]
+      [
+    id,
+    doctorId
+]
     );
 
     return rows[0] || null;
@@ -71,25 +78,33 @@ return rows[0];
     await pool.query(
       `
       UPDATE position_masters
-      SET
-      position_name = ?
-      WHERE id = ?
+SET position_name=?
+WHERE id=?
+AND doctor_id=?
       `,
       [
-        data.positionName,
-        id
-      ]
+    data.positionName,
+    id,
+    data.doctorId
+]
     );
   }
 
-  async delete(id: number) {
+  async delete(
+    id:number,
+    doctorId:number
+) {
 
     await pool.query(
       `
       DELETE FROM position_masters
-      WHERE id = ?
+WHERE id=?
+AND doctor_id=?
       `,
-      [id]
+      [
+    id,
+    doctorId
+]
     );
   }
 

@@ -24,6 +24,7 @@ export const templates = mysqlTable(
       mode: "number",
     }).notNull(),
 
+
     procedureName: varchar(
       "procedure_name",
       {
