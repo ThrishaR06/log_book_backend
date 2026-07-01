@@ -7,6 +7,16 @@ export class SurgeryStaffController {
 
   async create({ body, store }: any) {
     try {
+      if (
+    body.doctorId !== undefined &&
+    body.doctorId !== store.user.id
+) {
+    return {
+        success: false,
+        message:
+            "You are not authorized to create data for another doctor.",
+    };
+}
 
       return await this.service.create({
         ...body,
@@ -19,8 +29,7 @@ export class SurgeryStaffController {
         success: false,
         message: error.message
       };
-
-    }
+     }
   }
 
   async getAll({ store }: any) {

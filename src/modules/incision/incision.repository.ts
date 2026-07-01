@@ -62,29 +62,40 @@ return {
     return rows[0] || null;
 }
 
-  async update(id: number, data: any) {
+ async update(id: number, data: any) {
 
-    await pool.query(
+    const [result]: any = await pool.query(
         `
-       UPDATE incision_masters
-SET incision_name=?
-WHERE id=?
-AND doctor_id=?
+        UPDATE incision_masters
+        SET incision_name = ?
+        WHERE id = ?
+        AND doctor_id = ?
         `,
         [
             data.incisionName,
-            id
+            id,
+            data.doctorId
         ]
     );
 
+    if (result.affectedRows === 0) {
+        return null;
+    }
+
     const [rows]: any = await pool.query(
         `
-        SELECT *
-FROM incision_masters
-WHERE id = ?
-AND doctor_id = ?
+        SELECT
+            id,
+            doctor_id AS doctorId,
+            incision_name AS incisionName
+        FROM incision_masters
+        WHERE id = ?
+        AND doctor_id = ?
         `,
-        [id]
+        [
+            id,
+            data.doctorId
+        ]
     );
 
     console.log("REPOSITORY =", rows[0]);

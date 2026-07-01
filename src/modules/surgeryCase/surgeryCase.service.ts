@@ -5,6 +5,7 @@ import { media as mediaTable } from "../../db/schema/media.schema";
 import { eq, desc, and } from "drizzle-orm";
 import { inArray } from "drizzle-orm";
 import { redis } from "../../config/redis";
+import { sql } from "drizzle-orm";
 export class SurgeryCaseService {
   private repository = new SurgeryCaseRepository();
 
@@ -99,7 +100,6 @@ export class SurgeryCaseService {
 
   async create(data: any) {
     try{
-    console.log("CREATE PAYLOAD:", data);
 
     // VALIDATIONS
 
@@ -115,23 +115,24 @@ export class SurgeryCaseService {
 
     // ✅ NORMALIZE MEDIA
     const media = [
-      ...(data.preOpImages || []).map((url: string) => ({
-        url,
-        mediaType: "PRE_OP",
-      })),
+  ...(data.preOpImages || []).map((file: any) => ({
+    key: file.key,
+    url: file.url,
+    mediaType: "PRE_OP",
+  })),
 
-      ...(data.intraOpImages || []).map((url: string) => ({
-        url,
-        mediaType: "INTRA_OP",
-      })),
+  ...(data.intraOpImages || []).map((file: any) => ({
+    key: file.key,
+    url: file.url,
+    mediaType: "INTRA_OP",
+  })),
 
-      ...(data.postOpImages || []).map((url: string) => ({
-        url,
-        mediaType: "POST_OP",
-      })),
-    ];
-
-    console.log("NORMALIZED MEDIA:", media);
+  ...(data.postOpImages || []).map((file: any) => ({
+    key: file.key,
+    url: file.url,
+    mediaType: "POST_OP",
+  })),
+];
 
     return await db.transaction(async (tx) => {
       // STEP 1: CREATE SURGERY CASE
@@ -205,14 +206,14 @@ export class SurgeryCaseService {
 
       const caseId = Number(result[0]?.surgeryId || result[0]);
 
-      console.log("CASE CREATED:", caseId);
-
       // STEP 2: INSERT MEDIA
       if (media.length > 0) {
+
         const mediaRows: (typeof mediaTable.$inferInsert)[] = media.map(
           (m: any) => ({
-            fileName: m.url.split("/").pop() || "image.jpg",
-            s3Key: m.url,
+
+            fileName: m.key.split("/").pop() || "image.jpg",
+            s3Key: m.key,
             mimeType: "image/jpeg",
             size: 1,
             isPublic: false,
@@ -221,11 +222,6 @@ export class SurgeryCaseService {
             mediaType: m.mediaType,
           }),
         );
-
-        console.log("CASE ID:", caseId);
-        console.log("MEDIA LENGTH:", media.length);
-        console.log("MEDIA ROWS:", mediaRows);
-        console.log("👉 MEDIA INSERT BLOCK ENTERED");
 
         const preOpIds: number[] = [];
         const intraOpIds: number[] = [];
@@ -285,18 +281,60 @@ export class SurgeryCaseService {
   }
 
 }
-  async getAllByDoctorId(doctorId: number) { try{
-    return await db
-      .select()
-      .from(surgeryCases)
-      .where(eq(surgeryCases.doctorId, doctorId));
-  }catch (error: any) {
+ async getAllByDoctorId(
+    doctorId: number,
+    page: number = 1,
+    limit: number = 10
+) {
 
-    throw new Error(
-      error.message || "Failed to get doctor in surgery case."
-    );
+    try {
 
-  }
+        const offset = (page - 1) * limit;
+
+        // Total Count
+        const totalResult = await db
+            .select({
+                total: sql<number>`count(*)`,
+            })
+            .from(surgeryCases)
+            .where(
+                eq(surgeryCases.doctorId, doctorId)
+            );
+
+        const total = Number(totalResult[0].total);
+
+        // Paginated Data
+        const data = await db
+    .select()
+    .from(surgeryCases)
+    .where(
+        eq(surgeryCases.doctorId, doctorId)
+    )
+    .orderBy(desc(surgeryCases.surgeryId))
+    .limit(limit)
+    .offset(offset);
+
+        return {
+            success: true,
+
+            data,
+
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+
+    } catch (error: any) {
+
+        throw new Error(
+            error.message ||
+            "Failed to get doctor surgery cases."
+        );
+
+    }
 
 }
 
@@ -349,6 +387,8 @@ export class SurgeryCaseService {
 }
 
   private buildS3Url(s3Key: string) {
+    console.log("AWS_BUCKET_NAME =", process.env.AWS_BUCKET_NAME);
+console.log("AWS_REGION =", process.env.AWS_REGION);
     return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
   }
 

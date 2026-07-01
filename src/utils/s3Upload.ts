@@ -13,6 +13,8 @@ function slugify(name: string) {
         .replace(/\s+/g, "-");
 }
 export async function getSignedFileUrl(key: string) {
+    console.log(process.env.AWS_BUCKET_NAME);
+    console.log(process.env.AWS_REGION);
 
     const command = new GetObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME!,
@@ -49,13 +51,13 @@ console.log("S3 KEY =", key);
     );
 
     await s3.send(
-        new PutObjectCommand({
-            Bucket: process.env.AWS_BUCKET_NAME!,
-            Key: key,
-            Body: buffer,
-            ContentType: file.type,
-        })
-    );
+    new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type,
+    })
+);
 
     return {
     key,

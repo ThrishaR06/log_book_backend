@@ -5,9 +5,11 @@ export class SurgeryCaseController {
   private service = new SurgeryCaseService();
 
   private async prepareBody(body: any, doctor: any) {
-    const preOpImages: string[] = [];
-    const intraOpImages: string[] = [];
-    const postOpImages: string[] = [];
+    const preOpImages: { key: string; url: string }[] = [];
+
+const intraOpImages: { key: string; url: string }[] = [];
+
+const postOpImages: { key: string; url: string }[] = [];
 
     if (body.preOpImages) {
       const files = Array.isArray(body.preOpImages)
@@ -16,6 +18,8 @@ export class SurgeryCaseController {
 
       for (const file of files) {
         const path = await uploadToS3(file, "pre-op", doctor.full_name);
+        console.log("UPLOAD RESULT =", path);
+
         preOpImages.push(path);
       }
     }
@@ -27,6 +31,8 @@ export class SurgeryCaseController {
 
       for (const file of files) {
         const path = await uploadToS3(file, "intra-op", doctor.full_name);
+
+        console.log("UPLOAD RESULT =", path);
         intraOpImages.push(path);
       }
     }
@@ -38,6 +44,8 @@ export class SurgeryCaseController {
 
       for (const file of files) {
         const path = await uploadToS3(file, "post-op", doctor.full_name);
+        console.log("UPLOAD RESULT =", path);
+        
         postOpImages.push(path);
       }
     }
@@ -180,24 +188,32 @@ export class SurgeryCaseController {
     }
   }
 
-  async getAll(context: any) {
-    try {
+ async getAll(context: any) {
+  try {
 
-      const doctorId = context.store.user.id;
+    const doctorId = context.store.user.id;
 
-      return this.service.getAllByDoctorId(doctorId);
+    const page = Number(context.query.page || 1);
 
-    } catch (error: any) {
+    const limit = Number(context.query.limit || 10);
 
-      return {
-        success: false,
-        message:
-          error.message ||
-          "Something went wrong while fetching surgery cases.",
-      };
+    return this.service.getAllByDoctorId(
+      doctorId,
+      page,
+      limit
+    );
 
-    }
+  } catch (error: any) {
+
+    return {
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while fetching surgery cases.",
+    };
+
   }
+}
 
   async update(context: any) {
     try {

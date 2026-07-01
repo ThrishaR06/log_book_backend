@@ -75,20 +75,44 @@ AND doctor_id = ?
 
   async update(id: number, data: any) {
 
-    await pool.query(
-      `
-      UPDATE position_masters
-SET position_name=?
-WHERE id=?
-AND doctor_id=?
-      `,
-      [
-    data.positionName,
-    id,
-    data.doctorId
-]
-    );
+  const [result]: any = await pool.query(
+    `
+    UPDATE position_masters
+    SET position_name = ?
+    WHERE id = ?
+    AND doctor_id = ?
+    `,
+    [
+      data.positionName,
+      id,
+      data.doctorId
+    ]
+  );
+
+  // No record updated
+  if (result.affectedRows === 0) {
+    return null;
   }
+
+  // Fetch updated record
+  const [rows]: any = await pool.query(
+    `
+    SELECT
+      id,
+      doctor_id AS doctorId,
+      position_name AS positionName
+    FROM position_masters
+    WHERE id = ?
+    AND doctor_id = ?
+    `,
+    [
+      id,
+      data.doctorId
+    ]
+  );
+
+  return rows[0];
+}
 
   async delete(
     id:number,

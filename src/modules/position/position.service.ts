@@ -75,14 +75,23 @@ export class PositionService {
 ) {
     try {
 
-        await this.repository.update(
-            id,
-            data
-        );
+        const updatedPosition =
+            await this.repository.update(
+                id,
+                data
+            );
+
+        if (!updatedPosition) {
+            return {
+                success: false,
+                message: "Position not found"
+            };
+        }
 
         return {
             success: true,
-            message: "Position updated successfully"
+            message: "Position updated successfully",
+            data: updatedPosition
         };
 
     } catch (error: any) {
