@@ -76,13 +76,20 @@ export class IncisionService {
     try {
 
         const updatedIncision =
-            await this.repository.update(id, data);
+    await this.repository.update(id, data);
 
-        return {
-            success: true,
-            message: "Incision updated successfully",
-            data: updatedIncision
-        };
+if (!updatedIncision) {
+    return {
+        success: false,
+        message: "Incision not found"
+    };
+}
+
+return {
+    success: true,
+    message: "Incision updated successfully",
+    data: updatedIncision
+};
 
     } catch (error: any) {
         throw new Error(error.message || "Failed to update incision");
