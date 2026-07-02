@@ -23,6 +23,36 @@ export const dashboardRoutes = new Elysia({
 )
 
 .get(
+    "/cards",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.getDashboardCards(context);
+
+    }
+)
+
+.get(
+    "/weekly-revenue",
+    async (context) => {
+
+        const auth = await authMiddleware(context);
+
+        if (auth) {
+            return auth;
+        }
+
+        return controller.getWeeklyRevenue(context);
+
+    }
+)
+
+.get(
     "/hospitals",
     async (context) => {
 

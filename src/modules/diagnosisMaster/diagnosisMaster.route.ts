@@ -5,6 +5,7 @@ from "./diagnosisMaster.controller";
 
 import {
   createDiagnosisSchema,
+  searchDiagnosisSchema,
   updateDiagnosisSchema
 }
 from "./diagnosisMaster.validation";
@@ -54,18 +55,21 @@ export const diagnosisMasterRoutes =
 )
 
 .get(
-  "/search",
-  async (context) => {
+    "/search",
+    async (context) => {
 
-    const auth =
-      await authMiddleware(context);
+        const auth = await authMiddleware(context);
 
-    if (auth) {
-      return auth;
+        if (auth) {
+            return auth;
+        }
+
+        return controller.search(context);
+
+    },
+    {
+        query: searchDiagnosisSchema,
     }
-
-    return controller.search(context);
-  }
 )
 
 .put(

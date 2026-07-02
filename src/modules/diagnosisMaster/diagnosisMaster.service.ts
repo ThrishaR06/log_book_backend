@@ -1,184 +1,221 @@
-import { DiagnosisMasterRepository }from "./diagnosisMaster.repository";
+import { DiagnosisMasterRepository } from "./diagnosisMaster.repository";
+import { ApiResponse } from "../../utils/apiResponse";
 
 export class DiagnosisMasterService {
 
-  private repository =
-    new DiagnosisMasterRepository();
+    private repository = new DiagnosisMasterRepository();
 
-  async create(body: any) {
+    // ==========================
+    // CREATE
+    // ==========================
+    async create(body: any) {
 
-    try {
+        try {
 
-        const isValid =
-            await this.repository.validateDoctorCategory(
-                body.doctorId,
-                body.categoryId
+            const isValid =
+                await this.repository.validateDoctorCategory(
+                    body.categoryId
+                );
+
+            if (!isValid) {
+                return ApiResponse.error(
+                    "Category not found."
+                );
+            }
+
+            const id =
+                await this.repository.create(body);
+
+            const data =
+                await this.repository.findById(id);
+
+            return ApiResponse.success(
+                data,
+                "Diagnosis master created successfully."
             );
 
-        if (!isValid) {
-            return {
-                success: false,
-                message: "Category not found."
-            };
-        }
+        } catch (error) {
 
-        const id =
-            await this.repository.create(body);
-
-        return this.repository.findById(id);
-
-    } catch (error) {
-
-        console.error(
-            "SERVICE CREATE DIAGNOSIS MASTER ERROR =",
-            error
-        );
-
-        throw error;
-
-    }
-}
-
-  async getAll(data: any) {
-
-    try {
-
-        const isValid =
-            await this.repository.validateDoctorCategory(
-                data.doctorId,
-                data.categoryId
+            console.error(
+                "SERVICE CREATE DIAGNOSIS MASTER ERROR =",
+                error
             );
 
-        if (!isValid) {
-            return {
-                success: false,
-                message: "Category not found."
-            };
+            throw error;
+
         }
 
-        return this.repository.findAll();
-
-    } catch (error) {
-
-        console.error(
-            "SERVICE GET DIAGNOSIS MASTER ERROR =",
-            error
-        );
-
-        throw error;
-
     }
-}
 
-  async update(
-    id: number,
-    body: any
-) {
+    // ==========================
+    // GET ALL
+    // ==========================
+    async getAll(data: any) {
 
-    try {
+        try {
 
-        const isValid =
-            await this.repository.validateDoctorCategory(
-                body.doctorId,
-                body.categoryId
+            const isValid =
+                await this.repository.validateDoctorCategory(
+                    data.categoryId
+                );
+
+            if (!isValid) {
+                return ApiResponse.error(
+                    "Category not found."
+                );
+            }
+
+            const result =
+                await this.repository.findAll();
+
+            return ApiResponse.success(
+                result,
+                "Diagnosis masters fetched successfully."
             );
 
-        if (!isValid) {
-            return {
-                success: false,
-                message: "Category not found."
-            };
+        } catch (error) {
+
+            console.error(
+                "SERVICE GET DIAGNOSIS MASTER ERROR =",
+                error
+            );
+
+            throw error;
+
         }
 
-        await this.repository.update(
-            id,
-            body
-        );
-
-        return this.repository.findById(id);
-
-    } catch (error) {
-
-        console.error(
-            "SERVICE UPDATE DIAGNOSIS MASTER ERROR =",
-            error
-        );
-
-        throw error;
-
     }
-}
 
-  async delete(
-    id: number,
-    doctorId: number
-) {
+    // ==========================
+    // UPDATE
+    // ==========================
+    async update(
+        id: number,
+        body: any
+    ) {
 
-    try {
+        try {
 
-        const isOwner =
-            await this.repository.validateDiagnosisOwner(
+            const isValid =
+                await this.repository.validateDoctorCategory(
+                    body.categoryId
+                );
+
+            if (!isValid) {
+                return ApiResponse.error(
+                    "Category not found."
+                );
+            }
+
+            await this.repository.update(
                 id,
-                doctorId
+                body
             );
 
-        if (!isOwner) {
+            const data =
+                await this.repository.findById(id);
 
-            return {
-                success: false,
-                message: "Diagnosis not found."
-            };
+            return ApiResponse.success(
+                data,
+                "Diagnosis master updated successfully."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "SERVICE UPDATE DIAGNOSIS MASTER ERROR =",
+                error
+            );
+
+            throw error;
 
         }
 
-        await this.repository.delete(id);
-
-        return {
-            success: true,
-            message: "Diagnosis deleted successfully"
-        };
-
-    } catch (error) {
-
-        console.error(
-            "SERVICE DELETE DIAGNOSIS MASTER ERROR =",
-            error
-        );
-
-        throw error;
-
     }
-}
-  async search(data: any) {
 
-    try {
+    // ==========================
+    // DELETE
+    // ==========================
+    async delete(
+        id: number,
+        doctorId: number
+    ) {
 
-        const isValid =
-            await this.repository.validateDoctorCategory(
-                data.doctorId,
-                data.categoryId
+        try {
+
+            const isOwner =
+                await this.repository.validateDiagnosisOwner(
+                    id,
+                    doctorId
+                );
+
+            if (!isOwner) {
+
+                return ApiResponse.error(
+                    "Diagnosis not found."
+                );
+
+            }
+
+            await this.repository.delete(id);
+
+            return ApiResponse.success(
+                null,
+                "Diagnosis deleted successfully."
             );
 
-        if (!isValid) {
-            return {
-                success: false,
-                message: "Category not found."
-            };
+        } catch (error) {
+
+            console.error(
+                "SERVICE DELETE DIAGNOSIS MASTER ERROR =",
+                error
+            );
+
+            throw error;
+
         }
 
-        return this.repository.search(
-            data.keyword
-        );
+    }
 
-    } catch (error) {
+    // ==========================
+    // SEARCH
+    // ==========================
+    async search(data: any) {
 
-        console.error(
-            "SERVICE SEARCH DIAGNOSIS MASTER ERROR =",
-            error
-        );
+        try {
 
-        throw error;
+            const isValid =
+                await this.repository.validateDoctorCategory(
+                    data.categoryId
+                );
+
+            if (!isValid) {
+                return ApiResponse.error(
+                    "Category not found."
+                );
+            }
+
+            const result =
+                await this.repository.search(
+                    data.search
+                );
+
+            return ApiResponse.success(
+                result,
+                "Diagnosis masters fetched successfully."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "SERVICE SEARCH DIAGNOSIS MASTER ERROR =",
+                error
+            );
+
+            throw error;
+
+        }
 
     }
-}
+
 }

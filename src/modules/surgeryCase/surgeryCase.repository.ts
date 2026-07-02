@@ -2,7 +2,7 @@ import { pool } from "../../db";
 import { db } from "../../db";
 import { surgeryCases } from "../../db/schema/surgeryCases";
 import { media } from "../../db/schema/media.schema";
-import { eq } from "drizzle-orm";
+import { eq, and, like, desc, sql } from "drizzle-orm";
 
 export class SurgeryCaseRepository {
 
@@ -213,57 +213,141 @@ async findById(id: number) {
   return row;
 }
 
-async getAllByDoctorId(doctorId: number) {
+async getAllByDoctorId(
+    doctorId: number,
+    page: number,
+    limit: number,
+    filters: any
+) {
 
-  const [rows]: any = await pool.query(
-`
-SELECT *
-FROM operative_records
-WHERE doctor_id = ?
-ORDER BY created_at DESC
-`,
-[doctorId]
-);
+    const offset = (page - 1) * limit;
 
-  return rows.map((row: any) => {
+    let query = `
+        SELECT *
+        FROM operative_records
+        WHERE doctor_id = ?
+    `;
 
-    row.staff_ids =
-      typeof row.staff_ids === "string"
-        ? JSON.parse(row.staff_ids)
-        : row.staff_ids;
+    const values: any[] = [doctorId];
 
-    row.surgery_procedure =
-      typeof row.surgery_procedure === "string"
-        ? JSON.parse(row.surgery_procedure)
-        : row.surgery_procedure;
+    if (filters.patientName) {
+        query += ` AND patient_name LIKE ?`;
+        values.push(`%${filters.patientName}%`);
+    }
 
-    row.iv_fluid_ids =
-      typeof row.iv_fluid_ids === "string"
-        ? JSON.parse(row.iv_fluid_ids)
-        : row.iv_fluid_ids;
+    if (filters.hospital) {
+        query += ` AND hospital LIKE ?`;
+        values.push(`%${filters.hospital}%`);
+    }
 
-    row.medication_ids =
-      typeof row.medication_ids === "string"
-        ? JSON.parse(row.medication_ids)
-        : row.medication_ids;
+    if (filters.caseNumber) {
+        query += ` AND case_number LIKE ?`;
+        values.push(`%${filters.caseNumber}%`);
+    }
 
-    row.pre_op_images =
-      typeof row.pre_op_images === "string"
-        ? JSON.parse(row.pre_op_images)
-        : row.pre_op_images;
+    if (filters.caseDate) {
+        query += ` AND case_date = ?`;
+        values.push(filters.caseDate);
+    }
 
-    row.intra_op_images =
-      typeof row.intra_op_images === "string"
-        ? JSON.parse(row.intra_op_images)
-        : row.intra_op_images;
+    // Count Query
+    let countQuery = `
+        SELECT COUNT(*) AS total
+        FROM operative_records
+        WHERE doctor_id = ?
+    `;
 
-    row.post_op_images =
-      typeof row.post_op_images === "string"
-        ? JSON.parse(row.post_op_images)
-        : row.post_op_images;
+    const countValues: any[] = [doctorId];
 
-    return row;
-  });
+    if (filters.patientName) {
+        countQuery += ` AND patient_name LIKE ?`;
+        countValues.push(`%${filters.patientName}%`);
+    }
+
+    if (filters.hospital) {
+        countQuery += ` AND hospital LIKE ?`;
+        countValues.push(`%${filters.hospital}%`);
+    }
+
+    if (filters.caseNumber) {
+        countQuery += ` AND case_number LIKE ?`;
+        countValues.push(`%${filters.caseNumber}%`);
+    }
+
+    if (filters.caseDate) {
+        countQuery += ` AND case_date = ?`;
+        countValues.push(filters.caseDate);
+    }
+
+    query += `
+        ORDER BY created_at DESC
+        LIMIT ?
+        OFFSET ?
+    `;
+
+    values.push(limit);
+    values.push(offset);
+
+    const [rows]: any = await pool.query(query, values);
+
+    const [countRows]: any = await pool.query(
+        countQuery,
+        countValues
+    );
+
+    const total = Number(countRows[0].total);
+
+    const totalPages = Math.ceil(total / limit);
+
+    const data = rows.map((row: any) => {
+
+        row.staff_ids =
+            typeof row.staff_ids === "string"
+                ? JSON.parse(row.staff_ids)
+                : row.staff_ids;
+
+        row.surgery_procedure =
+            typeof row.surgery_procedure === "string"
+                ? JSON.parse(row.surgery_procedure)
+                : row.surgery_procedure;
+
+        row.iv_fluid_ids =
+            typeof row.iv_fluid_ids === "string"
+                ? JSON.parse(row.iv_fluid_ids)
+                : row.iv_fluid_ids;
+
+        row.medication_ids =
+            typeof row.medication_ids === "string"
+                ? JSON.parse(row.medication_ids)
+                : row.medication_ids;
+
+        row.pre_op_images =
+            typeof row.pre_op_images === "string"
+                ? JSON.parse(row.pre_op_images)
+                : row.pre_op_images;
+
+        row.intra_op_images =
+            typeof row.intra_op_images === "string"
+                ? JSON.parse(row.intra_op_images)
+                : row.intra_op_images;
+
+        row.post_op_images =
+            typeof row.post_op_images === "string"
+                ? JSON.parse(row.post_op_images)
+                : row.post_op_images;
+
+        return row;
+    });
+
+    return {
+        data,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
+        },
+    };
 }
 
 async update(
@@ -273,94 +357,7 @@ async update(
 
     await db
         .update(surgeryCases)
-        .set({
-
-
-            patientName: data.patientName,
-            age: data.age,
-            sex: data.sex,
-            uhidNo: data.uhidNo,
-            bloodGroup: data.bloodGroup,
-
-            caseNumber: data.caseNumber,
-            caseDate: data.caseDate,
-
-            startTime: data.startTime,
-            endTime: data.endTime,
-            duration: data.duration,
-
-            surgeon: data.surgeon,
-
-            anaesthesiaId: data.anaesthesiaId,
-            positionId: data.positionId,
-            incisionId: data.incisionId,
-
-            staffIds: data.staffIds || [],
-
-            surgeryProcedure: data.surgeryProcedure || {},
-
-            diagnosis: data.diagnosis,
-
-            operativeFindings: data.operativeFindings,
-
-            procedureDetails: data.procedureDetails,
-
-            bloodLoss: data.bloodLoss,
-
-            specimens: data.specimens,
-
-            additionalNotes: data.additionalNotes,
-
-            ivFluidIds: data.ivFluidIds || [],
-
-            medicationIds: data.medicationIds || [],
-
-            monitoring: data.monitoring,
-
-            diet: data.diet,
-
-            drainManagement: data.drainManagement,
-
-            woundCare: data.woundCare,
-
-            specialInstructions: data.specialInstructions,
-
-            followUp: data.followUp,
-
-            followUpImaging: data.followUpImaging,
-
-            preOpImages: data.preOpImages || [],
-
-            intraOpImages: data.intraOpImages || [],
-
-            postOpImages: data.postOpImages || [],
-
-            doctorFee: data.doctorFee,
-
-            doctorPaymentMode: data.doctorPaymentMode,
-
-            doctorRemarks: data.doctorRemarks,
-
-            assistantFee: data.assistantFee,
-
-            assistantPaymentMode: data.assistantPaymentMode,
-
-            assistantRemarks: data.assistantRemarks,
-
-            implantFee: data.implantFee,
-
-            implantPaymentMode: data.implantPaymentMode,
-
-            implantDetails: data.implantDetails,
-
-            implantPaidByHospital:
-                data.implantPaidByHospital,
-
-            implantReceivedFromHospital:
-                data.implantReceivedFromHospital,
-
-            totalAmount: data.totalAmount,
-        })
+        .set(data)
         .where(eq(surgeryCases.surgeryId, id));
 
     return await db.query.surgeryCases.findFirst({
@@ -393,27 +390,32 @@ async getDoctorById(id: number) {
 
     return rows[0];
 }
+
 async getDoctorInfoByCaseId(caseId: number) {
 
-  const [rows]: any = await pool.query(
-`
-SELECT
-d.id,
-d.full_name AS name,
-oc.surgery_id AS surgeryId
-FROM operative_records oc
-INNER JOIN doctors d
-ON d.id = oc.doctor_id
-WHERE oc.surgery_id = ?
-`,
-[caseId]
-);
+    console.log("Searching surgery =", caseId);
 
-  if (!rows.length) {
-    throw new Error("Surgery case not found");
-  }
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            d.id,
+            d.full_name,
+            oc.surgery_id
+        FROM operative_records oc
+        INNER JOIN doctors d
+        ON d.id = oc.doctor_id
+        WHERE oc.surgery_id = ?
+        `,
+        [caseId]
+    );
 
-  return rows[0];
+    console.log(rows);
+
+    if (!rows.length) {
+        throw new Error("Surgery case not found");
+    }
+
+    return rows[0];
 }
 
 async delete(id: number) {
@@ -442,4 +444,22 @@ async delete(id: number) {
     };
 
 }
+async getAllPdfData(doctorId: number) {
+    return await db.query.surgeryCases.findMany({
+        where: (sc, { eq }) => eq(sc.doctorId, doctorId),
+        with: {
+            media: true,
+        },
+    });
+}
+
+async getPdfData(id: number) {
+    return await db.query.surgeryCases.findFirst({
+        where: (sc, { eq }) => eq(sc.surgeryId, id),
+        with: {
+            media: true,
+        },
+    });
+}
+
 }

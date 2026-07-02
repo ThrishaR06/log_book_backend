@@ -1,137 +1,252 @@
 import { db } from "../../db";
-import { surgeryCases } from "../../db/schema/surgeryCases";
-import { eq, sql, like, and, gte, lte } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export class DashboardRepository {
 
     async getSummary(
-    doctorId: number,
-    filter: string
-) {
+        doctorId: number,
+        filter: string
+    ) {
 
-    let dateCondition = sql``;
+        let dateCondition = sql``;
 
-    switch (filter) {
+        switch (filter) {
 
-        case "today":
+            case "today":
 
-            dateCondition =
-                sql`AND DATE(o.case_date)=CURDATE()`;
+                dateCondition =
+                    sql`AND DATE(case_date)=CURDATE()`;
 
-            break;
+                break;
 
-        case "week":
+            case "week":
 
-            dateCondition =
-                sql`AND YEARWEEK(o.case_date,1)=YEARWEEK(CURDATE(),1)`;
+                dateCondition =
+                    sql`AND YEARWEEK(case_date,1)=YEARWEEK(CURDATE(),1)`;
 
-            break;
+                break;
 
-        case "month":
+            case "month":
 
-            dateCondition =
-                sql`
-                AND MONTH(o.case_date)=MONTH(CURDATE())
-                AND YEAR(o.case_date)=YEAR(CURDATE())
+                dateCondition =
+                    sql`
+                    AND MONTH(case_date)=MONTH(CURDATE())
+                    AND YEAR(case_date)=YEAR(CURDATE())
                 `;
 
-            break;
+                break;
 
-        case "year":
+            case "year":
 
-            dateCondition =
-                sql`
-                AND YEAR(o.case_date)=YEAR(CURDATE())
+                dateCondition =
+                    sql`
+                    AND YEAR(case_date)=YEAR(CURDATE())
                 `;
 
-            break;
+                break;
 
-        default:
+            default:
 
-            dateCondition = sql``;
+                dateCondition = sql``;
+        }
+
+        const result = await db.execute(sql`
+
+            SELECT
+
+            COUNT(*) AS totalCases,
+
+            COALESCE(SUM(total_amount),0) AS totalEarnings,
+
+            COALESCE(SUM(doctor_fee),0) AS doctorFee,
+
+            COALESCE(SUM(assistant_fee),0) AS assistantFee,
+
+            COALESCE(SUM(implant_fee),0) AS implantFee,
+
+            (
+
+                COALESCE(
+
+                    SUM(
+
+                        CASE
+
+                            WHEN doctor_remarks='Paid'
+
+                            THEN doctor_fee
+
+                            ELSE 0
+
+                        END
+
+                    ),0
+
+                )
+
+                +
+
+                COALESCE(
+
+                    SUM(
+
+                        CASE
+
+                            WHEN assistant_remarks='Paid'
+
+                            THEN assistant_fee
+
+                            ELSE 0
+
+                        END
+
+                    ),0
+
+                )
+
+                +
+
+                COALESCE(
+
+                    SUM(
+
+                        CASE
+
+                            WHEN implant_received_from_hospital=1
+
+                            THEN implant_fee
+
+                            ELSE 0
+
+                        END
+
+                    ),0
+
+                )
+
+            )
+
+            AS paidAmount
+
+            FROM operative_records
+
+            WHERE doctor_id=${doctorId}
+
+            ${dateCondition}
+
+        `);
+
+        return (result as any)[0][0];
     }
+
+    async getDashboardCards(
+    doctorId: number
+) {
 
     const result = await db.execute(sql`
 
         SELECT
 
-        COUNT(*) AS totalCases,
+        (
+            SELECT COUNT(*)
 
-        COALESCE(SUM(o.total_amount),0) AS totalEarnings,
+            FROM operative_records
 
-        COALESCE(SUM(o.doctor_fee),0) AS doctorFee,
+            WHERE doctor_id = ${doctorId}
 
-        COALESCE(SUM(o.assistant_fee),0) AS assistantFee,
+            AND MONTH(case_date) = MONTH(CURDATE())
 
-        COALESCE(SUM(o.implant_fee),0) AS implantFee,
+            AND YEAR(case_date) = YEAR(CURDATE())
+
+        ) AS totalSurgeries,
 
         (
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN o.doctor_remarks = 'Paid'
-                        THEN o.doctor_fee
-                        ELSE 0
-                    END
-                ),0
-            )
+            SELECT COUNT(DISTINCT uhid_no)
 
-            +
+            FROM operative_records
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN o.assistant_remarks = 'Paid'
-                        THEN o.assistant_fee
-                        ELSE 0
-                    END
-                ),0
-            )
+            WHERE doctor_id = ${doctorId}
 
-            +
+        ) AS totalPatients,
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN o.implant_received_from_hospital = 1
-                        THEN o.implant_fee
-                        ELSE 0
-                    END
-                ),0
-            )
+        (
+            SELECT COUNT(DISTINCT uhid_no)
 
-        ) AS paidAmount
+            FROM operative_records
 
-        FROM operative_records o
+            WHERE doctor_id = ${doctorId}
 
-        INNER JOIN surgeries s
-        ON s.id = o.surgery_id
+            AND YEARWEEK(case_date,1)=YEARWEEK(CURDATE(),1)
 
-        WHERE
-        s.doctor_id = ${doctorId}
-
-        ${dateCondition}
+        ) AS weeklyPatients
 
     `);
 
     return (result as any)[0][0];
+
 }
 
-    async getHospitals(doctorId:number){
+async getWeeklyRevenue(
+    doctorId: number
+) {
 
-        const result=await db.execute(sql`
+    const result = await db.execute(sql`
+
+        SELECT
+
+            DAYOFWEEK(case_date) AS dayNumber,
+
+            DAYNAME(case_date) AS day,
+
+            COALESCE(SUM(total_amount),0) AS revenue
+
+        FROM operative_records
+
+        WHERE doctor_id = ${doctorId}
+
+        AND YEARWEEK(case_date,1) = YEARWEEK(CURDATE(),1)
+
+        GROUP BY DAYOFWEEK(case_date), DAYNAME(case_date)
+
+        ORDER BY DAYOFWEEK(case_date)
+
+    `);
+
+    const rows = (result as any)[0];
+
+    const weeklyData = [
+        { day: "Sun", revenue: 0 },
+        { day: "Mon", revenue: 0 },
+        { day: "Tue", revenue: 0 },
+        { day: "Wed", revenue: 0 },
+        { day: "Thu", revenue: 0 },
+        { day: "Fri", revenue: 0 },
+        { day: "Sat", revenue: 0 }
+    ];
+
+    rows.forEach((item: any) => {
+
+        const index = Number(item.dayNumber) - 1;
+
+        weeklyData[index].revenue = Number(item.revenue);
+
+    });
+
+    return weeklyData;
+
+}
+
+    async getHospitals(doctorId: number) {
+
+        const result = await db.execute(sql`
 
             SELECT DISTINCT hospital
 
-            FROM operative_records o
+            FROM operative_records
 
-            INNER JOIN surgeries s
+            WHERE doctor_id=${doctorId}
 
-            ON s.id=o.surgery_id
-
-            WHERE
-    s.doctor_id=${doctorId}
-    AND o.hospital IS NOT NULL
+            AND hospital IS NOT NULL
 
             ORDER BY hospital
 
@@ -141,198 +256,203 @@ export class DashboardRepository {
     }
 
     async getEarnings(
-        doctorId:number,
-        filters:any
-    ){
+        doctorId: number,
+        filters: any
+    ) {
 
-        const conditions:any[]=[
-            sql`s.doctor_id=${doctorId}`
+        const conditions: any[] = [
+
+            sql`doctor_id=${doctorId}`
+
         ];
 
-        if(filters.hospital){
+        if (filters.hospital) {
 
             conditions.push(
-                sql`o.hospital=${filters.hospital}`
+                sql`hospital=${filters.hospital}`
             );
         }
 
         if (filters.search) {
 
-    const keyword = `%${filters.search}%`;
+            const keyword = `%${filters.search}%`;
 
-    conditions.push(sql`
-        (
-            o.patient_name LIKE ${keyword}
+            conditions.push(sql`
+                (
+                    patient_name LIKE ${keyword}
 
-            OR o.case_number LIKE ${keyword}
+                    OR case_number LIKE ${keyword}
 
-            OR o.hospital LIKE ${keyword}
+                    OR hospital LIKE ${keyword}
 
-            OR JSON_UNQUOTE(
-                JSON_EXTRACT(o.surgery_procedure, '$.procedureName')
-            ) LIKE ${keyword}
+                    OR JSON_UNQUOTE(
+                        JSON_EXTRACT(surgery_procedure, '$.procedureName')
+                    ) LIKE ${keyword}
 
-            OR JSON_UNQUOTE(
-                JSON_EXTRACT(o.surgery_procedure, '$.sideName')
-            ) LIKE ${keyword}
-        )
-    `);
-}
+                    OR JSON_UNQUOTE(
+                        JSON_EXTRACT(surgery_procedure, '$.sideName')
+                    ) LIKE ${keyword}
+                )
+            `);
+        }
 
-        if(filters.fromDate){
+        if (filters.fromDate) {
 
             conditions.push(
-                sql`o.case_date>=${filters.fromDate}`
+                sql`case_date>=${filters.fromDate}`
             );
         }
 
-        if(filters.toDate){
+        if (filters.toDate) {
 
             conditions.push(
-                sql`o.case_date<=${filters.toDate}`
+                sql`case_date<=${filters.toDate}`
             );
         }
 
-        const page=Number(filters.page||1);
+        const page = Number(filters.page || 1);
 
-        const limit=Number(filters.limit||10);
+        const limit = Number(filters.limit || 10);
 
-        const offset=(page-1)*limit;
+        const offset = (page - 1) * limit;
 
-        const result=await db.execute(sql`
+        const result = await db.execute(sql`
 
-        SELECT
+            SELECT
 
-o.id,
+            surgery_id,
 
-o.case_number,
+            case_number,
 
-o.patient_name,
+            patient_name,
 
-o.age,
+            age,
 
-o.sex,
+            sex,
 
-o.hospital,
+            hospital,
 
-o.case_date,
+            case_date,
 
-o.duration,
+            duration,
 
-o.surgery_procedure,
+            surgery_procedure,
 
-o.doctor_fee,
+            doctor_fee,
 
-o.assistant_fee,
+            assistant_fee,
 
-o.implant_fee,
+            implant_fee,
 
-o.total_amount
+            total_amount
 
-        FROM operative_records o
+            FROM operative_records
 
-        INNER JOIN surgeries s
+            WHERE ${sql.join(conditions, sql` AND `)}
 
-        ON s.id=o.surgery_id
+            ORDER BY case_date DESC
 
-        WHERE ${sql.join(conditions,sql` AND `)}
+            LIMIT ${limit}
 
-        ORDER BY o.case_date DESC
-
-        LIMIT ${limit}
-
-        OFFSET ${offset}
+            OFFSET ${offset}
 
         `);
 
         const count = await db.execute<{ total: number }>(sql`
 
-SELECT COUNT(*) AS total
+            SELECT COUNT(*) AS total
 
-FROM operative_records o
+            FROM operative_records
 
-INNER JOIN surgeries s
+            WHERE ${sql.join(conditions, sql` AND `)}
 
-ON s.id = o.surgery_id
+        `);
 
-WHERE ${sql.join(conditions, sql` AND `)}
+        const rows = (result as any)[0];
 
-`);
+        return {
 
-       const rows = (result as any)[0];
+            data: rows,
 
-return {
+            pagination: {
 
-    data: rows,
+                page,
 
-    pagination: {
+                limit,
 
-        page,
+                total: Number((count as any)[0].total)
 
-        limit,
+            }
 
-        total: Number((count as any)[0].total)
-
-    }
-
-};
+        };
 
     }
 
     async getExportData(
-    doctorId: number,
-    filters: any
-) {
+        doctorId: number,
+        filters: any
+    ) {
 
-    const conditions: any[] = [
-        sql`s.doctor_id = ${doctorId}`
-    ];
+        const conditions: any[] = [
 
-    if (filters.hospital) {
-        conditions.push(
-            sql`o.hospital = ${filters.hospital}`
-        );
+            sql`doctor_id = ${doctorId}`
+
+        ];
+
+        if (filters.hospital) {
+
+            conditions.push(
+                sql`hospital = ${filters.hospital}`
+            );
+        }
+
+        if (filters.fromDate) {
+
+            conditions.push(
+                sql`case_date >= ${filters.fromDate}`
+            );
+        }
+
+        if (filters.toDate) {
+
+            conditions.push(
+                sql`case_date <= ${filters.toDate}`
+            );
+        }
+
+        const result = await db.execute(sql`
+
+            SELECT
+
+            case_number,
+
+            case_date,
+
+            patient_name,
+
+            age,
+
+            sex,
+
+            diagnosis,
+
+            hospital,
+
+            duration,
+
+            surgery_procedure,
+
+            doctor_fee
+
+            FROM operative_records
+
+            WHERE ${sql.join(conditions, sql` AND `)}
+
+            ORDER BY case_date DESC
+
+        `);
+
+        return (result as any)[0];
     }
-
-    if (filters.fromDate) {
-        conditions.push(
-            sql`o.case_date >= ${filters.fromDate}`
-        );
-    }
-
-    if (filters.toDate) {
-        conditions.push(
-            sql`o.case_date <= ${filters.toDate}`
-        );
-    }
-
-    const result = await db.execute(sql`
-
-        SELECT
-
-        o.case_number,
-        o.case_date,
-        o.patient_name,
-        o.age,
-        o.sex,
-        o.diagnosis,
-        o.hospital,
-        o.duration,
-        o.surgery_procedure,
-        o.doctor_fee
-
-        FROM operative_records o
-
-        INNER JOIN surgeries s
-        ON s.id = o.surgery_id
-
-        WHERE ${sql.join(conditions, sql` AND `)}
-
-        ORDER BY o.case_date DESC
-
-    `);
-
-    return (result as any)[0];
-}
 
 }

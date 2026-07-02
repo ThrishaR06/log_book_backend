@@ -281,50 +281,38 @@ export class SurgeryCaseService {
   }
 
 }
- async getAllByDoctorId(
+async getAllByDoctorId(
     doctorId: number,
-    page: number = 1,
-    limit: number = 10
+    page: number,
+    limit: number,
+    filters: any
 ) {
 
     try {
 
-        const offset = (page - 1) * limit;
+        const result = await this.repository.getAllByDoctorId(
+            doctorId,
+            page,
+            limit,
+            filters
+        );
 
-        // Total Count
-        const totalResult = await db
-            .select({
-                total: sql<number>`count(*)`,
-            })
-            .from(surgeryCases)
-            .where(
-                eq(surgeryCases.doctorId, doctorId)
-            );
+        if (!result.data || result.data.length === 0) {
 
-        const total = Number(totalResult[0].total);
+            return {
+                success: false,
+                message: "No search found.",
+                data: [],
+                pagination: result.pagination
+            };
 
-        // Paginated Data
-        const data = await db
-    .select()
-    .from(surgeryCases)
-    .where(
-        eq(surgeryCases.doctorId, doctorId)
-    )
-    .orderBy(desc(surgeryCases.surgeryId))
-    .limit(limit)
-    .offset(offset);
+        }
 
         return {
             success: true,
-
-            data,
-
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            },
+            message: "Surgery cases fetched successfully.",
+            data: result.data,
+            pagination: result.pagination
         };
 
     } catch (error: any) {
@@ -562,16 +550,16 @@ console.log("AWS_REGION =", process.env.AWS_REGION);
     if (data.totalAmount !== undefined)
       updateData.totalAmount = Number(data.totalAmount);
 
-    await db
-      .update(surgeryCases)
-      .set(updateData)
-      .where(eq(surgeryCases.surgeryId, id));
+    const updatedRecord = await this.repository.update(
+    id,
+    updateData
+);
 
-    return {
-      success: true,
-      message: "Surgery case updated successfully",
-      data: await this.getById(id),
-    };
+return {
+    success: true,
+    message: "Surgery case updated successfully",
+    data: updatedRecord,
+};
   }catch (error: any) {
 
     throw new Error(
@@ -634,5 +622,33 @@ console.log("AWS_REGION =", process.env.AWS_REGION);
 
   }
 
+}
+
+async getAllPdfData(doctorId: number) {
+
+    const surgeries =
+        await this.repository.getAllPdfData(doctorId);
+
+    if (!surgeries.length) {
+        throw new Error("No surgery cases found.");
+    }
+
+    return surgeries;
+}
+
+async getPdfData(id: number) {
+    try {
+        const surgery = await this.repository.getPdfData(id);
+
+        if (!surgery) {
+            throw new Error("Surgery case not found.");
+        }
+
+        return surgery;
+    } catch (error: any) {
+        throw new Error(
+            error.message || "Failed to generate surgery PDF."
+        );
+    }
 }
 }

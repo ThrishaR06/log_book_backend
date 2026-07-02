@@ -25,6 +25,54 @@ export class DashboardService {
     };
 }
 
+/**
+ * Dashboard Cards
+ */
+async getDashboardCards(
+    doctorId: number
+) {
+
+    const cards =
+        await this.repository.getDashboardCards(
+            doctorId
+        );
+
+    return {
+
+        success: true,
+
+        message: "Dashboard cards fetched successfully.",
+
+        data: cards
+
+    };
+
+}
+
+/**
+ * Weekly Revenue Chart
+ */
+async getWeeklyRevenue(
+    doctorId: number
+) {
+
+    const revenue =
+        await this.repository.getWeeklyRevenue(
+            doctorId
+        );
+
+    return {
+
+        success: true,
+
+        message: "Weekly revenue fetched successfully.",
+
+        data: revenue
+
+    };
+
+}
+
     /**
      * Hospital Filter List
      */

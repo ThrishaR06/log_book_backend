@@ -1,171 +1,149 @@
-import { DiagnosisMasterService }
-from "./diagnosisMaster.service";
-
-import { ApiResponse }
-from "../../utils/apiResponse";
+import { DiagnosisMasterService } from "./diagnosisMaster.service";
+import { ApiResponse } from "../../utils/apiResponse";
 
 export class DiagnosisMasterController {
 
-  private service =
-    new DiagnosisMasterService();
+    private service = new DiagnosisMasterService();
 
-  async create({ body, store }: any) {
+    // ==========================
+    // CREATE
+    // ==========================
+    async create({ body, store }: any) {
 
-    try {
+        try {
 
-        const result =
-            await this.service.create({
-                ...body,
-                doctorId: store.user.id
-            });
-
-        return ApiResponse.success(
-            result,
-            "Diagnosis master created successfully."
-        );
-
-    } catch (error: any) {
-
-        console.error(
-            "CREATE DIAGNOSIS MASTER ERROR =",
-            error
-        );
-
-        return ApiResponse.error(
-            error.message ||
-            "Failed to create diagnosis master."
-        );
-
-    }
-}
-
-  async getAll({ query, store }: any) {
-
-    try {
-
-        const result =
-            await this.service.getAll({
+            return await this.service.create({
                 doctorId: store.user.id,
-                categoryId: Number(query.categoryId)
+                categoryId: Number(body.categoryId),
+                instruction: body.instruction,
             });
 
-        return ApiResponse.success(
-            result,
-            "Diagnosis masters fetched successfully."
-        );
+        } catch (error: any) {
 
-    } catch (error: any) {
+            console.error(
+                "CREATE DIAGNOSIS MASTER ERROR =",
+                error
+            );
 
-        console.error(
-            "GET DIAGNOSIS MASTER ERROR =",
-            error
-        );
+            return ApiResponse.error(
+                error.message || "Failed to create diagnosis master."
+            );
 
-        return ApiResponse.error(
-            error.message ||
-            "Failed to fetch diagnosis masters."
-        );
+        }
 
     }
-}
 
-  async update(
-    id: string,
-    { body, store }: any
-) {
+    // ==========================
+    // GET ALL
+    // ==========================
+    async getAll({ query, store }: any) {
 
-    try {
+        try {
 
-        const result =
-            await this.service.update(
+            return await this.service.getAll({
+                doctorId: store.user.id,
+                categoryId: Number(query.categoryId),
+            });
+
+        } catch (error: any) {
+
+            console.error(
+                "GET DIAGNOSIS MASTER ERROR =",
+                error
+            );
+
+            return ApiResponse.error(
+                error.message || "Failed to fetch diagnosis masters."
+            );
+
+        }
+
+    }
+
+    // ==========================
+    // UPDATE
+    // ==========================
+    async update(id: string, { body, store }: any) {
+
+        try {
+
+            return await this.service.update(
                 Number(id),
                 {
-                    ...body,
-                    doctorId: store.user.id
+                    doctorId: store.user.id,
+                    categoryId: Number(body.categoryId),
+                    instruction: body.instruction,
                 }
             );
 
-        return ApiResponse.success(
-            result,
-            "Diagnosis master updated successfully."
-        );
+        } catch (error: any) {
 
-    } catch (error: any) {
+            console.error(
+                "UPDATE DIAGNOSIS MASTER ERROR =",
+                error
+            );
 
-        console.error(
-            "UPDATE DIAGNOSIS MASTER ERROR =",
-            error
-        );
+            return ApiResponse.error(
+                error.message || "Failed to update diagnosis master."
+            );
 
-        return ApiResponse.error(
-            error.message ||
-            "Failed to update diagnosis master."
-        );
+        }
 
     }
-}
 
-  async delete(
-    id: string,
-    doctorId: number
-) {
+    // ==========================
+    // DELETE
+    // ==========================
+    async delete(id: string, doctorId: number) {
 
-    try {
+        try {
 
-        const result =
-            await this.service.delete(
+            return await this.service.delete(
                 Number(id),
                 doctorId
             );
 
-        return ApiResponse.success(
-            result,
-            "Diagnosis master deleted successfully."
-        );
+        } catch (error: any) {
 
-    } catch (error: any) {
+            console.error(
+                "DELETE DIAGNOSIS MASTER ERROR =",
+                error
+            );
 
-        console.error(
-            "DELETE DIAGNOSIS MASTER ERROR =",
-            error
-        );
+            return ApiResponse.error(
+                error.message || "Failed to delete diagnosis master."
+            );
 
-        return ApiResponse.error(
-            error.message ||
-            "Failed to delete diagnosis master."
-        );
+        }
 
     }
-}
 
-  async search({ query, store }: any) {
+    // ==========================
+    // SEARCH
+    // ==========================
+    async search({ query, store }: any) {
 
-    try {
+        try {
 
-        const result =
-            await this.service.search({
-                keyword: String(query.keyword || ""),
-                doctorId: store.user.id,
-                categoryId: Number(query.categoryId)
-            });
+            return await this.service.search({
+    doctorId: store.user.id,
+    categoryId: Number(query.categoryId),
+    search: query.keyword,
+});
 
-        return ApiResponse.success(
-            result,
-            "Diagnosis masters fetched successfully."
-        );
+        } catch (error: any) {
 
-    } catch (error: any) {
+            console.error(
+                "SEARCH DIAGNOSIS MASTER ERROR =",
+                error
+            );
 
-        console.error(
-            "SEARCH DIAGNOSIS MASTER ERROR =",
-            error
-        );
+            return ApiResponse.error(
+                error.message || "Failed to search diagnosis masters."
+            );
 
-        return ApiResponse.error(
-            error.message ||
-            "Failed to search diagnosis masters."
-        );
+        }
 
     }
-}
+
 }

@@ -83,17 +83,16 @@ export class MonitoringMasterController {
 
     try {
 
-        await MonitoringMasterService.update(
-            Number(params.id),
-            store.user.id,
-            body
-        );
+        const result = await MonitoringMasterService.update(
+    Number(params.id),
+    store.user.id,
+    body
+);
 
-        return ApiResponse.success(
-            null,
-            "Monitoring master updated successfully."
-        );
-
+return ApiResponse.success(
+    result,
+    "Monitoring master updated successfully."
+);
     } catch (error: any) {
 
         return ApiResponse.error(

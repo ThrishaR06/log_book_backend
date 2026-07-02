@@ -8,9 +8,11 @@ export class DashboardController {
      * Dashboard Summary
      * GET /dashboard/summary
      */
-    async getSummary(context: any) {
+   async getSummary(context:any){
 
     const doctorId = context.store.user.id;
+
+    console.log("Logged Doctor Id :", doctorId);
 
     const filter = context.query.filter || "all";
 
@@ -18,6 +20,34 @@ export class DashboardController {
         doctorId,
         filter
     );
+}
+
+/**
+ * Dashboard Cards
+ * GET /dashboard/cards
+ */
+async getDashboardCards(context: any) {
+
+    const doctorId = context.store.user.id;
+
+    return await this.service.getDashboardCards(
+        doctorId
+    );
+
+}
+
+/**
+ * Weekly Revenue Chart
+ * GET /dashboard/weekly-revenue
+ */
+async getWeeklyRevenue(context: any) {
+
+    const doctorId = context.store.user.id;
+
+    return await this.service.getWeeklyRevenue(
+        doctorId
+    );
+
 }
 
     /**

@@ -69,17 +69,20 @@ export class IvFluidMasterController {
 }
 
     static async update({ params, body, store }: any) {
-        try{
+    try {
 
-        await IvFluidMasterService.update(
-            Number(params.id),
-            store.user.id,
-            body
-        );
+        const result =
+            await IvFluidMasterService.update(
+                Number(params.id),
+                store.user.id,
+                body
+            );
 
         return ApiResponse.success(
-           "Failed to search IV fluid masters."
+            result,
+            "IV fluid master updated successfully."
         );
+
     } catch (error: any) {
         return ApiResponse.error(
             error.message || "Failed to update IV fluid master."
@@ -87,23 +90,33 @@ export class IvFluidMasterController {
     }
 }
 
-    static async delete({ params,store, query }: any)  {
-        try{
+  static async delete({ params, store, query }: any) {
+    try {
+
+        if (!query.categoryId) {
+            return ApiResponse.error(
+                "categoryId is required."
+            );
+        }
 
         await IvFluidMasterService.delete(
-    Number(params.id),
-    store.user.id,
-    Number(query.categoryId)
-);
+            Number(params.id),
+            store.user.id,
+            Number(query.categoryId)
+        );
 
         return ApiResponse.success(
             null,
             "IV fluid master deleted successfully."
         );
+
     } catch (error: any) {
+
         return ApiResponse.error(
-            error.message || "Failed to delete IV fluid master."
+            error.message ||
+            "Failed to delete IV fluid master."
         );
+
     }
 }
 }
