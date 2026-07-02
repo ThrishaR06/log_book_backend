@@ -29,6 +29,11 @@ export const surgeryCaseRoutes = new Elysia({
 )
 
 .get(
+  "/pdf",
+  (context) => controller.downloadAllPdf(context)
+)
+
+.get(
   "/",
   async (context) => {
 
@@ -41,6 +46,14 @@ export const surgeryCaseRoutes = new Elysia({
     return controller.getAll(context);
 
   }
+)
+
+.get(
+    "/:id/pdf",
+    async (context) => controller.downloadPdf(context),
+    {
+        beforeHandle: authMiddleware,
+    }
 )
 
 .get(

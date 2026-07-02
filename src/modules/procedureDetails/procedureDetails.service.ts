@@ -25,7 +25,10 @@ export class ProcedureDetailsService {
     const id =
       await this.repository.create(body);
 
-    return this.repository.findById(id);
+    return await this.repository.findById(
+    id,
+    body.doctorId
+);
 
   } catch (error: any) {
 
@@ -56,7 +59,10 @@ export class ProcedureDetailsService {
       };
     }
 
-    return await this.repository.findAll();
+    return await this.repository.findAll(
+    data.doctorId,
+    data.categoryId
+);
 
   } catch (error: any) {
 
@@ -88,11 +94,15 @@ export class ProcedureDetailsService {
     }
 
     await this.repository.update(
-      id,
-      body
-    );
+    id,
+    body.doctorId,
+    body
+);
 
-    return await this.repository.findById(id);
+    return await this.repository.findById(
+    id,
+    body.doctorId
+);
 
   } catch (error: any) {
 
@@ -129,7 +139,10 @@ export class ProcedureDetailsService {
 
         }
 
-        await this.repository.delete(id);
+        await this.repository.delete(
+    id,
+    doctorId
+);
 
         return {
             success: true,
@@ -166,9 +179,10 @@ export class ProcedureDetailsService {
     }
 
     return await this.repository.search(
-      data.keyword
-    );
-
+    data.keyword,
+    data.doctorId,
+    data.categoryId
+);
   } catch (error: any) {
 
     return {

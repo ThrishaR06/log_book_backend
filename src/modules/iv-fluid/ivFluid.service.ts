@@ -144,11 +144,8 @@ export class IvFluidMasterService {
             );
 
         if (!category) {
-            return {
-                success: false,
-                message: "Category does not belong to this doctor."
-            };
-        }
+    throw new Error("Category does not belong to this doctor.");
+}
 
         await db
             .update(ivFluidMasters)

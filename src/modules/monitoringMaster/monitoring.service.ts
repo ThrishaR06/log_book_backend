@@ -134,55 +134,64 @@ export class MonitoringMasterService {
 
 }
 
-    static async update(
+ static async update(
     id: number,
     doctorId: number,
     body: any
-) { try{
+) {
+    try {
 
-    const [category] = await db
-        .select()
-        .from(categories)
-        .where(
-            and(
-                eq(categories.id, body.categoryId),
-                eq(categories.doctorId, doctorId)
-            )
-        );
+        const [category] = await db
+            .select()
+            .from(categories)
+            .where(
+                and(
+                    eq(categories.id, body.categoryId),
+                    eq(categories.doctorId, doctorId)
+                )
+            );
 
-    if (!category) {
-        return {
-            success: false,
-            message: "Category not found."
-        };
-    }
+        if (!category) {
+            return {
+                success: false,
+                message: "Category not found."
+            };
+        }
 
-    await db
-        .update(monitoringMasters)
-        .set({
-            categoryId: body.categoryId,
-            monitoringInstruction: body.monitoringInstruction,
-        })
-        .where(
-            and(
-                eq(monitoringMasters.id, id),
-                eq(monitoringMasters.doctorId, doctorId)
-            )
-        );
+        await db
+            .update(monitoringMasters)
+            .set({
+                categoryId: body.categoryId,
+                monitoringInstruction: body.monitoringInstruction,
+            })
+            .where(
+                and(
+                    eq(monitoringMasters.id, id),
+                    eq(monitoringMasters.doctorId, doctorId)
+                )
+            );
 
-    return {
-        message: "Monitoring updated successfully",
-    };
-}catch (error: any) {
+        // Fetch updated record
+        const [data] = await db
+            .select()
+            .from(monitoringMasters)
+            .where(
+                and(
+                    eq(monitoringMasters.id, id),
+                    eq(monitoringMasters.doctorId, doctorId)
+                )
+            );
+
+        return data;
+
+    } catch (error: any) {
 
         throw new Error(
             error.message || "Failed to update monitoring master."
         );
 
     }
-
 }
-
     static async delete(
     id: number,
     doctorId: number,
