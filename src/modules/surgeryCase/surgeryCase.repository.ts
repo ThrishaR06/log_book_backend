@@ -3,8 +3,11 @@ import { db } from "../../db";
 import { surgeryCases } from "../../db/schema/surgeryCases";
 import { media } from "../../db/schema/media.schema";
 import { eq, and, like, desc, sql } from "drizzle-orm";
+import { MediaRepository } from "../media/media.repository";
 
 export class SurgeryCaseRepository {
+
+    private mediaRepository = new MediaRepository();
 
   async create(data: any) {
 
@@ -356,29 +359,181 @@ async update(id: number, data: any) {
     console.log("ID =", id);
     console.dir(data, { depth: null });
 
-    const result = await db
-        .update(surgeryCases)
-        .set(data)
-        .where(eq(surgeryCases.surgeryId, id));
+    const existing = await db.query.surgeryCases.findFirst({
+        where: (table, { eq }) => eq(table.surgeryId, id),
+    });
 
-    console.log("UPDATE RESULT");
-    console.dir(result);
+    if (!existing) {
+        throw new Error("Surgery case not found");
+    }
 
-    console.log("FETCHING UPDATED RECORD");
+    await db.transaction(async (tx) => {
 
-    const record = await db.query.surgeryCases.findFirst({
+        //--------------------------------------------------
+        // PRE OP
+        //--------------------------------------------------
 
-        where: (sc, { eq }) =>
-            eq(sc.surgeryId, id),
+        if (data.preOpImages) {
 
-        with: {
-            media: true,
-        },
+            const ids: number[] = [];
+
+            for (const image of data.preOpImages) {
+
+    // Existing image URL - keep it
+    if (typeof image === "string") {
+        ids.push(image as any);
+        continue;
+    }
+
+    // Existing media id - keep it
+    if (typeof image === "number") {
+        ids.push(image);
+        continue;
+    }
+
+    // New uploaded image
+    const mediaRow = await this.mediaRepository.create({
+
+        fileName: image.fileName,
+
+        s3Key: image.key,
+
+        mimeType: image.mimeType,
+
+        surgeryCaseId: id,
+
+        mediaType: "PRE_OP",
+
+        size: 1,
+
+        isPublic: false,
+
+        uploadedBy: existing.doctorId,
 
     });
 
-    console.log("UPDATED RECORD");
-    console.dir(record, { depth: null });
+    ids.push(mediaRow.id);
+}
+
+data.preOpImages = ids;
+
+            }
+
+        //--------------------------------------------------
+        // INTRA OP
+        //--------------------------------------------------
+
+        if (data.intraOpImages) {
+
+            const ids: number[] = [];
+
+            for (const image of data.intraOpImages) {
+
+    if (typeof image === "string") {
+        ids.push(image as any);
+        continue;
+    }
+
+    if (typeof image === "number") {
+        ids.push(image);
+        continue;
+    }
+
+    const mediaRow = await this.mediaRepository.create({
+
+        fileName: image.fileName,
+
+        s3Key: image.key,
+
+        mimeType: image.mimeType,
+
+        surgeryCaseId: id,
+
+        mediaType: "INTRA_OP",
+
+        size: 1,
+
+        isPublic: false,
+
+        uploadedBy: existing.doctorId,
+
+    });
+
+    ids.push(mediaRow.id);
+}
+
+data.intraOpImages = ids;
+
+            }
+
+        //--------------------------------------------------
+        // POST OP
+        //--------------------------------------------------
+
+        if (data.postOpImages) {
+
+            const ids: number[] = [];
+
+           for (const image of data.postOpImages) {
+
+    if (typeof image === "string") {
+        ids.push(image as any);
+        continue;
+    }
+
+    if (typeof image === "number") {
+        ids.push(image);
+        continue;
+    }
+
+    const mediaRow = await this.mediaRepository.create({
+
+        fileName: image.fileName,
+
+        s3Key: image.key,
+
+        mimeType: image.mimeType,
+
+        surgeryCaseId: id,
+
+        mediaType: "POST_OP",
+
+        size: 1,
+
+        isPublic: false,
+
+        uploadedBy: existing.doctorId,
+
+    });
+
+    ids.push(mediaRow.id);
+}
+
+data.postOpImages = ids;
+}
+
+        //--------------------------------------------------
+        // UPDATE SURGERY
+        //--------------------------------------------------
+
+        await tx
+            .update(surgeryCases)
+            .set(data)
+            .where(eq(surgeryCases.surgeryId, id));
+
+    });
+
+    const record =
+        await db.query.surgeryCases.findFirst({
+
+            where: (table, { eq }) =>
+                eq(table.surgeryId, id),
+
+            with: {
+                media: true,
+            },
+
+        });
 
     return record;
 }

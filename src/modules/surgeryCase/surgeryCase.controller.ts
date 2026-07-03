@@ -7,11 +7,17 @@ export class SurgeryCaseController {
   private service = new SurgeryCaseService();
 
   private async prepareBody(body: any, doctor: any) {
-    const preOpImages: { key: string; url: string }[] = [];
+    type UploadedImage = {
+    fileName: string;
+    mimeType: string;
+    key: string;
+};
 
-const intraOpImages: { key: string; url: string }[] = [];
+const preOpImages: UploadedImage[] = [];
 
-const postOpImages: { key: string; url: string }[] = [];
+const intraOpImages: UploadedImage[] = [];
+
+const postOpImages: UploadedImage[] = [];
 
     if (body.preOpImages) {
       const files = Array.isArray(body.preOpImages)
@@ -24,13 +30,24 @@ const postOpImages: { key: string; url: string }[] = [];
 
     console.log("FILE NAME =", file?.name);
 
-    const path = await uploadToS3(
-        file,
-        "pre-op",
-        doctor.full_name
-    );
+    // Existing image URL
+if (typeof file === "string") {
+    preOpImages.push(file as any);
+    continue;
+}
 
-    preOpImages.push(path);
+// New uploaded file
+const uploaded = await uploadToS3(
+    file,
+    "pre-op",
+    doctor.full_name
+);
+
+preOpImages.push({
+    fileName: file.name,
+    mimeType: file.type,
+    key: uploaded.key,
+});
 }
     }
 
@@ -45,13 +62,22 @@ const postOpImages: { key: string; url: string }[] = [];
 
     console.log("FILE NAME =", file?.name);
 
-    const path = await uploadToS3(
-        file,
-        "intra-op",
-        doctor.full_name
-    );
+    if (typeof file === "string") {
+    intraOpImages.push(file as any);
+    continue;
+}
 
-    intraOpImages.push(path);
+const uploaded = await uploadToS3(
+    file,
+    "intra-op",
+    doctor.full_name
+);
+
+intraOpImages.push({
+    fileName: file.name,
+    mimeType: file.type,
+    key: uploaded.key,
+});
 }
     }
 
@@ -66,13 +92,22 @@ const postOpImages: { key: string; url: string }[] = [];
 
     console.log("FILE NAME =", file?.name);
 
-    const path = await uploadToS3(
-        file,
-        "post-op",
-        doctor.full_name
-    );
+   if (typeof file === "string") {
+    postOpImages.push(file as any);
+    continue;
+}
 
-    postOpImages.push(path);
+const uploaded = await uploadToS3(
+    file,
+    "post-op",
+    doctor.full_name
+);
+
+postOpImages.push({
+    fileName: file.name,
+    mimeType: file.type,
+    key: uploaded.key,
+});
 }
     }
 
@@ -149,9 +184,15 @@ const postOpImages: { key: string; url: string }[] = [];
 
   private async prepareUpdateBody(body: any, doctor: any) {
 
-  const preOpImages: { key: string; url: string }[] = [];
-  const intraOpImages: { key: string; url: string }[] = [];
-  const postOpImages: { key: string; url: string }[] = [];
+type UploadedImage = {
+    fileName: string;
+    mimeType: string;
+    key: string;
+};
+
+const preOpImages: UploadedImage[] = [];
+const intraOpImages: UploadedImage[] = [];
+const postOpImages: UploadedImage[] = [];
 
   if (body.preOpImages) {
     const files = Array.isArray(body.preOpImages)
@@ -159,9 +200,37 @@ const postOpImages: { key: string; url: string }[] = [];
       : [body.preOpImages];
 
     for (const file of files) {
-      const path = await uploadToS3(file, "pre-op", doctor.full_name);
-      preOpImages.push(path);
+
+    // Existing media id
+    if (typeof file === "number") {
+        preOpImages.push(file as any);
+        continue;
     }
+
+    // Existing media object
+    if (
+        typeof file === "object" &&
+        file !== null &&
+        "id" in file &&
+        typeof file.arrayBuffer !== "function"
+    ) {
+        preOpImages.push(file.id as any);
+        continue;
+    }
+
+    // New uploaded file
+    const uploaded = await uploadToS3(
+        file,
+        "pre-op",
+        doctor.full_name
+    );
+
+    preOpImages.push({
+    fileName: file.name,
+    mimeType: file.type,
+    key: uploaded.key,
+});
+}
 
     body.preOpImages = preOpImages;
   }
@@ -172,10 +241,34 @@ const postOpImages: { key: string; url: string }[] = [];
       : [body.intraOpImages];
 
     for (const file of files) {
-      const path = await uploadToS3(file, "intra-op", doctor.full_name);
-      intraOpImages.push(path);
+
+    if (typeof file === "number") {
+        intraOpImages.push(file as any);
+        continue;
     }
 
+    if (
+        typeof file === "object" &&
+        file !== null &&
+        "id" in file &&
+        typeof file.arrayBuffer !== "function"
+    ) {
+        intraOpImages.push(file.id as any);
+        continue;
+    }
+
+    const uploaded = await uploadToS3(
+        file,
+        "intra-op",
+        doctor.full_name
+    );
+
+    intraOpImages.push({
+    fileName: file.name,
+    mimeType: file.type,
+    key: uploaded.key,
+});
+}
     body.intraOpImages = intraOpImages;
   }
 
@@ -185,9 +278,34 @@ const postOpImages: { key: string; url: string }[] = [];
       : [body.postOpImages];
 
     for (const file of files) {
-      const path = await uploadToS3(file, "post-op", doctor.full_name);
-      postOpImages.push(path);
+
+    if (typeof file === "number") {
+        postOpImages.push(file as any);
+        continue;
     }
+
+    if (
+        typeof file === "object" &&
+        file !== null &&
+        "id" in file &&
+        typeof file.arrayBuffer !== "function"
+    ) {
+        postOpImages.push(file.id as any);
+        continue;
+    }
+
+    const uploaded = await uploadToS3(
+        file,
+        "post-op",
+        doctor.full_name
+    );
+
+    postOpImages.push({
+    fileName: file.name,
+    mimeType: file.type,
+    key: uploaded.key,
+});
+}
 
     body.postOpImages = postOpImages;
   }
