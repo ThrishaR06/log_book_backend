@@ -7,7 +7,7 @@ export const media = mysqlTable("media", {
   s3Key: varchar("s3_key", { length: 512 }).notNull(),
   mimeType: varchar("mime_type", { length: 100 }).notNull(),
 
-  surgeryCaseId: bigint("surgery_case_id", { mode: "number" }),
+  surgeryCaseId: bigint("surgery_case_id", { mode: "number" }).notNull(),
 
   mediaType: varchar("media_type", { length: 50 }),
 

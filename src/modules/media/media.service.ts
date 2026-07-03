@@ -33,4 +33,16 @@ export class MediaService {
 
     }
 }
+
+async deleteMedia(
+    mediaId: number,
+    doctorId: number
+) {
+
+    return await this.repo.deleteMedia(
+        mediaId,
+        doctorId
+    );
+
+}
 }

@@ -1,4 +1,6 @@
 import { MediaService } from "./media.service";
+import { ApiResponse } from "../../utils/apiResponse";
+
 
 export class MediaController {
   private service = new MediaService();
@@ -25,4 +27,17 @@ export class MediaController {
 
     }
 }
+
+ static async deleteMedia({ params, store }: any) {
+
+        await new MediaService().deleteMedia(
+            Number(params.id),
+            store.user.id
+        );
+
+        return {
+            success: true,
+            message: "Image deleted successfully."
+        };
+    }
 }

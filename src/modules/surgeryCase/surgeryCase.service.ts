@@ -6,6 +6,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { inArray } from "drizzle-orm";
 import { redis } from "../../config/redis";
 import { sql } from "drizzle-orm";
+import { getImageUrl } from "../../utils/s3Url";
 export class SurgeryCaseService {
   private repository = new SurgeryCaseRepository();
 
@@ -266,6 +267,10 @@ export class SurgeryCaseService {
         },
       });
 
+     if (surgeryCase?.media) {
+    surgeryCase.media = await this.formatMedia(surgeryCase.media);
+}
+
       return {
         success: true,
         message: "Surgery case created successfully",
@@ -340,30 +345,48 @@ async getAllByDoctorId(
     const intraOpIds = (data.intraOpImages || []) as number[];
     const postOpIds = (data.postOpImages || []) as number[];
 
-    const mediaIds = [...preOpIds, ...intraOpIds, ...postOpIds];
+   const mediaIds = [...preOpIds, ...intraOpIds, ...postOpIds];
 
-    const mediaRecords =
-      mediaIds.length > 0
+const mediaRecords =
+    mediaIds.length > 0
         ? await db.query.media.findMany({
-            where: (m, { inArray }) => inArray(m.id, mediaIds),
+              where: (m, { inArray }) => inArray(m.id, mediaIds),
           })
         : [];
 
-    const mediaMap = new Map<number, string>();
+const mediaMap = new Map<
+    number,
+    {
+        id: number;
+        url: string;
+    }
+>();
 
-    mediaRecords.forEach((m) => {
-      mediaMap.set(m.id, this.buildS3Url(m.s3Key));
+for (const media of mediaRecords) {
+
+    const url = await this.buildS3Url(media.s3Key!);
+
+    mediaMap.set(media.id, {
+        id: media.id,
+        url,
     });
+}
 
     return {
-      ...data,
+    ...data,
 
-      preOpImages: preOpIds.map((id) => mediaMap.get(id)),
+    preOpImages: preOpIds
+        .map((id) => mediaMap.get(id))
+        .filter(Boolean),
 
-      intraOpImages: intraOpIds.map((id) => mediaMap.get(id)),
+    intraOpImages: intraOpIds
+        .map((id) => mediaMap.get(id))
+        .filter(Boolean),
 
-      postOpImages: postOpIds.map((id) => mediaMap.get(id)),
-    };
+    postOpImages: postOpIds
+        .map((id) => mediaMap.get(id))
+        .filter(Boolean),
+};
   }catch (error: any) {
 
     throw new Error(
@@ -374,11 +397,28 @@ async getAllByDoctorId(
 
 }
 
-  private buildS3Url(s3Key: string) {
-    console.log("AWS_BUCKET_NAME =", process.env.AWS_BUCKET_NAME);
-console.log("AWS_REGION =", process.env.AWS_REGION);
-    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
-  }
+ private async buildS3Url(
+    key: string
+): Promise<string> {
+
+    return await getImageUrl(key);
+
+}
+private async formatMedia(media: any[]) {
+
+    return Promise.all(
+
+        media.map(async (item) => ({
+
+            ...item,
+
+            url: await this.buildS3Url(item.s3Key),
+
+        }))
+
+    );
+
+}
 
   private formatResponse(data: any) {
     if (!data?.media) return data;
@@ -520,6 +560,19 @@ console.log("VALIDATIONS DONE");
     if (data.followUpImaging !== undefined)
       updateData.followUpImaging = data.followUpImaging;
 
+    // Images
+if (data.preOpImages !== undefined) {
+    updateData.preOpImages = data.preOpImages;
+}
+
+if (data.intraOpImages !== undefined) {
+    updateData.intraOpImages = data.intraOpImages;
+}
+
+if (data.postOpImages !== undefined) {
+    updateData.postOpImages = data.postOpImages;
+}
+
     // Fees
     if (data.doctorFee !== undefined)
       updateData.doctorFee = Number(data.doctorFee);
@@ -568,7 +621,10 @@ console.dir(updateData, { depth: null });
     id,
     updateData
 );
-
+if (updatedRecord?.media) {
+    updatedRecord.media =
+    await this.formatMedia(updatedRecord.media);
+}
 return {
     success: true,
     message: "Surgery case updated successfully",
