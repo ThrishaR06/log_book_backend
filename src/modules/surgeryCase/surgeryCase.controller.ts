@@ -19,11 +19,19 @@ const postOpImages: { key: string; url: string }[] = [];
         : [body.preOpImages];
 
       for (const file of files) {
-        const path = await uploadToS3(file, "pre-op", doctor.full_name);
-        console.log("UPLOAD RESULT =", path);
 
-        preOpImages.push(path);
-      }
+    console.log("FILE =", file);
+
+    console.log("FILE NAME =", file?.name);
+
+    const path = await uploadToS3(
+        file,
+        "pre-op",
+        doctor.full_name
+    );
+
+    preOpImages.push(path);
+}
     }
 
     if (body.intraOpImages) {
@@ -31,12 +39,20 @@ const postOpImages: { key: string; url: string }[] = [];
         ? body.intraOpImages
         : [body.intraOpImages];
 
-      for (const file of files) {
-        const path = await uploadToS3(file, "intra-op", doctor.full_name);
+     for (const file of files) {
 
-        console.log("UPLOAD RESULT =", path);
-        intraOpImages.push(path);
-      }
+    console.log("FILE =", file);
+
+    console.log("FILE NAME =", file?.name);
+
+    const path = await uploadToS3(
+        file,
+        "intra-op",
+        doctor.full_name
+    );
+
+    intraOpImages.push(path);
+}
     }
 
     if (body.postOpImages) {
@@ -45,11 +61,19 @@ const postOpImages: { key: string; url: string }[] = [];
         : [body.postOpImages];
 
       for (const file of files) {
-        const path = await uploadToS3(file, "post-op", doctor.full_name);
-        console.log("UPLOAD RESULT =", path);
-        
-        postOpImages.push(path);
-      }
+
+    console.log("FILE =", file);
+
+    console.log("FILE NAME =", file?.name);
+
+    const path = await uploadToS3(
+        file,
+        "post-op",
+        doctor.full_name
+    );
+
+    postOpImages.push(path);
+}
     }
 
     body.preOpImages = preOpImages;
@@ -251,14 +275,18 @@ const postOpImages: { key: string; url: string }[] = [];
       const body: any = context.body;
 
       console.log("BODY =", body);
+      console.log("PRE OP =", body.preOpImages);
 
       if (body.preOpImages && !Array.isArray(body.preOpImages)) {
         body.preOpImages = [body.preOpImages];
       }
+      console.log("INTRA OP =", body.intraOpImages);
 
       if (body.intraOpImages && !Array.isArray(body.intraOpImages)) {
         body.intraOpImages = [body.intraOpImages];
       }
+
+      console.log("POST OP =", body.postOpImages);
 
       if (body.postOpImages && !Array.isArray(body.postOpImages)) {
         body.postOpImages = [body.postOpImages];
@@ -370,6 +398,9 @@ console.log("Update Id :", id);
       }
 
       const body = context.body;
+      console.log("============== BODY ==============");
+console.dir(body, { depth: null });
+console.log("==================================");
 
       await this.prepareUpdateBody(body, doctor);
 

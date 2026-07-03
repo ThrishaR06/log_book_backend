@@ -2,22 +2,34 @@ import { SubscriptionRepository } from "./subscription.repository";
 import Cashfree from "../../config/cashfree.config";
 
 export class SubscriptionService {
-    private calculateExpiryDate(
+   private calculateExpiryDate(
     startDate: Date,
-    durationDays: number
+    frequency: string
 ) {
-
     const expiryDate = new Date(startDate);
 
-    expiryDate.setDate(
-        expiryDate.getDate() + durationDays
-    );
+    switch (frequency) {
+        case "monthly":
+            expiryDate.setMonth(expiryDate.getMonth() + 1);
+            break;
+
+        case "quarterly":
+            expiryDate.setMonth(expiryDate.getMonth() + 3);
+            break;
+
+        case "half_yearly":
+            expiryDate.setMonth(expiryDate.getMonth() + 6);
+            break;
+
+        case "yearly":
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+            break;
+    }
 
     return expiryDate;
-
 }
 
-    private repository = new SubscriptionRepository();
+private repository = new SubscriptionRepository();
 
    // ==========================
 // GET ALL SUBSCRIPTION PLANS
@@ -64,6 +76,7 @@ if (!doctor) {
         data: null
     };
 }
+
 
 // Validate doctor details
 if (!doctor.phone) {
@@ -231,13 +244,12 @@ if (!doctor.email_address) {
         }
 
         // Calculate dates
-        const startDate = new Date();
+       const startDate = new Date();
 
-        const expiryDate = new Date(startDate);
-
-        expiryDate.setDate(
-            expiryDate.getDate() + subscription.duration_days
-        );
+const expiryDate = this.calculateExpiryDate(
+    startDate,
+    subscription.frequency
+);
 
         // Update subscription
         await this.repository.updatePaymentSuccess({
@@ -337,11 +349,10 @@ if (!doctor.email_address) {
 
         const startDate = new Date();
 
-        const expiryDate = new Date(startDate);
-
-        expiryDate.setDate(
-            expiryDate.getDate() + subscription.duration_days
-        );
+const expiryDate = this.calculateExpiryDate(
+    startDate,
+    subscription.frequency
+);
 
         await this.repository.updatePaymentSuccess({
 
@@ -422,9 +433,9 @@ async subscriptionHistory(
     try {
 
         const data =
-            await this.repository.subscriptionHistory(
-                doctorId
-            );
+    await this.repository.getHistory(
+        doctorId
+    );
 
         return {
 

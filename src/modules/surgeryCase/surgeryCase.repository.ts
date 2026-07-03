@@ -350,17 +350,23 @@ async getAllByDoctorId(
     };
 }
 
-async update(
-    id: number,
-    data: any
-) {
+async update(id: number, data: any) {
 
-    await db
+    console.log("========== REPOSITORY UPDATE ==========");
+    console.log("ID =", id);
+    console.dir(data, { depth: null });
+
+    const result = await db
         .update(surgeryCases)
         .set(data)
         .where(eq(surgeryCases.surgeryId, id));
 
-    return await db.query.surgeryCases.findFirst({
+    console.log("UPDATE RESULT");
+    console.dir(result);
+
+    console.log("FETCHING UPDATED RECORD");
+
+    const record = await db.query.surgeryCases.findFirst({
 
         where: (sc, { eq }) =>
             eq(sc.surgeryId, id),
@@ -368,8 +374,13 @@ async update(
         with: {
             media: true,
         },
+
     });
 
+    console.log("UPDATED RECORD");
+    console.dir(record, { depth: null });
+
+    return record;
 }
 
 async getDoctorById(id: number) {
