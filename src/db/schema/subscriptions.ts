@@ -1,55 +1,35 @@
 import {
-    mysqlTable,
-    bigint,
-    varchar,
-    decimal,
-    mysqlEnum,
-    datetime,
-    timestamp
+  mysqlTable,
+  bigint,
+  varchar,
+  int,
+  timestamp,
+  tinyint,
 } from "drizzle-orm/mysql-core";
 
-export const subscriptions = mysqlTable("doctor_subscriptions", {
+export const subscriptions = mysqlTable("subscriptions", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .autoincrement(),
 
-    id: bigint("id", { mode: "number" })
-        .primaryKey()
-        .autoincrement(),
+  planName: varchar("plan_name", { length: 100 })
+    .notNull(),
 
-    doctorId: bigint("doctor_id", { mode: "number" })
-        .notNull(),
+  operationalRecordLimit: int("operational_record_limit")
+    .notNull(),
 
-    planId: bigint("plan_id", { mode: "number" })
-        .notNull(),
+  templateLimit: int("template_limit")
+    .notNull(),
 
-    orderId: varchar("order_id", { length: 100 }),
+  storageLimit: varchar("storage_limit", { length: 50 })
+    .notNull(),
 
-    paymentStatus: mysqlEnum("payment_status", [
-        "PENDING",
-        "SUCCESS",
-        "FAILED",
-        "CANCELLED"
-    ]).default("PENDING"),
+  isActive: tinyint("is_active")
+    .default(1),
 
-    amount: decimal("amount", {
-        precision: 10,
-        scale: 2
-    }),
+  createdAt: timestamp("created_at")
+    .defaultNow(),
 
-    startDate: datetime("start_date"),
-
-    expiryDate: datetime("expiry_date"),
-
-    transactionId: varchar("transaction_id", {
-        length: 150
-    }),
-
-    paymentMethod: varchar("payment_method", {
-        length: 50
-    }),
-
-    createdAt: timestamp("created_at")
-        .defaultNow(),
-
-    updatedAt: timestamp("updated_at")
-        .defaultNow()
-
+  updatedAt: timestamp("updated_at")
+    .defaultNow(),
 });

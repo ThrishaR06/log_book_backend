@@ -394,15 +394,26 @@ console.log("AWS_REGION =", process.env.AWS_REGION);
   async update(id: number, data: any) {
 
     try{
-    this.validateAge(Number(data.age));
+    console.log("validateAge");
+this.validateAge(Number(data.age));
 
-    this.validateBloodGroup(data.bloodGroup);
+console.log("validateBloodGroup");
+this.validateBloodGroup(data.bloodGroup);
 
-    this.validateCaseDate(data.caseDate);
+console.log("validateCaseDate");
+this.validateCaseDate(data.caseDate);
 
-    this.validateTime(data.startTime, data.endTime);
+console.log("validateTime");
+this.validateTime(data.startTime, data.endTime);
 
-    await this.validateDuplicateCaseNumber(data.doctorId, data.caseNumber, id);
+console.log("validateDuplicateCaseNumber");
+await this.validateDuplicateCaseNumber(
+    data.doctorId,
+    data.caseNumber,
+    id
+);
+
+console.log("VALIDATIONS DONE");
 
     const existing = await db.query.surgeryCases.findFirst({
       where: (table, { eq }) => eq(table.surgeryId, id),
@@ -550,6 +561,9 @@ console.log("AWS_REGION =", process.env.AWS_REGION);
     if (data.totalAmount !== undefined)
       updateData.totalAmount = Number(data.totalAmount);
 
+    console.log("UPDATE DATA");
+console.dir(updateData, { depth: null });
+
     const updatedRecord = await this.repository.update(
     id,
     updateData
@@ -562,11 +576,12 @@ return {
 };
   }catch (error: any) {
 
-    throw new Error(
-      error.message || "Failed to update surgery case."
-    );
+    console.log("========== SERVICE ERROR ==========");
+    console.error(error);
+    console.error(error.stack);
 
-  }
+    throw error;
+}
 
 }
 

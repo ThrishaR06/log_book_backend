@@ -2,7 +2,10 @@ import jwt from "jsonwebtoken";
 import { db } from "../db";
 import { subscriptions } from "../db/schema/subscriptions";
 import { sessions } from "../db/schema/sessions";
-import { eq } from "drizzle-orm";
+import { subscriptionPlans } from "../db/schema/subscription-plans";
+import { doctorSubscriptions } from "../db/schema/doctor-subscriptions";
+
+import { eq, desc } from "drizzle-orm";
 
 export const authMiddleware = async ({ cookie, store }: any) => {
     const sessionId = cookie.auth.value;
@@ -33,38 +36,95 @@ export const authMiddleware = async ({ cookie, store }: any) => {
             "SECRET_KEY"
         ) as any;
 
-        // Fetch subscription
-        const subscription = await db
-            .select()
-            .from(subscriptions)
-            .where(eq(subscriptions.doctorId, decoded.id))
-            .orderBy(subscriptions.createdAt);
+        // ==========================
+// Fetch latest subscription
+// ==========================
 
-        const current =
-            subscription[subscription.length - 1] || null;
+const subscription = await db
+    .select({
+        planId: doctorSubscriptions.planId,
 
-        // Attach authenticated user
-        store.user = {
+        paymentStatus: doctorSubscriptions.paymentStatus,
+
+        startDate: doctorSubscriptions.startDate,
+
+        expiryDate: doctorSubscriptions.expiryDate,
+
+        planName: subscriptions.planName,
+
+        amount: subscriptionPlans.amount,
+
+        frequency: subscriptionPlans.frequency,
+
+        operationalRecordLimit:
+            subscriptions.operationalRecordLimit,
+
+        templateLimit:
+            subscriptions.templateLimit,
+
+        storageLimit:
+            subscriptions.storageLimit,
+    })
+    .from(doctorSubscriptions)
+    .innerJoin(
+        subscriptionPlans,
+        eq(
+            doctorSubscriptions.planId,
+            subscriptionPlans.id
+        )
+    )
+    .innerJoin(
+        subscriptions,
+        eq(
+            subscriptionPlans.subscriptionId,
+            subscriptions.id
+        )
+    )
+    .where(eq(doctorSubscriptions.doctorId, decoded.id))
+    .orderBy(desc(doctorSubscriptions.id))
+    .limit(1);
+
+const current = subscription[0] || null;
+
+       store.user = {
     id: decoded.id,
     role: decoded.role,
+
     subscription: current
         ? {
               planId: current.planId,
-              paymentStatus: current.paymentStatus,
+
+              planName: current.planName,
+
+              amount: current.amount,
+
+              frequency: current.frequency,
+
+              operationalRecordLimit:
+                  current.operationalRecordLimit,
+
+              templateLimit:
+                  current.templateLimit,
+
+              storageLimit:
+                  current.storageLimit,
+
+              paymentStatus:
+                  current.paymentStatus,
+
               startDate: current.startDate,
+
               expiryDate: current.expiryDate,
           }
-        : {
-              planId: null,
-              paymentStatus: "PENDING",
-              startDate: null,
-              expiryDate: null,
-          },
+        : null,
 };
-    } catch (error) {
-        return {
-            success: false,
-            message: "Invalid session",
-        };
-    }
+    } catch (error: any) {
+
+    console.error("AUTH MIDDLEWARE ERROR =", error);
+
+    return {
+        success: false,
+        message: error.message,
+    };
+}
 };

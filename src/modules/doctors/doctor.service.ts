@@ -1,6 +1,5 @@
 import { db } from "../../db";
 import { doctors } from "../../db/schema/doctors";
-import { eq, and, ne } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { subscriptions } from "../../db/schema/subscriptions";
@@ -8,6 +7,8 @@ import { subscriptionPlans } from "../../db/schema/subscription-plans";
 import { sessions } from "../../db/schema/sessions";
 import { v4 as uuid } from "uuid";
 import {uploadToS3,getSignedFileUrl,} from "../../utils/s3Upload";
+import { doctorSubscriptions } from "../../db/schema/doctor-subscriptions";
+import { eq, and, ne, desc } from "drizzle-orm";
 
 export class DoctorService {
 
@@ -99,29 +100,6 @@ if (!data.password?.trim()) {
 
   const doctorId = result[0].insertId;
 
-  // Fetch FREE plan
-const freePlan = await db
-    .select()
-    .from(subscriptionPlans)
-    .where(eq(subscriptionPlans.name, "FREE"));
-
-if (!freePlan.length) {
-    throw new Error("FREE subscription plan not found.");
-}
-
-// Create FREE subscription
-await db.insert(subscriptions).values({
-    doctorId: doctorId,
-    planId: freePlan[0].id,
-    amount: freePlan[0].amount,
-    paymentStatus: "SUCCESS",
-    startDate: new Date(),
-    expiryDate: new Date(
-        Date.now() +
-        Number(freePlan[0].durationDays) * 24 * 60 * 60 * 1000
-    ),
-});
-
   return {
     success: true,
     id: doctorId,
@@ -182,30 +160,76 @@ await db.insert(sessions).values({
     token, // Save JWT
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 });
-  // ✅ FETCH SUBSCRIPTION
+// ==========================
+// FETCH ACTIVE SUBSCRIPTION
+// ==========================
+
 const subscription = await db
   .select()
-  .from(subscriptions)
-  .where(eq(subscriptions.doctorId, doctor[0].id));
+  .from(doctorSubscriptions)
+  .where(eq(doctorSubscriptions.doctorId, doctor[0].id))
+  .orderBy(desc(doctorSubscriptions.id))
+  .limit(1);
 
 let subscriptionData = null;
 
 if (subscription.length > 0) {
+
   const planData = await db
-    .select()
+    .select({
+      planName: subscriptions.planName,
+      operationalRecordLimit: subscriptions.operationalRecordLimit,
+      templateLimit: subscriptions.templateLimit,
+      storageLimit: subscriptions.storageLimit,
+
+      amount: subscriptionPlans.amount,
+      frequency: subscriptionPlans.frequency,
+    })
     .from(subscriptionPlans)
-    .where(eq(subscriptionPlans.id, subscription[0].planId));
+    .innerJoin(
+      subscriptions,
+      eq(subscriptionPlans.subscriptionId, subscriptions.id)
+    )
+    .where(eq(subscriptionPlans.id, subscription[0].planId))
+    .limit(1);
 
   subscriptionData = {
+
     planId: subscription[0].planId,
-    plan: planData.length ? planData[0].name : null,
-    amount: planData.length ? planData[0].amount : null,
-    durationDays: planData.length ? planData[0].durationDays : null,
+
+    plan: planData.length
+      ? planData[0].planName
+      : null,
+
+    amount: planData.length
+      ? planData[0].amount
+      : null,
+
+    frequency: planData.length
+      ? planData[0].frequency
+      : null,
+
+    operationalRecordLimit: planData.length
+      ? planData[0].operationalRecordLimit
+      : null,
+
+    templateLimit: planData.length
+      ? planData[0].templateLimit
+      : null,
+
+    storageLimit: planData.length
+      ? planData[0].storageLimit
+      : null,
+
     paymentStatus: subscription[0].paymentStatus,
+
     startDate: subscription[0].startDate,
+
     expiryDate: subscription[0].expiryDate,
   };
+
 }
+
 
   return {
     success: true,
@@ -306,7 +330,15 @@ static async getProfile(doctorId: number) {
         throw new Error("Doctor not found");
     }
 
-    return doctor[0];
+    const doctorData = doctor[0];
+
+if (doctorData.profileImage) {
+    doctorData.profileImage = await getSignedFileUrl(
+        doctorData.profileImage
+    );
+}
+
+return doctorData;
  }catch(error:any){
 
         console.error("GET PROFILE SERVICE ERROR =", error);

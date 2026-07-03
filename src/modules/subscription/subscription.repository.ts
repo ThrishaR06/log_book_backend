@@ -7,43 +7,68 @@ export class SubscriptionRepository {
     // ==========================
     async getPlans() {
 
-        const [rows]: any = await pool.query(
-            `
-            SELECT
-                id,
-                name,
-                description,
-                amount,
-                duration_days,
-                is_active,
-                created_at,
-                updated_at
-            FROM subscription_plans
-            WHERE is_active = 1
-            ORDER BY amount ASC
-            `
-        );
+    const [rows]: any = await pool.query(
+        `
+        SELECT
 
-        return rows;
-    }
+            sp.id,
+            s.id AS subscriptionId,
+            s.plan_name,
+            s.operational_record_limit,
+            s.template_limit,
+            s.storage_limit,
+
+            sp.amount,
+            sp.frequency,
+
+            sp.is_active,
+            sp.created_at,
+            sp.updated_at
+
+        FROM subscription_plans sp
+
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
+
+        WHERE sp.is_active = 1
+
+        ORDER BY sp.amount ASC
+        `
+    );
+
+    return rows;
+}
 
     // ==========================
     // GET PLAN BY ID
     // ==========================
     async findPlan(planId: number) {
 
-        const [rows]: any = await pool.query(
-            `
-            SELECT *
-            FROM subscription_plans
-            WHERE id = ?
-            LIMIT 1
-            `,
-            [planId]
-        );
+    const [rows]: any = await pool.query(
+        `
+        SELECT
 
-        return rows[0] || null;
-    }
+            sp.*,
+
+            s.plan_name,
+            s.operational_record_limit,
+            s.template_limit,
+            s.storage_limit
+
+        FROM subscription_plans sp
+
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
+
+        WHERE sp.id = ?
+
+        LIMIT 1
+        `,
+        [planId]
+    );
+
+    return rows[0] || null;
+}
 
     async findDoctor(doctorId: number) {
 
@@ -63,8 +88,6 @@ export class SubscriptionRepository {
 
     return rows[0] || null;
 }
-
-
 
     // ==========================
     // CREATE SUBSCRIPTION
@@ -176,17 +199,21 @@ async findPlanBySubscription(orderId: string) {
         `
         SELECT
 
-            s.*,
+            ds.*,
 
-            p.duration_days
+            sp.frequency,
 
-        FROM doctor_subscriptions s
+            s.plan_name
 
-        INNER JOIN subscription_plans p
+        FROM doctor_subscriptions ds
 
-            ON p.id = s.plan_id
+        INNER JOIN subscription_plans sp
+            ON sp.id = ds.plan_id
 
-        WHERE s.order_id = ?
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
+
+        WHERE ds.order_id = ?
 
         LIMIT 1
         `,
@@ -271,14 +298,39 @@ async findPlanBySubscription(orderId: string) {
         );
     }
 
-    async mySubscription(doctorId: number) {
+  async mySubscription(doctorId: number) {
 
     const [rows]: any = await pool.query(
         `
-        SELECT *
-        FROM doctor_subscriptions
-        WHERE doctor_id = ?
-        ORDER BY id DESC
+        SELECT
+
+            ds.*,
+
+            s.plan_name,
+
+            s.operational_record_limit,
+
+            s.template_limit,
+
+            s.storage_limit,
+
+            sp.amount,
+
+            sp.frequency
+
+        FROM doctor_subscriptions ds
+
+        INNER JOIN subscription_plans sp
+            ON sp.id = ds.plan_id
+
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
+
+        WHERE
+            ds.doctor_id = ?
+
+        ORDER BY ds.id DESC
+
         LIMIT 1
         `,
         [doctorId]
@@ -288,92 +340,96 @@ async findPlanBySubscription(orderId: string) {
 
 }
 
-async subscriptionHistory(doctorId: number) {
-
-    const [rows]: any = await pool.query(
-        `
-        SELECT *
-        FROM doctor_subscriptions
-        WHERE doctor_id = ?
-        ORDER BY id DESC
-        `,
-        [doctorId]
-    );
-
-    return rows;
-
-}
 
     // ==========================
     // MY SUBSCRIPTION
     // ==========================
     async getCurrentSubscription(
-        doctorId: number
-    ) {
+    doctorId: number
+) {
 
-        const [rows]: any = await pool.query(
-            `
-            SELECT
+    const [rows]: any = await pool.query(
+        `
+        SELECT
 
-                s.*,
+            ds.*,
 
-                p.name,
+            s.plan_name,
 
-                p.duration_days
+            s.operational_record_limit,
 
-            FROM doctor_subscriptions s
+            s.template_limit,
 
-            INNER JOIN subscription_plans p
+            s.storage_limit,
 
-                ON p.id = s.plan_id
+            sp.amount,
 
-            WHERE
+            sp.frequency
 
-                s.doctor_id = ?
+        FROM doctor_subscriptions ds
 
-                AND s.payment_status = 'SUCCESS'
+        INNER JOIN subscription_plans sp
+            ON sp.id = ds.plan_id
 
-            ORDER BY s.id DESC
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
 
-            LIMIT 1
-            `,
-            [doctorId]
-        );
+        WHERE
+            ds.doctor_id = ?
+            AND ds.payment_status = 'SUCCESS'
 
-        return rows[0] || null;
-    }
+        ORDER BY ds.id DESC
+
+        LIMIT 1
+        `,
+        [doctorId]
+    );
+
+    return rows[0] || null;
+}
 
     // ==========================
     // SUBSCRIPTION HISTORY
     // ==========================
     async getHistory(
-        doctorId: number
-    ) {
+    doctorId: number
+) {
 
-        const [rows]: any = await pool.query(
-            `
-            SELECT
+    const [rows]: any = await pool.query(
+        `
+        SELECT
 
-                s.*,
+            ds.*,
 
-                p.name
+            s.plan_name,
 
-            FROM doctor_subscriptions s
+            s.operational_record_limit,
 
-            INNER JOIN subscription_plans p
+            s.template_limit,
 
-                ON p.id = s.plan_id
+            s.storage_limit,
 
-            WHERE
+            sp.amount,
 
-                s.doctor_id = ?
+            sp.frequency
 
-            ORDER BY s.id DESC
-            `,
-            [doctorId]
-        );
+        FROM doctor_subscriptions ds
 
-        return rows;
-    }
+        INNER JOIN subscription_plans sp
+            ON sp.id = ds.plan_id
+
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
+
+        WHERE
+            ds.doctor_id = ?
+
+        ORDER BY ds.id DESC
+        `,
+        [doctorId]
+    );
+
+    return rows;
+}
 
 }
