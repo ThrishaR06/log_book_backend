@@ -65,9 +65,13 @@ async getPlans() {
     try {
 
         // Find selected plan
-        const plan = await this.repository.findPlan(data.planId);
+        const [plan, doctor] = await Promise.all([
 
-        const doctor = await this.repository.findDoctor(data.doctorId);
+    this.repository.findPlan(data.planId),
+
+    this.repository.findDoctor(data.doctorId)
+
+]);
 
 if (!doctor) {
     return {

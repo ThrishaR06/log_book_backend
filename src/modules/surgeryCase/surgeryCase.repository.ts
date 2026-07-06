@@ -64,6 +64,7 @@ export class SurgeryCaseRepository {
           implant_details,
 
           implant_paid_by_hospital,
+          paid_by_hospital,
           implant_received_from_hospital,
 
           total_amount
@@ -83,7 +84,7 @@ export class SurgeryCaseRepository {
           ?,?,?,
           ?,?,?,
           ?,?,?,
-          ?,?,
+          ?,?,?,
           ?
         )
         `,
@@ -153,6 +154,7 @@ data.doctorId,
           data.implantDetails ?? null,
 
           data.implantPaidByHospital ?? false,
+          data.paidByHospital ?? 0,
           data.implantReceivedFromHospital ?? false,
 
           data.totalAmount ?? 0
@@ -611,21 +613,47 @@ async delete(id: number) {
 
 }
 async getAllPdfData(doctorId: number) {
+
     return await db.query.surgeryCases.findMany({
+
         where: (sc, { eq }) => eq(sc.doctorId, doctorId),
+
         with: {
+
             media: true,
+
+            anaesthesia: true,
+
+            position: true,
+
+            incision: true,
+
         },
+
     });
+
 }
 
 async getPdfData(id: number) {
+
     return await db.query.surgeryCases.findFirst({
+
         where: (sc, { eq }) => eq(sc.surgeryId, id),
+
         with: {
+
             media: true,
+
+            anaesthesia: true,
+
+            position: true,
+
+            incision: true,
+
         },
+
     });
+
 }
 
 }

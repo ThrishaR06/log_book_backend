@@ -68,5 +68,7 @@ postOpImages: t.Optional(t.Any()),
 
   implantReceivedFromHospital: t.Optional(t.String()),
 
+  paidByHospital: t.Optional(t.String()),
+
   totalAmount: t.Optional(t.String())
 });

@@ -7,10 +7,12 @@ export class SurgeryCaseController {
   private service = new SurgeryCaseService();
 
   private async prepareBody(body: any, doctor: any) {
-    type UploadedImage = {
+   type UploadedImage = {
     fileName: string;
     mimeType: string;
     key: string;
+    url: string;
+    size: number;
 };
 
 const preOpImages: UploadedImage[] = [];
@@ -47,6 +49,8 @@ preOpImages.push({
     fileName: file.name,
     mimeType: file.type,
     key: uploaded.key,
+    url: uploaded.url,
+    size: uploaded.size,
 });
 }
     }
@@ -77,6 +81,8 @@ intraOpImages.push({
     fileName: file.name,
     mimeType: file.type,
     key: uploaded.key,
+    url: uploaded.url,
+    size: uploaded.size,
 });
 }
     }
@@ -107,6 +113,8 @@ postOpImages.push({
     fileName: file.name,
     mimeType: file.type,
     key: uploaded.key,
+    url: uploaded.url,
+    size: uploaded.size,
 });
 }
     }
@@ -188,6 +196,8 @@ type UploadedImage = {
     fileName: string;
     mimeType: string;
     key: string;
+    url: string;
+    size: number;
 };
 
 const preOpImages: UploadedImage[] = [];
@@ -229,6 +239,8 @@ const postOpImages: UploadedImage[] = [];
     fileName: file.name,
     mimeType: file.type,
     key: uploaded.key,
+    url: uploaded.url,
+    size: uploaded.size,
 });
 }
 
@@ -267,6 +279,8 @@ const postOpImages: UploadedImage[] = [];
     fileName: file.name,
     mimeType: file.type,
     key: uploaded.key,
+    url: uploaded.url,
+    size: uploaded.size,
 });
 }
     body.intraOpImages = intraOpImages;
@@ -300,10 +314,12 @@ const postOpImages: UploadedImage[] = [];
         doctor.full_name
     );
 
-    postOpImages.push({
+   postOpImages.push({
     fileName: file.name,
     mimeType: file.type,
     key: uploaded.key,
+    url: uploaded.url,
+    size: uploaded.size,
 });
 }
 
@@ -418,18 +434,18 @@ const postOpImages: UploadedImage[] = [];
 
       await this.prepareBody(body, doctor);
 
-      return this.service.create(body);
+      const data = await this.service.create(body);
+
+return data;
 
     } catch (error: any) {
 
-      return {
+    return {
         success: false,
-        message:
-          error.message ||
-          "Something went wrong while creating surgery case.",
-      };
+        message: error.message || "Something went wrong."
+    };
 
-    }
+}
   }
 
   async getById(params: any) {

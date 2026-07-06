@@ -1,8 +1,9 @@
 import { db } from "../../db";
 import { templates } from "../../db/schema/templates";
-import { eq, and } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 import { categories } from "../../db/schema/categories";
 import { templateCustomFields } from "../../db/schema/templateCustomFields";
+import { SubscriptionLimitService } from "../subscription/subscriptionLimit.service";
 
 export class TemplateService {
 
@@ -27,6 +28,27 @@ export class TemplateService {
           message: "Category not found.",
         };
       }
+
+      // ==========================
+// CHECK TEMPLATE LIMIT
+// ==========================
+
+const [templateCount] = await db
+    .select({
+        total: count(),
+    })
+    .from(templates)
+    .where(
+        eq(
+            templates.doctorId,
+            data.doctorId
+        )
+    );
+
+await SubscriptionLimitService.validateTemplateLimit(
+    data.doctorId,
+    templateCount.total
+);
 
       const result = await db.insert(templates).values({
         doctorId: data.doctorId,

@@ -1,5 +1,6 @@
 import { db } from "../../db";
 import { sql } from "drizzle-orm";
+import { doctors } from "../../db/schema/doctors";
 
 export class DashboardRepository {
 
@@ -63,6 +64,8 @@ export class DashboardRepository {
             COALESCE(SUM(assistant_fee),0) AS assistantFee,
 
             COALESCE(SUM(implant_fee),0) AS implantFee,
+
+            COALESCE(SUM(paid_by_hospital),0) AS paidByHospital,
 
             (
 
@@ -192,27 +195,39 @@ async getWeeklyRevenue(
 
     const result = await db.execute(sql`
 
-        SELECT
+    SELECT
 
-            DAYOFWEEK(case_date) AS dayNumber,
+        DAYOFWEEK(case_date) AS dayNumber,
 
-            DAYNAME(case_date) AS day,
+        DAYNAME(case_date) AS day,
 
-            COALESCE(SUM(total_amount),0) AS revenue
+        COALESCE(SUM(total_amount), 0) AS revenue
 
-        FROM operative_records
+    FROM operative_records
 
-        WHERE doctor_id = ${doctorId}
+    WHERE doctor_id = ${doctorId}
 
-        AND YEARWEEK(case_date,1) = YEARWEEK(CURDATE(),1)
+    AND case_date BETWEEN
 
-        GROUP BY DAYOFWEEK(case_date), DAYNAME(case_date)
+        DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY)
 
-        ORDER BY DAYOFWEEK(case_date)
+        AND
 
-    `);
+        DATE_ADD(
+            DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY),
+            INTERVAL 6 DAY
+        )
+
+    GROUP BY DAYOFWEEK(case_date), DAYNAME(case_date)
+
+    ORDER BY DAYOFWEEK(case_date)
+
+`);
 
     const rows = (result as any)[0];
+
+    console.log("Weekly Revenue SQL Rows:");
+console.log(JSON.stringify(rows, null, 2));
 
     const weeklyData = [
         { day: "Sun", revenue: 0 },
@@ -224,13 +239,29 @@ async getWeeklyRevenue(
         { day: "Sat", revenue: 0 }
     ];
 
-    rows.forEach((item: any) => {
+   const dayMap: Record<string, string> = {
+    Sunday: "Sun",
+    Monday: "Mon",
+    Tuesday: "Tue",
+    Wednesday: "Wed",
+    Thursday: "Thu",
+    Friday: "Fri",
+    Saturday: "Sat",
+};
 
-        const index = Number(item.dayNumber) - 1;
+rows.forEach((item: any) => {
 
-        weeklyData[index].revenue = Number(item.revenue);
+    const day = dayMap[item.day];
 
-    });
+    const record = weeklyData.find(
+        x => x.day === day
+    );
+
+    if (record) {
+        record.revenue = Number(item.revenue);
+    }
+
+});
 
     return weeklyData;
 
@@ -389,70 +420,112 @@ async getWeeklyRevenue(
     }
 
     async getExportData(
-        doctorId: number,
-        filters: any
-    ) {
+    doctorId: number,
+    filters: any
+) {
 
-        const conditions: any[] = [
+    const conditions: any[] = [
 
-            sql`doctor_id = ${doctorId}`
+        sql`o.doctor_id = ${doctorId}`
 
-        ];
+    ];
 
-        if (filters.hospital) {
+    if (filters.hospital) {
 
-            conditions.push(
-                sql`hospital = ${filters.hospital}`
-            );
-        }
+        conditions.push(
+            sql`o.hospital = ${filters.hospital}`
+        );
 
-        if (filters.fromDate) {
-
-            conditions.push(
-                sql`case_date >= ${filters.fromDate}`
-            );
-        }
-
-        if (filters.toDate) {
-
-            conditions.push(
-                sql`case_date <= ${filters.toDate}`
-            );
-        }
-
-        const result = await db.execute(sql`
-
-            SELECT
-
-            case_number,
-
-            case_date,
-
-            patient_name,
-
-            age,
-
-            sex,
-
-            diagnosis,
-
-            hospital,
-
-            duration,
-
-            surgery_procedure,
-
-            doctor_fee
-
-            FROM operative_records
-
-            WHERE ${sql.join(conditions, sql` AND `)}
-
-            ORDER BY case_date DESC
-
-        `);
-
-        return (result as any)[0];
     }
+
+    if (filters.fromDate) {
+
+        conditions.push(
+            sql`o.case_date >= ${filters.fromDate}`
+        );
+
+    }
+
+    if (filters.toDate) {
+
+        conditions.push(
+            sql`o.case_date <= ${filters.toDate}`
+        );
+
+    }
+
+    const result = await db.execute(sql`
+
+        SELECT
+
+            o.case_number,
+
+            o.case_date,
+
+            o.patient_name,
+
+            o.age,
+
+            o.sex,
+
+            o.diagnosis,
+
+            o.hospital,
+
+            o.duration,
+
+            o.doctor_fee,
+
+            COALESCE(
+
+                JSON_UNQUOTE(
+                    JSON_EXTRACT(
+                        o.surgery_procedure,
+                        '$.procedureName'
+                    )
+                ),
+
+                p.procedure_name
+
+            ) AS procedureName
+
+        FROM operative_records o
+
+        LEFT JOIN procedure_note_templates p
+
+        ON p.id = CAST(
+
+            JSON_UNQUOTE(
+
+                JSON_EXTRACT(
+                    o.surgery_procedure,
+                    '$.procedureId'
+                )
+
+            ) AS UNSIGNED
+
+        )
+
+        WHERE ${sql.join(conditions, sql` AND `)}
+
+        ORDER BY o.case_date DESC
+
+    `);
+
+    return (result as any)[0];
+
+}
+
+    async getDoctorName(doctorId: number) {
+
+    const doctor = await db.query.doctors.findFirst({
+        where: (d, { eq }) => eq(d.id, doctorId),
+        columns: {
+            fullName: true,
+        },
+    });
+
+    return doctor;
+}
 
 }

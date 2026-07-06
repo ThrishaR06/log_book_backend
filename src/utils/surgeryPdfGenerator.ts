@@ -484,11 +484,23 @@ export async function generateSurgeryPdf(
 
         row(doc, "Blood Loss", data.bloodLoss);
 
-        row(doc, "Anaesthesia ID", data.anaesthesiaId);
+        row(
+    doc,
+    "Anaesthesia",
+    data.anaesthesia?.anaesthesiaName ?? "-"
+);
 
-        row(doc, "Position ID", data.positionId);
+row(
+    doc,
+    "Position",
+    data.position?.positionName ?? "-"
+);
 
-        row(doc, "Incision ID", data.incisionId);
+row(
+    doc,
+    "Incision",
+    data.incision?.incisionName ?? "-"
+);
 
         // =====================================================
         // CLINICAL FINDINGS

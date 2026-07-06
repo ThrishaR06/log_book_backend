@@ -1,4 +1,7 @@
 import { DashboardRepository } from "./dashboard.repository";
+import { DashboardExcel } from "./dashboard.excel";
+import { DashboardPdf } from "./dashboard.pdf";
+
 
 export class DashboardService {
 
@@ -110,7 +113,7 @@ async getWeeklyRevenue(
         };
     }
 
-    async exportPdf(
+ async exportPdf(
     doctorId: number,
     filters: any
 ) {
@@ -119,13 +122,16 @@ async getWeeklyRevenue(
         doctorId,
         filters
     );
+    console.log(data);
 
-    return {
-        success: true,
-        message: "Export PDF data fetched successfully.",
-        data
-    };
+    const doctor = await this.repository.getDoctorName(
+        doctorId
+    );
 
+    return await DashboardPdf.generate(
+        data,
+        doctor?.fullName ?? "Doctor"
+    );
 }
 async exportExcel(
     doctorId: number,
@@ -137,12 +143,7 @@ async exportExcel(
         filters
     );
 
-    return {
-        success: true,
-        message: "Export PDF data fetched successfully.",
-        data
-    };
+    return await DashboardExcel.generate(data);
 
 }
-
 }

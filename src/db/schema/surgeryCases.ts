@@ -121,6 +121,7 @@ export const surgeryCases = mysqlTable("operative_records", {
     precision: 12,
     scale: 2,
   }),
+ 
 
   doctorPaymentMode: varchar("doctor_payment_mode", {
     length: 100,
@@ -149,9 +150,12 @@ export const surgeryCases = mysqlTable("operative_records", {
   }),
 
   implantDetails: text("implant_details"),
-
   implantPaidByHospital: boolean("implant_paid_by_hospital")
-    .default(false),
+  .default(false),
+  paidByHospital: decimal("paid_by_hospital", {
+  precision: 12,
+  scale: 2,
+}),
 
   implantReceivedFromHospital: boolean("implant_received_from_hospital")
     .default(false),
