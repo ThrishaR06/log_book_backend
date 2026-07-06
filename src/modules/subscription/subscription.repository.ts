@@ -36,7 +36,20 @@ export class SubscriptionRepository {
         `
     );
 
-    return rows;
+    const plans = rows.map((plan: any) => ({
+    ...plan,
+    operational_record_limit:
+        plan.operational_record_limit === -1
+            ? "Unlimited"
+            : plan.operational_record_limit,
+
+    template_limit:
+        plan.template_limit === -1
+            ? "Unlimited"
+            : plan.template_limit,
+}));
+
+return plans;
 }
 
     // ==========================
@@ -67,7 +80,24 @@ export class SubscriptionRepository {
         [planId]
     );
 
-    return rows[0] || null;
+    const plan = rows[0];
+
+if (!plan) {
+    return null;
+}
+
+return {
+    ...plan,
+    operational_record_limit:
+        plan.operational_record_limit === -1
+            ? "Unlimited"
+            : plan.operational_record_limit,
+
+    template_limit:
+        plan.template_limit === -1
+            ? "Unlimited"
+            : plan.template_limit,
+};
 }
 
     async findDoctor(doctorId: number) {
@@ -277,25 +307,25 @@ async findPlanBySubscription(orderId: string) {
     async saveWebhook(data: any) {
 
         await pool.query(
-            `
-            INSERT INTO payment_logs
-            (
-                order_id,
-                payment_status,
-                request_data,
-                response_data
-            )
-            VALUES
-            (?, ?, ?, ?)
-            `,
-            [
-                data.orderId,
-                data.transactionId,
-                data.paymentStatus,
-                JSON.stringify(data.requestData),
-                JSON.stringify(data.responseData)
-            ]
-        );
+`
+INSERT INTO payment_logs
+(
+    order_id,
+    payment_status,
+    request_data,
+    response_data
+)
+VALUES
+(?, ?, ?, ?)
+`,
+[
+    data.orderId,
+    data.paymentStatus,
+    JSON.stringify(data.requestData),
+    JSON.stringify(data.responseData)
+]
+);
+           
     }
 
   async mySubscription(doctorId: number) {
@@ -385,9 +415,87 @@ async findPlanBySubscription(orderId: string) {
         [doctorId]
     );
 
-    return rows[0] || null;
+    const subscription = rows[0];
+
+if (!subscription) {
+    return null;
 }
 
+return {
+    ...subscription,
+    operational_record_limit:
+        subscription.operational_record_limit === -1
+            ? "Unlimited"
+            : subscription.operational_record_limit,
+
+    template_limit:
+        subscription.template_limit === -1
+            ? "Unlimited"
+            : subscription.template_limit,
+};
+}
+
+async getUsedStorage(doctorId: number) {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            COALESCE(SUM(size), 0) AS usedStorage
+        FROM media
+        WHERE uploaded_by = ?
+        `,
+        [doctorId]
+    );
+
+    return Number(rows[0].usedStorage);
+}
+
+
+// ==========================
+// GET ACTIVE SUBSCRIPTION LIMITS
+// ==========================
+async getActiveSubscription(doctorId: number) {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+
+            ds.doctor_id,
+
+            ds.start_date,
+            ds.expiry_date,
+            ds.payment_status,
+
+            s.plan_name,
+            s.operational_record_limit,
+            s.template_limit,
+            s.storage_limit
+
+        FROM doctor_subscriptions ds
+
+        INNER JOIN subscription_plans sp
+            ON sp.id = ds.plan_id
+
+        INNER JOIN subscriptions s
+            ON s.id = sp.subscription_id
+
+        WHERE
+            ds.doctor_id = ?
+            AND ds.payment_status = 'SUCCESS'
+            AND (
+                ds.expiry_date IS NULL
+                OR ds.expiry_date >= NOW()
+            )
+
+        ORDER BY ds.id DESC
+
+        LIMIT 1
+        `,
+        [doctorId]
+    );
+
+    return rows[0] || null;
+}
     // ==========================
     // SUBSCRIPTION HISTORY
     // ==========================
@@ -429,7 +537,20 @@ async findPlanBySubscription(orderId: string) {
         [doctorId]
     );
 
-    return rows;
+const history = rows.map((item: any) => ({
+    ...item,
+    operational_record_limit:
+        item.operational_record_limit === -1
+            ? "Unlimited"
+            : item.operational_record_limit,
+
+    template_limit:
+        item.template_limit === -1
+            ? "Unlimited"
+            : item.template_limit,
+}));
+
+return history;
 }
 
 }

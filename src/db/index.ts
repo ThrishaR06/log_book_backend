@@ -2,6 +2,10 @@ import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import "dotenv/config";
 
+import * as anaesthesiaMasters from "./schema/anaesthesiaMasters";
+import * as positionMasters from "./schema/positionMasters";
+import * as incisionMasters from "./schema/incisionMasters";
+
 import * as hospitals from "./schema/hospitals";
 import * as doctors from "./schema/doctors";
 import * as subscriptions from "./schema/subscriptions";
@@ -52,6 +56,9 @@ export const db = drizzle(pool, {
         ...sessions,
         ...surgeryStaffMasters,
         ...surgeryCases,
+        ...anaesthesiaMasters,
+        ...positionMasters,
+        ...incisionMasters,
         ...media,
         ...relations,
         ...adminSessions,

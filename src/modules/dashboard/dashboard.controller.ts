@@ -44,10 +44,11 @@ async getWeeklyRevenue(context: any) {
 
     const doctorId = context.store.user.id;
 
+    console.log("Doctor ID =", doctorId);
+
     return await this.service.getWeeklyRevenue(
         doctorId
     );
-
 }
 
     /**
@@ -101,46 +102,63 @@ async getWeeklyRevenue(context: any) {
         );
     }
 
-    async exportPdf(context:any){
+  async exportPdf(context:any){
 
-    const doctorId=context.store.user.id;
+    const doctorId = context.store.user.id;
 
-    const filters={
+    const filters = {
 
-        hospital:context.query.hospital,
+        hospital: context.query.hospital,
 
-        fromDate:context.query.fromDate,
+        fromDate: context.query.fromDate,
 
-        toDate:context.query.toDate
+        toDate: context.query.toDate
 
     };
 
-    return await this.service.exportPdf(
+    const pdf = await this.service.exportPdf(
         doctorId,
         filters
     );
+
+    context.set.headers["Content-Type"] = "application/pdf";
+
+    context.set.headers["Content-Disposition"] =
+        'attachment; filename="dashboard-report.pdf"';
+
+    return pdf;
 
 }
 
-async exportExcel(context:any){
+async exportExcel(context: any) {
 
-    const doctorId=context.store.user.id;
+    const doctorId = context.store.user.id;
 
-    const filters={
+    const filters = {
 
-        hospital:context.query.hospital,
+        hospital: context.query.hospital,
 
-        fromDate:context.query.fromDate,
+        fromDate: context.query.fromDate,
 
-        toDate:context.query.toDate
+        toDate: context.query.toDate
 
     };
 
-    return await this.service.exportExcel(
+    const excel = await this.service.exportExcel(
         doctorId,
         filters
     );
 
+    context.set.headers["Content-Type"] =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    context.set.headers["Content-Disposition"] =
+        'attachment; filename="dashboard-report.xlsx"';
+
+    context.set.headers["Content-Length"] =
+        excel.length.toString();
+
+    return excel;
 }
 
 }

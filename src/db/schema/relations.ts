@@ -11,9 +11,53 @@ import { admins } from "./admins";
 /**
  * 🔹 surgery_cases → media (1 to many)
  */
-export const surgeryCasesRelations = relations(surgeryCases, ({ many }) => ({
-  media: many(media),
-}));
+import { anaesthesiaMasters } from "./anaesthesiaMasters";
+import { positionMasters } from "./positionMasters";
+import { incisionMasters } from "./incisionMasters";
+
+
+export const surgeryCasesRelations = relations(
+    surgeryCases,
+    ({ many, one }) => ({
+        media: many(media),
+
+        anaesthesia: one(anaesthesiaMasters, {
+            fields: [surgeryCases.anaesthesiaId],
+            references: [anaesthesiaMasters.id],
+        }),
+
+        position: one(positionMasters, {
+            fields: [surgeryCases.positionId],
+            references: [positionMasters.id],
+        }),
+
+        incision: one(incisionMasters, {
+            fields: [surgeryCases.incisionId],
+            references: [incisionMasters.id],
+        }),
+    })
+);
+
+export const anaesthesiaRelations = relations(
+  anaesthesiaMasters,
+  ({ many }) => ({
+    surgeryCases: many(surgeryCases),
+  })
+);
+
+export const positionRelations = relations(
+  positionMasters,
+  ({ many }) => ({
+    surgeryCases: many(surgeryCases),
+  })
+);
+
+export const incisionRelations = relations(
+  incisionMasters,
+  ({ many }) => ({
+    surgeryCases: many(surgeryCases),
+  })
+);
 
 /**
  * 🔹 media → surgery_cases (many to 1)
@@ -51,3 +95,4 @@ export const adminsRelations = relations(
     }),
   })
 );
+

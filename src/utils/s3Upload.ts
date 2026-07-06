@@ -73,5 +73,6 @@ export async function uploadToS3(
     return {
         key,
         url: await getSignedFileUrl(key),
+        size: buffer.length,
     };
 }

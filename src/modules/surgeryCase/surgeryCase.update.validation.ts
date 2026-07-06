@@ -67,6 +67,7 @@ export const updateSurgeryCaseSchema = t.Object({
 
   implantPaidByHospital: t.Optional(t.String()),
   implantReceivedFromHospital: t.Optional(t.String()),
+  paidByHospital: t.Optional(t.String()),
 
   totalAmount: t.Optional(t.String())
 

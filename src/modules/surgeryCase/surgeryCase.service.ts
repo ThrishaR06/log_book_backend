@@ -2,11 +2,12 @@ import { SurgeryCaseRepository } from "./surgeryCase.repository";
 import { db } from "../../db";
 import { surgeryCases } from "../../db/schema/surgeryCases";
 import { media as mediaTable } from "../../db/schema/media.schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and ,count} from "drizzle-orm";
 import { inArray } from "drizzle-orm";
 import { redis } from "../../config/redis";
 import { sql } from "drizzle-orm";
 import { getImageUrl } from "../../utils/s3Url";
+import { SubscriptionLimitService } from "../subscription/subscriptionLimit.service";
 export class SurgeryCaseService {
   private repository = new SurgeryCaseRepository();
 
@@ -114,26 +115,64 @@ export class SurgeryCaseService {
 
     await this.validateDuplicateCaseNumber(data.doctorId, data.caseNumber);
 
+    // ==========================
+// CHECK OPERATIONAL RECORD LIMIT
+// ==========================
+
+const [recordCount] = await db
+  .select({
+    total: count(),
+  })
+  .from(surgeryCases)
+  .where(
+    eq(
+      surgeryCases.doctorId,
+      data.doctorId
+    )
+  );
+
+await SubscriptionLimitService.validateOperationalLimit(
+  data.doctorId,
+  recordCount.total
+);
+
     // ✅ NORMALIZE MEDIA
-    const media = [
-  ...(data.preOpImages || []).map((file: any) => ({
-    key: file.key,
-    url: file.url,
-    mediaType: "PRE_OP",
-  })),
+   const media = [
 
-  ...(data.intraOpImages || []).map((file: any) => ({
-    key: file.key,
-    url: file.url,
-    mediaType: "INTRA_OP",
-  })),
+    ...(data.preOpImages || []).map((file: any) => ({
+        key: file.key,
+        url: file.url,
+        size: file.size,
+        mediaType: "PRE_OP",
+    })),
 
-  ...(data.postOpImages || []).map((file: any) => ({
-    key: file.key,
-    url: file.url,
-    mediaType: "POST_OP",
-  })),
+    ...(data.intraOpImages || []).map((file: any) => ({
+        key: file.key,
+        url: file.url,
+        size: file.size,
+        mediaType: "INTRA_OP",
+    })),
+
+    ...(data.postOpImages || []).map((file: any) => ({
+        key: file.key,
+        url: file.url,
+        size: file.size,
+        mediaType: "POST_OP",
+    })),
 ];
+
+// ==========================
+// VALIDATE STORAGE LIMIT
+// ==========================
+const totalFileSize = media.reduce(
+    (total: number, file: any) => total + (file.size || 0),
+    0
+);
+
+await SubscriptionLimitService.validateStorageLimit(
+    data.doctorId,
+    totalFileSize
+);
 
     return await db.transaction(async (tx) => {
       // STEP 1: CREATE SURGERY CASE
@@ -199,7 +238,11 @@ export class SurgeryCaseService {
           implantDetails: data.implantDetails,
 
           implantPaidByHospital: data.implantPaidByHospital,
+          paidByHospital: data.paidByHospital ?? null,
           implantReceivedFromHospital: data.implantReceivedFromHospital,
+
+          
+
 
           totalAmount: data.totalAmount,
         })
@@ -210,19 +253,16 @@ export class SurgeryCaseService {
       // STEP 2: INSERT MEDIA
       if (media.length > 0) {
 
-        const mediaRows: (typeof mediaTable.$inferInsert)[] = media.map(
-          (m: any) => ({
-
-            fileName: m.key.split("/").pop() || "image.jpg",
-            s3Key: m.key,
-            mimeType: "image/jpeg",
-            size: 1,
-            isPublic: false,
-            uploadedBy: 1,
-            surgeryCaseId: caseId,
-            mediaType: m.mediaType,
-          }),
-        );
+       const mediaRows = media.map((m: any) => ({
+    fileName: m.key.split("/").pop() || "image.jpg",
+    s3Key: m.key,
+    mimeType: "image/jpeg",
+    size: m.size,
+    isPublic: false,
+    uploadedBy: data.doctorId,
+    surgeryCaseId: caseId,
+    mediaType: m.mediaType,
+}));
 
         const preOpIds: number[] = [];
         const intraOpIds: number[] = [];
@@ -279,11 +319,9 @@ export class SurgeryCaseService {
     });
   }catch (error: any) {
 
-    throw new Error(
-      error.message || "Failed to create surgery case."
-    );
+    throw error;
 
-  }
+}
 
 }
 async getAllByDoctorId(
@@ -560,17 +598,62 @@ console.log("VALIDATIONS DONE");
     if (data.followUpImaging !== undefined)
       updateData.followUpImaging = data.followUpImaging;
 
-    // Images
+    // =======================
+// Images (Append New Images)
+// =======================
+
 if (data.preOpImages !== undefined) {
-    updateData.preOpImages = data.preOpImages;
+
+  const existingPre = Array.isArray(existing.preOpImages)
+    ? existing.preOpImages
+    : [];
+
+  const newPre = Array.isArray(data.preOpImages)
+    ? data.preOpImages
+    : [];
+
+  updateData.preOpImages = [
+    ...new Set([
+      ...existingPre,
+      ...newPre,
+    ]),
+  ];
 }
 
 if (data.intraOpImages !== undefined) {
-    updateData.intraOpImages = data.intraOpImages;
+
+  const existingIntra = Array.isArray(existing.intraOpImages)
+    ? existing.intraOpImages
+    : [];
+
+  const newIntra = Array.isArray(data.intraOpImages)
+    ? data.intraOpImages
+    : [];
+
+  updateData.intraOpImages = [
+    ...new Set([
+      ...existingIntra,
+      ...newIntra,
+    ]),
+  ];
 }
 
 if (data.postOpImages !== undefined) {
-    updateData.postOpImages = data.postOpImages;
+
+  const existingPost = Array.isArray(existing.postOpImages)
+    ? existing.postOpImages
+    : [];
+
+  const newPost = Array.isArray(data.postOpImages)
+    ? data.postOpImages
+    : [];
+
+  updateData.postOpImages = [
+    ...new Set([
+      ...existingPost,
+      ...newPost,
+    ]),
+  ];
 }
 
     // Fees
@@ -610,6 +693,13 @@ if (data.postOpImages !== undefined) {
       updateData.implantReceivedFromHospital =
         data.implantReceivedFromHospital === true ||
         data.implantReceivedFromHospital === "true";
+
+        if (data.paidByHospital !== undefined) {
+  updateData.paidByHospital =
+    data.paidByHospital === ""
+      ? null
+      : Number(data.paidByHospital);
+}
 
     if (data.totalAmount !== undefined)
       updateData.totalAmount = Number(data.totalAmount);
