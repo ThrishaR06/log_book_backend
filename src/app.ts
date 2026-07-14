@@ -42,6 +42,7 @@ import {clinicalPresetsRoutes}from "./modules/clinicalPresets/clinicalPresets.ro
 import { dashboardRoutes } from "./modules/dashboard/dashboard.route";
 //import "./config/redis";
 import { mediaRoutes } from "./modules/media/media.route";
+import { businessSettingRoutes } from "./modules/business-setting/businessSetting.route";
 
 import { bloodLossMasterRoutes } from "./modules/blood-loss-master/bloodLossMaster.route";
 import { specimensMasterRoutes } from "./modules/specimens-master/specimensMaster.route";
@@ -86,6 +87,7 @@ export const app = new Elysia()
     .use(surgeryImagesRoutes)
     .use(surgeryFinanceRoutes)
     .use(dashboardRoutes)
+    .use(businessSettingRoutes)
     
     .use(diagnosisMasterRoutes)
     .use(operativeFindingsRoutes)
