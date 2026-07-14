@@ -55,8 +55,6 @@ export class DashboardPdf {
 
             const headerHeight = 28;
 
-            const rowHeight = 38;
-
             const columns = [
 
                 { title: "S.No", width: 35 },
@@ -69,13 +67,13 @@ export class DashboardPdf {
 
                 { title: "Age/Sex", width: 80 },
 
-                { title: "Diagnosis", width: 130 },
+                { title: "Diagnosis", width: 180 },
 
                 { title: "Procedure", width: 95 },
 
                 { title: "Hospital", width: 120 },
 
-                { title: "Fees (₹)", width: 70 },
+                { title: "Fees", width: 70 },
 
             ];
 
@@ -126,101 +124,142 @@ export class DashboardPdf {
             // TABLE ROWS
             //------------------------------------------
 
+            const getRowHeight = (row: any[]) => {
+
+    let maxHeight = 20;
+
+    row.forEach((value, i) => {
+
+        const text = String(value ?? "-");
+
+        const height = doc.heightOfString(text, {
+            width: Math.max(columns[i].width - 8, 20),
+        });
+
+        if (Number.isFinite(height)) {
+            maxHeight = Math.max(maxHeight, height);
+        }
+
+    });
+
+    return Math.min(Math.max(maxHeight + 16, 38), 200);
+};
+
             data.forEach((item: any, index: number) => {
 
-                if (y + rowHeight > 540) {
+    let x = startX;
 
-                    doc.addPage();
+    const row = [
 
-                    y = 30;
+        index + 1,
 
-                    drawHeader();
+        item.case_date
+            ? new Date(item.case_date).toLocaleDateString("en-GB")
+            : "-",
 
+        item.case_number ?? "-",
+
+        item.patient_name ?? "-",
+
+        `${item.age ?? "-"} / ${item.sex ?? "-"}`,
+
+        item.diagnosis ?? "-",
+
+        item.procedureName ?? "-",
+
+        item.hospital ?? "-",
+
+        item.doctor_fee
+            ? `RS.${Number(item.doctor_fee).toLocaleString("en-IN")}`
+            : "-",
+
+    ];
+
+    const rowHeight = getRowHeight(row);
+
+    // Page break check
+    if (y + rowHeight > doc.page.height - 40) {
+
+        doc.addPage();
+
+        y = 30;
+
+        drawHeader();
+
+    }
+
+    row.forEach((value, i) => {
+
+        doc
+            .rect(
+                x,
+                y,
+                columns[i].width,
+                rowHeight
+            )
+            .stroke("#D4D8E3");
+
+        doc
+            .fillColor("black")
+            .font("Helvetica")
+            .fontSize(7)
+            .text(
+                String(value ?? "-"),
+                x + 4,
+                y + 6,
+                {
+                    width: columns[i].width - 8,
+                    align: i === 0 ? "center" : "left",
                 }
+            );
 
-                let x = startX;
+        x += columns[i].width;
 
-                const row = [
+    });
 
-    index + 1,
+    y += rowHeight;
 
-    item.case_date
-        ? new Date(item.case_date).toLocaleDateString("en-GB")
-        : "-",
+});
 
-    item.case_number ?? "-",
+  //------------------------------------------
+// FOOTER
+//------------------------------------------
 
-    item.patient_name ?? "-",
+y += 15;
 
-    `${item.age ?? "-"} / ${item.sex ?? "-"}`,
+if (y > doc.page.height - 40) {
 
-    item.diagnosis ?? "-",
+    doc.addPage();
 
-    item.procedureName ?? "-",
+    y = 40;
+}
 
-    item.hospital ?? "-",
+const generatedOn = new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+}).format(new Date());
 
-    item.doctor_fee
-        ? `₹${Number(item.doctor_fee).toLocaleString("en-IN")}`
-        : "-",
-];
-
-                row.forEach((value, i) => {
-
-                    doc
-                        .rect(
-                            x,
-                            y,
-                            columns[i].width,
-                            rowHeight
-                        )
-                        .stroke("#D4D8E3");
-
-                    doc
-                        .fillColor("black")
-                        .font("Helvetica")
-                        .fontSize(8)
-                        .text(
-                            String(value ?? "-"),
-                            x + 4,
-                            y + 10,
-                            {
-                                width: columns[i].width - 8,
-                                align:
-                                    i === 0
-                                        ? "center"
-                                        : "left",
-                            }
-                        );
-
-                    x += columns[i].width;
-
-                });
-
-                y += rowHeight;
-
-            });
-
-            //------------------------------------------
-            // FOOTER
-            //------------------------------------------
-
-            doc.moveDown(2);
-
-            doc
-                .font("Helvetica")
-                .fontSize(9)
-                .fillColor("gray")
-                .text(
-                    `Generated on ${new Date().toLocaleString()}`,
-                    {
-                        align: "right",
-                    }
-                );
-
-            doc.end();
+doc
+    .font("Helvetica")
+    .fontSize(9)
+    .fillColor("gray")
+    .text(
+        `Generated on ${generatedOn}`,
+        startX,
+        y,
+        {
+            width: doc.page.width - 25,
+            align: "right",
+        }
+    );
+    doc.end();
 
         });
+        
 
     }
 
