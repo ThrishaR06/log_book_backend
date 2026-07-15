@@ -56,46 +56,46 @@ export class BusinessSettingService {
         }
 
         // Fetch latest settings
-const settings = await db
-    .select()
-    .from(businessSettings)
-    .where(
-        eq(
-            businessSettings.doctorId,
-            doctorId
-        )
-    );
+        const settings = await db
+            .select()
+            .from(businessSettings)
+            .where(
+                eq(
+                    businessSettings.doctorId,
+                    doctorId
+                )
+            );
 
-for (const item of settings) {
+        for (const item of settings) {
 
-    if (
-        item.settingKey === "logo" &&
-        item.settingValue
-    ) {
+            if (
+                item.settingKey === "logo" &&
+                item.settingValue
+            ) {
 
-        logo = await getImageUrl(
-            item.settingValue
+                logo = await getImageUrl(
+                    item.settingValue
+                );
+
+            }
+
+            if (
+                item.settingKey === "color"
+            ) {
+
+                color = item.settingValue;
+
+            }
+
+        }
+
+        return ApiResponse.success(
+            {
+                logo,
+                color,
+            },
+            "Business settings saved successfully."
         );
-
-    }
-
-    if (
-        item.settingKey === "color"
-    ) {
-
-        color = item.settingValue;
-
-    }
-
-}
-
-return ApiResponse.success(
-    {
-        logo,
-        color,
-    },
-    "Business settings saved successfully."
-);
 
     }
 
@@ -151,7 +151,7 @@ return ApiResponse.success(
 
     }
 
-        // ==========================
+    // ==========================
     // GET ALL
     // ==========================
     static async getAll({
@@ -161,48 +161,48 @@ return ApiResponse.success(
     }) {
 
         const settings = await db
-    .select()
-    .from(businessSettings)
-    .where(
-        eq(
-            businessSettings.doctorId,
-            doctorId
-        )
-    );
+            .select()
+            .from(businessSettings)
+            .where(
+                eq(
+                    businessSettings.doctorId,
+                    doctorId
+                )
+            );
 
-let logo: string | null = null;
-let color: string | null = null;
+        let logo: string | null = null;
+        let color: string | null = null;
 
-for (const item of settings) {
+        for (const item of settings) {
 
-    if (
-        item.settingKey === "logo" &&
-        item.settingValue
-    ) {
+            if (
+                item.settingKey === "logo" &&
+                item.settingValue
+            ) {
 
-        logo = await getImageUrl(
-            item.settingValue
+                logo = await getImageUrl(
+                    item.settingValue
+                );
+
+            }
+
+            if (
+                item.settingKey === "color"
+            ) {
+
+                color = item.settingValue;
+
+            }
+
+        }
+
+        return ApiResponse.success(
+            {
+                logo,
+                color,
+            },
+            "Business settings fetched successfully."
         );
-
-    }
-
-    if (
-        item.settingKey === "color"
-    ) {
-
-        color = item.settingValue;
-
-    }
-
-}
-
-return ApiResponse.success(
-    {
-        logo,
-        color,
-    },
-    "Business settings fetched successfully."
-);
     }
 
     // ==========================

@@ -12,15 +12,15 @@ export class BusinessSettingController {
 
             // At least one field should be provided
             if (
-    !body.logo &&
-    (!body.color || body.color.trim() === "")
-) {
+                !body.logo &&
+                (!body.color || body.color.trim() === "")
+            ) {
 
-    return ApiResponse.error(
-        "Please provide logo or color."
-    );
+                return ApiResponse.error(
+                    "Please provide logo or color."
+                );
 
-}
+            }
 
             return await BusinessSettingService.save({
                 doctorId: store.user.id,

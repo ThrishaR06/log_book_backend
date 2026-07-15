@@ -4,7 +4,7 @@ import { BusinessSettingController } from "./businessSetting.controller";
 
 import {
     saveBusinessSettingValidation,
-} from "./businesssetting.validation";
+} from "./businessSetting.validation";
 
 import { authMiddleware } from "../../middleware/auth.middleware";
 
