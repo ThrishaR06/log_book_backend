@@ -286,135 +286,176 @@ export class DashboardRepository {
         return result[0];
     }
 
-     async getFinanceDetails(
-    doctorId: number,
-    filters: any
-) {
+    async getFinanceDetails(
+        doctorId: number,
+        filters: any
+    ) {
 
-    const conditions: any[] = [
-        sql`doctor_id = ${doctorId}`
-    ];
+        const conditions: any[] = [
+            sql`doctor_id = ${doctorId}`
+        ];
 
-    // Hospital Filter
-    if (filters.hospital) {
-        conditions.push(
-            sql`hospital = ${filters.hospital}`
-        );
-    }
+        switch (filters.filter) {
 
-    // Search Filter
-    if (filters.search) {
+            case "today":
 
-        const keyword = `%${filters.search}%`;
+                conditions.push(
+                    sql`DATE(case_date) = CURDATE()`
+                );
 
-        conditions.push(sql`
+                break;
+
+            case "week":
+
+                conditions.push(
+                    sql`YEARWEEK(case_date,1) = YEARWEEK(CURDATE(),1)`
+                );
+
+                break;
+
+            case "month":
+
+                conditions.push(sql`
+            MONTH(case_date) = MONTH(CURDATE())
+            AND YEAR(case_date) = YEAR(CURDATE())
+        `);
+
+                break;
+
+            case "year":
+
+                conditions.push(sql`
+            YEAR(case_date) = YEAR(CURDATE())
+        `);
+
+                break;
+
+            case "all":
+            default:
+                break;
+
+        }
+
+        // Hospital Filter
+        if (filters.hospital) {
+            conditions.push(
+                sql`hospital = ${filters.hospital}`
+            );
+        }
+
+        // Search Filter
+        if (filters.search) {
+
+            const keyword = `%${filters.search}%`;
+
+            conditions.push(sql`
             (
                 patient_name LIKE ${keyword}
                 OR case_number LIKE ${keyword}
                 OR hospital LIKE ${keyword}
             )
         `);
-    }
+        }
 
-    // Date Filter
-    if (filters.fromDate) {
-        conditions.push(
-            sql`case_date >= ${filters.fromDate}`
-        );
-    }
+        // Date Filter
+        if (filters.fromDate) {
+            conditions.push(
+                sql`case_date >= ${filters.fromDate}`
+            );
+        }
 
-    if (filters.toDate) {
-        conditions.push(
-            sql`case_date <= ${filters.toDate}`
-        );
-    }
+        if (filters.toDate) {
+            conditions.push(
+                sql`case_date <= ${filters.toDate}`
+            );
+        }
 
-    // Finance Type Filter
-    switch (filters.type) {
+        // Finance Type Filter
+        switch (filters.type) {
 
-        case "earnings":
-            conditions.push(sql`paid_by_hospital > 0`);
-            break;
+            case "earnings":
+                conditions.push(sql`paid_by_hospital > 0`);
+                break;
 
-        case "doctor":
-            conditions.push(sql`doctor_fee > 0`);
-            break;
+            case "doctor":
+                conditions.push(sql`doctor_fee > 0`);
+                break;
 
-        case "assistant":
-            conditions.push(sql`assistant_fee > 0`);
-            break;
+            case "assistant":
+                conditions.push(sql`assistant_fee > 0`);
+                break;
 
-        case "implant":
-            conditions.push(sql`implant_fee > 0`);
-            break;
+            case "implant":
+                conditions.push(sql`implant_fee > 0`);
+                break;
 
-        case "pending":
-            conditions.push(sql`
+            case "pending":
+                conditions.push(sql`
                 (
                     doctor_remarks != 'Paid'
                     OR assistant_remarks != 'Paid'
                     OR implant_received_from_hospital = 0
                 )
             `);
-            break;
+                break;
 
-        default:
-            conditions.push(sql`paid_by_hospital > 0`);
-    }
+            default:
+                conditions.push(sql`paid_by_hospital > 0`);
+        }
 
-    const page = Number(filters.page || 1);
-    const limit = Number(filters.limit || 10);
-    const offset = (page - 1) * limit;
+        const page = Number(filters.page || 1);
+        const limit = Number(filters.limit || 10);
+        const offset = (page - 1) * limit;
 
-    // Dynamic SELECT column
-    let financeColumn = sql``;
-    let message = "";
+        // Dynamic SELECT column
+        let financeColumn = sql``;
+        let message = "";
 
-    switch (filters.type) {
+        switch (filters.type) {
 
-        case "earnings":
+            case "earnings":
 
-            financeColumn = sql`
+                financeColumn = sql`
                 paid_by_hospital
             `;
 
-            message = "Earnings";
+                message = "Earnings";
 
-            break;
+                break;
 
-        case "doctor":
+            case "doctor":
 
-            financeColumn = sql`
+                financeColumn = sql`
                 doctor_fee
             `;
 
-            message = "Doctor Fee";
+                message = "Doctor Fee";
 
-            break;
+                break;
 
-        case "assistant":
+            case "assistant":
 
-            financeColumn = sql`
+                financeColumn = sql`
                 assistant_fee
             `;
 
-            message = "Assistant Fee";
+                message = "Assistant Fee";
 
-            break;
+                break;
 
-        case "implant":
+            case "implant":
 
-            financeColumn = sql`
+                financeColumn = sql`
                 implant_fee
             `;
 
-            message = "Implant Fee";
+                message = "Implant Fee";
 
-            break;
+                break;
 
-        case "pending":
+            case "pending":
 
-            financeColumn = sql`
+                financeColumn = sql`
                 (
                     total_amount
                     -
@@ -444,20 +485,20 @@ export class DashboardRepository {
                 ) AS pending_amount
             `;
 
-            message = "Pending";
+                message = "Pending";
 
-            break;
+                break;
 
-        default:
+            default:
 
-            financeColumn = sql`
+                financeColumn = sql`
                 paid_by_hospital
             `;
 
-            message = "Earnings";
-    }
+                message = "Earnings";
+        }
 
-    const result = await db.execute(sql`
+        const result = await db.execute(sql`
 
         SELECT
 
@@ -485,7 +526,7 @@ export class DashboardRepository {
 
     `);
 
-    const count = await db.execute(sql`
+        const count = await db.execute(sql`
 
         SELECT COUNT(*) AS total
 
@@ -495,25 +536,25 @@ export class DashboardRepository {
 
     `);
 
-    return {
+        return {
 
-        message,
+            message,
 
-        data: (result as any)[0],
+            data: (result as any)[0],
 
-        pagination: {
+            pagination: {
 
-            page,
+                page,
 
-            limit,
+                limit,
 
-            total: Number((count as any)[0][0].total)
+                total: Number((count as any)[0][0].total)
 
-        }
+            }
 
-    };
+        };
 
-}
+    }
 
     async getEarnings(
         doctorId: number,
@@ -649,7 +690,7 @@ export class DashboardRepository {
     }
 
 
-   
+
 
     async getExportData(
         doctorId: number,
