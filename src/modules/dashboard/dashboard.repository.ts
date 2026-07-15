@@ -295,6 +295,47 @@ export class DashboardRepository {
         sql`doctor_id = ${doctorId}`
     ];
 
+    switch (filters.filter) {
+
+    case "today":
+
+        conditions.push(
+            sql`DATE(case_date) = CURDATE()`
+        );
+
+        break;
+
+    case "week":
+
+        conditions.push(
+            sql`YEARWEEK(case_date,1) = YEARWEEK(CURDATE(),1)`
+        );
+
+        break;
+
+    case "month":
+
+        conditions.push(sql`
+            MONTH(case_date) = MONTH(CURDATE())
+            AND YEAR(case_date) = YEAR(CURDATE())
+        `);
+
+        break;
+
+    case "year":
+
+        conditions.push(sql`
+            YEAR(case_date) = YEAR(CURDATE())
+        `);
+
+        break;
+
+    case "all":
+    default:
+        break;
+
+}
+
     // Hospital Filter
     if (filters.hospital) {
         conditions.push(

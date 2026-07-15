@@ -72,6 +72,8 @@ export class DashboardController {
 
             type: context.query.type,
 
+            filter: context.query.filter || "all",
+
             page: context.query.page,
 
             limit: context.query.limit,
