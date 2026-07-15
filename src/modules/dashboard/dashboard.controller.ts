@@ -8,48 +8,48 @@ export class DashboardController {
      * Dashboard Summary
      * GET /dashboard/summary
      */
-   async getSummary(context:any){
+    async getSummary(context: any) {
 
-    const doctorId = context.store.user.id;
+        const doctorId = context.store.user.id;
 
-    console.log("Logged Doctor Id :", doctorId);
+        console.log("Logged Doctor Id :", doctorId);
 
-    const filter = context.query.filter || "all";
+        const filter = context.query.filter || "all";
 
-    return await this.service.getSummary(
-        doctorId,
-        filter
-    );
-}
+        return await this.service.getSummary(
+            doctorId,
+            filter
+        );
+    }
 
-/**
- * Dashboard Cards
- * GET /dashboard/cards
- */
-async getDashboardCards(context: any) {
+    /**
+     * Dashboard Cards
+     * GET /dashboard/cards
+     */
+    async getDashboardCards(context: any) {
 
-    const doctorId = context.store.user.id;
+        const doctorId = context.store.user.id;
 
-    return await this.service.getDashboardCards(
-        doctorId
-    );
+        return await this.service.getDashboardCards(
+            doctorId
+        );
 
-}
+    }
 
-/**
- * Weekly Revenue Chart
- * GET /dashboard/weekly-revenue
- */
-async getWeeklyRevenue(context: any) {
+    /**
+     * Weekly Revenue Chart
+     * GET /dashboard/weekly-revenue
+     */
+    async getWeeklyRevenue(context: any) {
 
-    const doctorId = context.store.user.id;
+        const doctorId = context.store.user.id;
 
-    console.log("Doctor ID =", doctorId);
+        console.log("Doctor ID =", doctorId);
 
-    return await this.service.getWeeklyRevenue(
-        doctorId
-    );
-}
+        return await this.service.getWeeklyRevenue(
+            doctorId
+        );
+    }
 
     /**
      * Hospital Dropdown
@@ -102,63 +102,91 @@ async getWeeklyRevenue(context: any) {
         );
     }
 
-  async exportPdf(context:any){
 
-    const doctorId = context.store.user.id;
+    async getFinanceDetails(context: any) {
 
-    const filters = {
+        const doctorId = context.store.user.id;
 
-        hospital: context.query.hospital,
+        const filters = {
 
-        fromDate: context.query.fromDate,
+            type: context.query.type,
 
-        toDate: context.query.toDate
+            page: context.query.page,
 
-    };
+            limit: context.query.limit,
 
-    const pdf = await this.service.exportPdf(
-        doctorId,
-        filters
-    );
+            hospital: context.query.hospital,
 
-    context.set.headers["Content-Type"] = "application/pdf";
+            search: context.query.search,
 
-    context.set.headers["Content-Disposition"] =
-        'attachment; filename="dashboard-report.pdf"';
+            fromDate: context.query.fromDate,
 
-    return pdf;
+            toDate: context.query.toDate,
+        };
 
-}
+        return await this.service.getFinanceDetails(
+            doctorId,
+            filters
+        );
+    }
 
-async exportExcel(context: any) {
+    async exportPdf(context: any) {
 
-    const doctorId = context.store.user.id;
+        const doctorId = context.store.user.id;
 
-    const filters = {
+        const filters = {
 
-        hospital: context.query.hospital,
+            hospital: context.query.hospital,
 
-        fromDate: context.query.fromDate,
+            fromDate: context.query.fromDate,
 
-        toDate: context.query.toDate
+            toDate: context.query.toDate
 
-    };
+        };
 
-    const excel = await this.service.exportExcel(
-        doctorId,
-        filters
-    );
+        const pdf = await this.service.exportPdf(
+            doctorId,
+            filters
+        );
 
-    context.set.headers["Content-Type"] =
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        context.set.headers["Content-Type"] = "application/pdf";
 
-    context.set.headers["Content-Disposition"] =
-        'attachment; filename="dashboard-report.xlsx"';
+        context.set.headers["Content-Disposition"] =
+            'attachment; filename="dashboard-report.pdf"';
 
-    context.set.headers["Content-Length"] =
-        excel.length.toString();
+        return pdf;
 
-    return excel;
-}
+    }
+
+    async exportExcel(context: any) {
+
+        const doctorId = context.store.user.id;
+
+        const filters = {
+
+            hospital: context.query.hospital,
+
+            fromDate: context.query.fromDate,
+
+            toDate: context.query.toDate
+
+        };
+
+        const excel = await this.service.exportExcel(
+            doctorId,
+            filters
+        );
+
+        context.set.headers["Content-Type"] =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+        context.set.headers["Content-Disposition"] =
+            'attachment; filename="dashboard-report.xlsx"';
+
+        context.set.headers["Content-Length"] =
+            excel.length.toString();
+
+        return excel;
+    }
 
 }

@@ -8,110 +8,123 @@ export const dashboardRoutes = new Elysia({
     prefix: "/dashboard",
 })
 
-.get(
-    "/summary",
-    async (context) => {
+    .get(
+        "/summary",
+        async (context) => {
 
-        const auth = await authMiddleware(context);
+            const auth = await authMiddleware(context);
 
-        if (auth) {
-            return auth;
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getSummary(context);
+        }
+    )
+
+    .get(
+        "/cards",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getDashboardCards(context);
+
+        }
+    )
+
+    .get(
+        "/weekly-revenue",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getWeeklyRevenue(context);
+
+        }
+    )
+
+    .get(
+        "/hospitals",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getHospitals(context);
+        }
+    )
+
+    .get(
+        "/export/pdf",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+
+                return auth;
+
+            }
+
+            return controller.exportPdf(context);
+
+        }
+    )
+
+    .get(
+        "/export/excel",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+
+                return auth;
+
+            }
+
+            return controller.exportExcel(context);
+
+        }
+    )
+
+    .get(
+        "/earnings",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getEarnings(context);
         }
 
-        return controller.getSummary(context);
-    }
-)
 
-.get(
-    "/cards",
-    async (context) => {
+    )
+    .get(
+        "/finance-details",
+        async (context) => {
 
-        const auth = await authMiddleware(context);
+            const auth = await authMiddleware(context);
 
-        if (auth) {
-            return auth;
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getFinanceDetails(context);
         }
-
-        return controller.getDashboardCards(context);
-
-    }
-)
-
-.get(
-    "/weekly-revenue",
-    async (context) => {
-
-        const auth = await authMiddleware(context);
-
-        if (auth) {
-            return auth;
-        }
-
-        return controller.getWeeklyRevenue(context);
-
-    }
-)
-
-.get(
-    "/hospitals",
-    async (context) => {
-
-        const auth = await authMiddleware(context);
-
-        if (auth) {
-            return auth;
-        }
-
-        return controller.getHospitals(context);
-    }
-)
-
-.get(
-"/export/pdf",
-async(context)=>{
-
-    const auth=await authMiddleware(context);
-
-    if(auth){
-
-        return auth;
-
-    }
-
-    return controller.exportPdf(context);
-
-}
-)
-
-.get(
-"/export/excel",
-async(context)=>{
-
-    const auth=await authMiddleware(context);
-
-    if(auth){
-
-        return auth;
-
-    }
-
-    return controller.exportExcel(context);
-
-}
-)
-
-.get(
-    "/earnings",
-    async (context) => {
-
-        const auth = await authMiddleware(context);
-
-        if (auth) {
-            return auth;
-        }
-
-        return controller.getEarnings(context);
-    }
-
-
-);
+    );

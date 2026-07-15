@@ -11,70 +11,70 @@ export class DashboardService {
      * Dashboard Summary
      */
     async getSummary(
-    doctorId: number,
-    filter: string
-) {
+        doctorId: number,
+        filter: string
+    ) {
 
-    const summary =
-        await this.repository.getSummary(
-            doctorId,
-            filter
-        );
+        const summary =
+            await this.repository.getSummary(
+                doctorId,
+                filter
+            );
 
-    return {
-        success: true,
-        message: "Dashboard summary fetched successfully.",
-        data: summary,
-    };
-}
+        return {
+            success: true,
+            message: "Dashboard summary fetched successfully.",
+            data: summary,
+        };
+    }
 
-/**
- * Dashboard Cards
- */
-async getDashboardCards(
-    doctorId: number
-) {
+    /**
+     * Dashboard Cards
+     */
+    async getDashboardCards(
+        doctorId: number
+    ) {
 
-    const cards =
-        await this.repository.getDashboardCards(
-            doctorId
-        );
+        const cards =
+            await this.repository.getDashboardCards(
+                doctorId
+            );
 
-    return {
+        return {
 
-        success: true,
+            success: true,
 
-        message: "Dashboard cards fetched successfully.",
+            message: "Dashboard cards fetched successfully.",
 
-        data: cards
+            data: cards
 
-    };
+        };
 
-}
+    }
 
-/**
- * Weekly Revenue Chart
- */
-async getWeeklyRevenue(
-    doctorId: number
-) {
+    /**
+     * Weekly Revenue Chart
+     */
+    async getWeeklyRevenue(
+        doctorId: number
+    ) {
 
-    const revenue =
-        await this.repository.getWeeklyRevenue(
-            doctorId
-        );
+        const revenue =
+            await this.repository.getWeeklyRevenue(
+                doctorId
+            );
 
-    return {
+        return {
 
-        success: true,
+            success: true,
 
-        message: "Weekly revenue fetched successfully.",
+            message: "Weekly revenue fetched successfully.",
 
-        data: revenue
+            data: revenue
 
-    };
+        };
 
-}
+    }
 
     /**
      * Hospital Filter List
@@ -113,37 +113,65 @@ async getWeeklyRevenue(
         };
     }
 
- async exportPdf(
-    doctorId: number,
-    filters: any
-) {
+    /**
+ * Finance Details
+ */
+    async getFinanceDetails(
+        doctorId: number,
+        filters: any
+    ) {
 
-    const data = await this.repository.getExportData(
-        doctorId,
-        filters
-    );
-    console.log(data);
+        const result =
+            await this.repository.getFinanceDetails(
+                doctorId,
+                filters
+            );
 
-    const doctor = await this.repository.getDoctorName(
-        doctorId
-    );
+        return {
 
-    return await DashboardPdf.generate(
-        data,
-        doctor?.fullName ?? "Doctor"
-    );
-}
-async exportExcel(
-    doctorId: number,
-    filters: any
-) {
+            success: true,
 
-    const data = await this.repository.getExportData(
-        doctorId,
-        filters
-    );
+            message: `${result.message} details fetched successfully.`,
 
-    return await DashboardExcel.generate(data);
+            data: result.data,
 
-}
+            pagination: result.pagination
+
+        };
+
+    }
+
+    async exportPdf(
+        doctorId: number,
+        filters: any
+    ) {
+
+        const data = await this.repository.getExportData(
+            doctorId,
+            filters
+        );
+        console.log(data);
+
+        const doctor = await this.repository.getDoctorName(
+            doctorId
+        );
+
+        return await DashboardPdf.generate(
+            data,
+            doctor?.fullName ?? "Doctor"
+        );
+    }
+    async exportExcel(
+        doctorId: number,
+        filters: any
+    ) {
+
+        const data = await this.repository.getExportData(
+            doctorId,
+            filters
+        );
+
+        return await DashboardExcel.generate(data);
+
+    }
 }
