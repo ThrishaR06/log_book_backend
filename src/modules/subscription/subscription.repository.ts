@@ -7,8 +7,8 @@ export class SubscriptionRepository {
     // ==========================
     async getPlans() {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             sp.id,
@@ -34,31 +34,31 @@ export class SubscriptionRepository {
 
         ORDER BY sp.amount ASC
         `
-    );
+        );
 
-    const plans = rows.map((plan: any) => ({
-    ...plan,
-    operational_record_limit:
-        plan.operational_record_limit === -1
-            ? "Unlimited"
-            : plan.operational_record_limit,
+        const plans = rows.map((plan: any) => ({
+            ...plan,
+            operational_record_limit:
+                plan.operational_record_limit === -1
+                    ? "Unlimited"
+                    : plan.operational_record_limit,
 
-    template_limit:
-        plan.template_limit === -1
-            ? "Unlimited"
-            : plan.template_limit,
-}));
+            template_limit:
+                plan.template_limit === -1
+                    ? "Unlimited"
+                    : plan.template_limit,
+        }));
 
-return plans;
-}
+        return plans;
+    }
 
     // ==========================
     // GET PLAN BY ID
     // ==========================
     async findPlan(planId: number) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             sp.*,
@@ -77,33 +77,33 @@ return plans;
 
         LIMIT 1
         `,
-        [planId]
-    );
+            [planId]
+        );
 
-    const plan = rows[0];
+        const plan = rows[0];
 
-if (!plan) {
-    return null;
-}
+        if (!plan) {
+            return null;
+        }
 
-return {
-    ...plan,
-    operational_record_limit:
-        plan.operational_record_limit === -1
-            ? "Unlimited"
-            : plan.operational_record_limit,
+        return {
+            ...plan,
+            operational_record_limit:
+                plan.operational_record_limit === -1
+                    ? "Unlimited"
+                    : plan.operational_record_limit,
 
-    template_limit:
-        plan.template_limit === -1
-            ? "Unlimited"
-            : plan.template_limit,
-};
-}
+            template_limit:
+                plan.template_limit === -1
+                    ? "Unlimited"
+                    : plan.template_limit,
+        };
+    }
 
     async findDoctor(doctorId: number) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
             id,
             full_name,
@@ -113,11 +113,11 @@ return {
         WHERE id = ?
         LIMIT 1
         `,
-        [doctorId]
-    );
+            [doctorId]
+        );
 
-    return rows[0] || null;
-}
+        return rows[0] || null;
+    }
 
     // ==========================
     // CREATE SUBSCRIPTION
@@ -178,8 +178,8 @@ return {
 
     async updatePaymentSuccess(data: any) {
 
-    await pool.query(
-        `
+        await pool.query(
+            `
         UPDATE doctor_subscriptions
         SET
             payment_status = ?,
@@ -190,43 +190,43 @@ return {
             updated_at = NOW()
         WHERE order_id = ?
         `,
-        [
-            data.paymentStatus,
-            data.transactionId,
-            data.paymentMethod,
-            data.startDate,
-            data.expiryDate,
-            data.orderId
-        ]
-    );
+            [
+                data.paymentStatus,
+                data.transactionId,
+                data.paymentMethod,
+                data.startDate,
+                data.expiryDate,
+                data.orderId
+            ]
+        );
 
-}
+    }
 
-async updatePaymentFailed(
-    orderId: string,
-    status: string
-) {
+    async updatePaymentFailed(
+        orderId: string,
+        status: string
+    ) {
 
-    await pool.query(
-        `
+        await pool.query(
+            `
         UPDATE doctor_subscriptions
         SET
             payment_status = ?,
             updated_at = NOW()
         WHERE order_id = ?
         `,
-        [
-            status,
-            orderId
-        ]
-    );
+            [
+                status,
+                orderId
+            ]
+        );
 
-}
+    }
 
-async findPlanBySubscription(orderId: string) {
+    async findPlanBySubscription(orderId: string) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             ds.*,
@@ -247,11 +247,11 @@ async findPlanBySubscription(orderId: string) {
 
         LIMIT 1
         `,
-        [orderId]
-    );
+            [orderId]
+        );
 
-    return rows[0] || null;
-}
+        return rows[0] || null;
+    }
 
     // ==========================
     // UPDATE PAYMENT SUCCESS
@@ -307,7 +307,7 @@ async findPlanBySubscription(orderId: string) {
     async saveWebhook(data: any) {
 
         await pool.query(
-`
+            `
 INSERT INTO payment_logs
 (
     order_id,
@@ -318,20 +318,20 @@ INSERT INTO payment_logs
 VALUES
 (?, ?, ?, ?)
 `,
-[
-    data.orderId,
-    data.paymentStatus,
-    JSON.stringify(data.requestData),
-    JSON.stringify(data.responseData)
-]
-);
-           
+            [
+                data.orderId,
+                data.paymentStatus,
+                JSON.stringify(data.requestData),
+                JSON.stringify(data.responseData)
+            ]
+        );
+
     }
 
-  async mySubscription(doctorId: number) {
+    async mySubscription(doctorId: number) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             ds.*,
@@ -363,23 +363,23 @@ VALUES
 
         LIMIT 1
         `,
-        [doctorId]
-    );
+            [doctorId]
+        );
 
-    return rows[0] || null;
+        return rows[0] || null;
 
-}
+    }
 
 
     // ==========================
     // MY SUBSCRIPTION
     // ==========================
     async getCurrentSubscription(
-    doctorId: number
-) {
+        doctorId: number
+    ) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             ds.*,
@@ -412,52 +412,85 @@ VALUES
 
         LIMIT 1
         `,
-        [doctorId]
-    );
+            [doctorId]
+        );
 
-    const subscription = rows[0];
+        const subscription = rows[0];
 
-if (!subscription) {
-    return null;
-}
+        if (!subscription) {
+            return null;
+        }
 
-return {
-    ...subscription,
-    operational_record_limit:
-        subscription.operational_record_limit === -1
-            ? "Unlimited"
-            : subscription.operational_record_limit,
+        return {
+            ...subscription,
+            operational_record_limit:
+                subscription.operational_record_limit === -1
+                    ? "Unlimited"
+                    : subscription.operational_record_limit,
 
-    template_limit:
-        subscription.template_limit === -1
-            ? "Unlimited"
-            : subscription.template_limit,
-};
-}
+            template_limit:
+                subscription.template_limit === -1
+                    ? "Unlimited"
+                    : subscription.template_limit,
+        };
+    }
 
-async getUsedStorage(doctorId: number) {
+    async getUsedStorage(doctorId: number) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
             COALESCE(SUM(size), 0) AS usedStorage
         FROM media
         WHERE uploaded_by = ?
         `,
-        [doctorId]
-    );
+            [doctorId]
+        );
 
-    return Number(rows[0].usedStorage);
-}
+        return Number(rows[0].usedStorage);
+    }
 
 
-// ==========================
-// GET ACTIVE SUBSCRIPTION LIMITS
-// ==========================
-async getActiveSubscription(doctorId: number) {
+    // ==========================
+    // GET USED OPERATIONAL RECORDS
+    // ==========================
+    async getUsedOperationalRecords(doctorId: number) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
+        SELECT COUNT(*) AS total
+        FROM operative_records
+        WHERE doctor_id = ?
+        `,
+            [doctorId]
+        );
+
+        return Number(rows[0].total);
+    }
+    // ==========================
+    // GET USED TEMPLATES
+    // ==========================
+    async getUsedTemplates(doctorId: number) {
+
+        const [rows]: any = await pool.query(
+            `
+        SELECT COUNT(*) AS total
+        FROM procedure_note_templates
+        WHERE doctor_id = ?
+        `,
+            [doctorId]
+        );
+
+        return Number(rows[0].total);
+    }
+
+    // ==========================
+    // GET ACTIVE SUBSCRIPTION LIMITS
+    // ==========================
+    async getActiveSubscription(doctorId: number) {
+
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             ds.doctor_id,
@@ -491,20 +524,20 @@ async getActiveSubscription(doctorId: number) {
 
         LIMIT 1
         `,
-        [doctorId]
-    );
+            [doctorId]
+        );
 
-    return rows[0] || null;
-}
+        return rows[0] || null;
+    }
     // ==========================
     // SUBSCRIPTION HISTORY
     // ==========================
     async getHistory(
-    doctorId: number
-) {
+        doctorId: number
+    ) {
 
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
 
             ds.*,
@@ -534,23 +567,23 @@ async getActiveSubscription(doctorId: number) {
 
         ORDER BY ds.id DESC
         `,
-        [doctorId]
-    );
+            [doctorId]
+        );
 
-const history = rows.map((item: any) => ({
-    ...item,
-    operational_record_limit:
-        item.operational_record_limit === -1
-            ? "Unlimited"
-            : item.operational_record_limit,
+        const history = rows.map((item: any) => ({
+            ...item,
+            operational_record_limit:
+                item.operational_record_limit === -1
+                    ? "Unlimited"
+                    : item.operational_record_limit,
 
-    template_limit:
-        item.template_limit === -1
-            ? "Unlimited"
-            : item.template_limit,
-}));
+            template_limit:
+                item.template_limit === -1
+                    ? "Unlimited"
+                    : item.template_limit,
+        }));
 
-return history;
-}
+        return history;
+    }
 
 }
