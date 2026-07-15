@@ -64,6 +64,33 @@ export class DashboardController {
         );
     }
 
+     async getFinanceDetails(context: any) {
+
+        const doctorId = context.store.user.id;
+
+        const filters = {
+
+            type: context.query.type,
+
+            page: context.query.page,
+
+            limit: context.query.limit,
+
+            hospital: context.query.hospital,
+
+            search: context.query.search,
+
+            fromDate: context.query.fromDate,
+
+            toDate: context.query.toDate,
+        };
+
+        return await this.service.getFinanceDetails(
+            doctorId,
+            filters
+        );
+    }
+
     /**
      * Earnings List
      * GET /dashboard/earnings
@@ -103,32 +130,7 @@ export class DashboardController {
     }
 
 
-    async getFinanceDetails(context: any) {
-
-        const doctorId = context.store.user.id;
-
-        const filters = {
-
-            type: context.query.type,
-
-            page: context.query.page,
-
-            limit: context.query.limit,
-
-            hospital: context.query.hospital,
-
-            search: context.query.search,
-
-            fromDate: context.query.fromDate,
-
-            toDate: context.query.toDate,
-        };
-
-        return await this.service.getFinanceDetails(
-            doctorId,
-            filters
-        );
-    }
+   
 
     async exportPdf(context: any) {
 

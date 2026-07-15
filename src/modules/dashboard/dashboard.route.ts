@@ -101,21 +101,6 @@ export const dashboardRoutes = new Elysia({
     )
 
     .get(
-        "/earnings",
-        async (context) => {
-
-            const auth = await authMiddleware(context);
-
-            if (auth) {
-                return auth;
-            }
-
-            return controller.getEarnings(context);
-        }
-
-
-    )
-    .get(
         "/finance-details",
         async (context) => {
 
@@ -126,5 +111,19 @@ export const dashboardRoutes = new Elysia({
             }
 
             return controller.getFinanceDetails(context);
+        }
+    )
+
+    .get(
+        "/earnings",
+        async (context) => {
+
+            const auth = await authMiddleware(context);
+
+            if (auth) {
+                return auth;
+            }
+
+            return controller.getEarnings(context);
         }
     );

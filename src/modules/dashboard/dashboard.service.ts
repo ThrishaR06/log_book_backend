@@ -91,29 +91,7 @@ export class DashboardService {
         };
     }
 
-    /**
-     * Earnings List
-     */
-    async getEarnings(
-        doctorId: number,
-        filters: any
-    ) {
-
-        const earnings =
-            await this.repository.getEarnings(
-                doctorId,
-                filters
-            );
-
-        return {
-            success: true,
-            message: "Dashboard earnings fetched successfully.",
-            data: earnings.data,
-            pagination: earnings.pagination,
-        };
-    }
-
-    /**
+        /**
  * Finance Details
  */
     async getFinanceDetails(
@@ -140,6 +118,30 @@ export class DashboardService {
         };
 
     }
+
+    /**
+     * Earnings List
+     */
+    async getEarnings(
+        doctorId: number,
+        filters: any
+    ) {
+
+        const earnings =
+            await this.repository.getEarnings(
+                doctorId,
+                filters
+            );
+
+        return {
+            success: true,
+            message: "Dashboard earnings fetched successfully.",
+            data: earnings.data,
+            pagination: earnings.pagination,
+        };
+    }
+
+
 
     async exportPdf(
         doctorId: number,
