@@ -102,4 +102,15 @@ export const app = new Elysia()
     .use(surgeryStaffTypeRoutes)
     .use(clinicalPresetsRoutes)
     
-    .use(surgeryCaseRoutes);
+    .use(surgeryCaseRoutes)
+    .onError(({ error, set }) => {
+
+    set.status = 400;
+
+    const err = error as Error;
+
+    return {
+        success: false,
+        message: err.message || "Something went wrong."
+    };
+});

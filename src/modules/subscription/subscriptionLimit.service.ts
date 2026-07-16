@@ -67,45 +67,63 @@ export class SubscriptionLimitService {
         return true;
     }
 
-   // ==========================
-// VALIDATE STORAGE LIMIT
-// ==========================
-static async validateStorageLimit(
-    doctorId: number,
-    newFileSize: number
-) {
+    // ==========================
+    // VALIDATE STORAGE LIMIT
+    // ==========================
+    static async validateStorageLimit(
+        doctorId: number,
+        newFileSize: number
+    ) {
 
-    const subscription =
-        await this.getDoctorSubscription(doctorId);
+        const subscription =
+            await this.getDoctorSubscription(doctorId);
 
-    // Unlimited storage
-    if (subscription.storage_limit === "Unlimited") {
+        // Unlimited storage
+        if (subscription.storage_limit === "Unlimited") {
+            return true;
+        }
+
+        // Get already used storage
+        const usedStorage =
+            await this.repository.getUsedStorage(doctorId);
+
+        // Convert storage limit to bytes
+        // ==========================
+
+        const match = subscription.storage_limit
+            .trim()
+            .match(/^(\d+)\s*(KB|MB|GB)$/i);
+
+        if (!match) {
+            throw new Error("Invalid storage limit.");
+        }
+
+        const limit = Number(match[1]);
+        const unit = match[2].toUpperCase();
+
+        let limitInBytes = limit;
+
+        switch (unit) {
+
+            case "KB":
+                limitInBytes *= 1024;
+                break;
+
+            case "MB":
+                limitInBytes *= 1024 * 1024;
+                break;
+
+            case "GB":
+                limitInBytes *= 1024 * 1024 * 1024;
+                break;
+        }
+
+        if (Number(usedStorage) + newFileSize > limitInBytes) {
+            throw new Error(
+                "Storage limit exceeded. Please upgrade your subscription."
+            );
+        }
+
         return true;
     }
-
-    // Get already used storage
-    const usedStorage =
-        await this.repository.getUsedStorage(doctorId);
-
-    // Convert storage limit to bytes
-    const [limit, unit] = subscription.storage_limit.split(" ");
-
-    let limitInBytes = Number(limit);
-
-    if (unit === "KB") {
-        limitInBytes *= 1024;
-    } else if (unit === "MB") {
-        limitInBytes *= 1024 * 1024;
-    } else if (unit === "GB") {
-        limitInBytes *= 1024 * 1024 * 1024;
-    }
-
-    if (Number(usedStorage) + newFileSize > limitInBytes) {
-        throw new Error(
-            "Storage limit exceeded. Please upgrade your subscription."
-        );
-    }
-
-    return true;
-}
 }

@@ -7,19 +7,19 @@ export class SurgeryCaseController {
   private service = new SurgeryCaseService();
 
   private async prepareBody(body: any, doctor: any) {
-   type UploadedImage = {
-    fileName: string;
-    mimeType: string;
-    key: string;
-    url: string;
-    size: number;
-};
+    type UploadedImage = {
+      fileName: string;
+      mimeType: string;
+      key: string;
+      url: string;
+      size: number;
+    };
 
-const preOpImages: UploadedImage[] = [];
+    const preOpImages: UploadedImage[] = [];
 
-const intraOpImages: UploadedImage[] = [];
+    const intraOpImages: UploadedImage[] = [];
 
-const postOpImages: UploadedImage[] = [];
+    const postOpImages: UploadedImage[] = [];
 
     if (body.preOpImages) {
       const files = Array.isArray(body.preOpImages)
@@ -28,31 +28,31 @@ const postOpImages: UploadedImage[] = [];
 
       for (const file of files) {
 
-    console.log("FILE =", file);
+        console.log("FILE =", file);
 
-    console.log("FILE NAME =", file?.name);
+        console.log("FILE NAME =", file?.name);
 
-    // Existing image URL
-if (typeof file === "string") {
-    preOpImages.push(file as any);
-    continue;
-}
+        // Existing image URL
+        if (typeof file === "string") {
+          preOpImages.push(file as any);
+          continue;
+        }
 
-// New uploaded file
-const uploaded = await uploadToS3(
-    file,
-    "pre-op",
-    doctor.full_name
-);
+        // New uploaded file
+        const uploaded = await uploadToS3(
+          file,
+          "pre-op",
+          doctor.full_name
+        );
 
-preOpImages.push({
-    fileName: file.name,
-    mimeType: file.type,
-    key: uploaded.key,
-    url: uploaded.url,
-    size: uploaded.size,
-});
-}
+        preOpImages.push({
+          fileName: file.name,
+          mimeType: file.type,
+          key: uploaded.key,
+          url: uploaded.url,
+          size: uploaded.size,
+        });
+      }
     }
 
     if (body.intraOpImages) {
@@ -60,31 +60,31 @@ preOpImages.push({
         ? body.intraOpImages
         : [body.intraOpImages];
 
-     for (const file of files) {
+      for (const file of files) {
 
-    console.log("FILE =", file);
+        console.log("FILE =", file);
 
-    console.log("FILE NAME =", file?.name);
+        console.log("FILE NAME =", file?.name);
 
-    if (typeof file === "string") {
-    intraOpImages.push(file as any);
-    continue;
-}
+        if (typeof file === "string") {
+          intraOpImages.push(file as any);
+          continue;
+        }
 
-const uploaded = await uploadToS3(
-    file,
-    "intra-op",
-    doctor.full_name
-);
+        const uploaded = await uploadToS3(
+          file,
+          "intra-op",
+          doctor.full_name
+        );
 
-intraOpImages.push({
-    fileName: file.name,
-    mimeType: file.type,
-    key: uploaded.key,
-    url: uploaded.url,
-    size: uploaded.size,
-});
-}
+        intraOpImages.push({
+          fileName: file.name,
+          mimeType: file.type,
+          key: uploaded.key,
+          url: uploaded.url,
+          size: uploaded.size,
+        });
+      }
     }
 
     if (body.postOpImages) {
@@ -94,29 +94,29 @@ intraOpImages.push({
 
       for (const file of files) {
 
-    console.log("FILE =", file);
+        console.log("FILE =", file);
 
-    console.log("FILE NAME =", file?.name);
+        console.log("FILE NAME =", file?.name);
 
-   if (typeof file === "string") {
-    postOpImages.push(file as any);
-    continue;
-}
+        if (typeof file === "string") {
+          postOpImages.push(file as any);
+          continue;
+        }
 
-const uploaded = await uploadToS3(
-    file,
-    "post-op",
-    doctor.full_name
-);
+        const uploaded = await uploadToS3(
+          file,
+          "post-op",
+          doctor.full_name
+        );
 
-postOpImages.push({
-    fileName: file.name,
-    mimeType: file.type,
-    key: uploaded.key,
-    url: uploaded.url,
-    size: uploaded.size,
-});
-}
+        postOpImages.push({
+          fileName: file.name,
+          mimeType: file.type,
+          key: uploaded.key,
+          url: uploaded.url,
+          size: uploaded.size,
+        });
+      }
     }
 
     body.preOpImages = preOpImages;
@@ -192,214 +192,214 @@ postOpImages.push({
 
   private async prepareUpdateBody(body: any, doctor: any) {
 
-type UploadedImage = {
-    fileName: string;
-    mimeType: string;
-    key: string;
-    url: string;
-    size: number;
-};
+    type UploadedImage = {
+      fileName: string;
+      mimeType: string;
+      key: string;
+      url: string;
+      size: number;
+    };
 
-const preOpImages: UploadedImage[] = [];
-const intraOpImages: UploadedImage[] = [];
-const postOpImages: UploadedImage[] = [];
+    const preOpImages: UploadedImage[] = [];
+    const intraOpImages: UploadedImage[] = [];
+    const postOpImages: UploadedImage[] = [];
 
-  if (body.preOpImages) {
-    const files = Array.isArray(body.preOpImages)
-      ? body.preOpImages
-      : [body.preOpImages];
+    if (body.preOpImages) {
+      const files = Array.isArray(body.preOpImages)
+        ? body.preOpImages
+        : [body.preOpImages];
 
-    for (const file of files) {
+      for (const file of files) {
 
-    // Existing media id
-    if (typeof file === "number") {
-        preOpImages.push(file as any);
-        continue;
+        // Existing media id
+        if (typeof file === "number") {
+          preOpImages.push(file as any);
+          continue;
+        }
+
+        // Existing media object
+        if (
+          typeof file === "object" &&
+          file !== null &&
+          "id" in file &&
+          typeof file.arrayBuffer !== "function"
+        ) {
+          preOpImages.push(file.id as any);
+          continue;
+        }
+
+        // New uploaded file
+        const uploaded = await uploadToS3(
+          file,
+          "pre-op",
+          doctor.full_name
+        );
+
+        preOpImages.push({
+          fileName: file.name,
+          mimeType: file.type,
+          key: uploaded.key,
+          url: uploaded.url,
+          size: uploaded.size,
+        });
+      }
+
+      body.preOpImages = preOpImages;
     }
 
-    // Existing media object
-    if (
-        typeof file === "object" &&
-        file !== null &&
-        "id" in file &&
-        typeof file.arrayBuffer !== "function"
-    ) {
-        preOpImages.push(file.id as any);
-        continue;
+    if (body.intraOpImages) {
+      const files = Array.isArray(body.intraOpImages)
+        ? body.intraOpImages
+        : [body.intraOpImages];
+
+      for (const file of files) {
+
+        if (typeof file === "number") {
+          intraOpImages.push(file as any);
+          continue;
+        }
+
+        if (
+          typeof file === "object" &&
+          file !== null &&
+          "id" in file &&
+          typeof file.arrayBuffer !== "function"
+        ) {
+          intraOpImages.push(file.id as any);
+          continue;
+        }
+
+        const uploaded = await uploadToS3(
+          file,
+          "intra-op",
+          doctor.full_name
+        );
+
+        intraOpImages.push({
+          fileName: file.name,
+          mimeType: file.type,
+          key: uploaded.key,
+          url: uploaded.url,
+          size: uploaded.size,
+        });
+      }
+      body.intraOpImages = intraOpImages;
     }
 
-    // New uploaded file
-    const uploaded = await uploadToS3(
-        file,
-        "pre-op",
-        doctor.full_name
-    );
+    if (body.postOpImages) {
+      const files = Array.isArray(body.postOpImages)
+        ? body.postOpImages
+        : [body.postOpImages];
 
-    preOpImages.push({
-    fileName: file.name,
-    mimeType: file.type,
-    key: uploaded.key,
-    url: uploaded.url,
-    size: uploaded.size,
-});
-}
+      for (const file of files) {
 
-    body.preOpImages = preOpImages;
-  }
+        if (typeof file === "number") {
+          postOpImages.push(file as any);
+          continue;
+        }
 
-  if (body.intraOpImages) {
-    const files = Array.isArray(body.intraOpImages)
-      ? body.intraOpImages
-      : [body.intraOpImages];
+        if (
+          typeof file === "object" &&
+          file !== null &&
+          "id" in file &&
+          typeof file.arrayBuffer !== "function"
+        ) {
+          postOpImages.push(file.id as any);
+          continue;
+        }
 
-    for (const file of files) {
+        const uploaded = await uploadToS3(
+          file,
+          "post-op",
+          doctor.full_name
+        );
 
-    if (typeof file === "number") {
-        intraOpImages.push(file as any);
-        continue;
+        postOpImages.push({
+          fileName: file.name,
+          mimeType: file.type,
+          key: uploaded.key,
+          url: uploaded.url,
+          size: uploaded.size,
+        });
+      }
+
+      body.postOpImages = postOpImages;
     }
 
-    if (
-        typeof file === "object" &&
-        file !== null &&
-        "id" in file &&
-        typeof file.arrayBuffer !== "function"
-    ) {
-        intraOpImages.push(file.id as any);
-        continue;
+    if (body.age !== undefined) {
+      body.age = Number(body.age);
     }
 
-    const uploaded = await uploadToS3(
-        file,
-        "intra-op",
-        doctor.full_name
-    );
-
-    intraOpImages.push({
-    fileName: file.name,
-    mimeType: file.type,
-    key: uploaded.key,
-    url: uploaded.url,
-    size: uploaded.size,
-});
-}
-    body.intraOpImages = intraOpImages;
-  }
-
-  if (body.postOpImages) {
-    const files = Array.isArray(body.postOpImages)
-      ? body.postOpImages
-      : [body.postOpImages];
-
-    for (const file of files) {
-
-    if (typeof file === "number") {
-        postOpImages.push(file as any);
-        continue;
+    if (body.anaesthesiaId !== undefined) {
+      body.anaesthesiaId = Number(body.anaesthesiaId);
     }
 
-    if (
-        typeof file === "object" &&
-        file !== null &&
-        "id" in file &&
-        typeof file.arrayBuffer !== "function"
-    ) {
-        postOpImages.push(file.id as any);
-        continue;
+    if (body.positionId !== undefined) {
+      body.positionId = Number(body.positionId);
     }
 
-    const uploaded = await uploadToS3(
-        file,
-        "post-op",
-        doctor.full_name
-    );
+    if (body.incisionId !== undefined) {
+      body.incisionId = Number(body.incisionId);
+    }
 
-   postOpImages.push({
-    fileName: file.name,
-    mimeType: file.type,
-    key: uploaded.key,
-    url: uploaded.url,
-    size: uploaded.size,
-});
-}
+    if (body.doctorFee !== undefined) {
+      body.doctorFee = Number(body.doctorFee);
+    }
 
-    body.postOpImages = postOpImages;
+    if (body.assistantFee !== undefined) {
+      body.assistantFee = Number(body.assistantFee);
+    }
+
+    if (body.implantFee !== undefined) {
+      body.implantFee = Number(body.implantFee);
+    }
+
+    if (body.totalAmount !== undefined) {
+      body.totalAmount = Number(body.totalAmount);
+    }
+
+    if (body.implantPaidByHospital !== undefined) {
+      body.implantPaidByHospital =
+        body.implantPaidByHospital === "true" ||
+        body.implantPaidByHospital === true;
+    }
+
+    if (body.implantReceivedFromHospital !== undefined) {
+      body.implantReceivedFromHospital =
+        body.implantReceivedFromHospital === "true" ||
+        body.implantReceivedFromHospital === true;
+    }
+
+    if (body.staffIds !== undefined) {
+      body.staffIds =
+        typeof body.staffIds === "string"
+          ? JSON.parse(body.staffIds)
+          : body.staffIds;
+    }
+
+    if (body.ivFluidIds !== undefined) {
+      body.ivFluidIds =
+        typeof body.ivFluidIds === "string"
+          ? JSON.parse(body.ivFluidIds)
+          : body.ivFluidIds;
+    }
+
+    if (body.medicationIds !== undefined) {
+      body.medicationIds =
+        typeof body.medicationIds === "string"
+          ? JSON.parse(body.medicationIds)
+          : body.medicationIds;
+    }
+
+    if (body.surgeryProcedure !== undefined) {
+      body.surgeryProcedure =
+        typeof body.surgeryProcedure === "string"
+          ? JSON.parse(body.surgeryProcedure)
+          : body.surgeryProcedure;
+    }
+
+    return body;
   }
-
-  if (body.age !== undefined) {
-    body.age = Number(body.age);
-  }
-
-  if (body.anaesthesiaId !== undefined) {
-    body.anaesthesiaId = Number(body.anaesthesiaId);
-  }
-
-  if (body.positionId !== undefined) {
-    body.positionId = Number(body.positionId);
-  }
-
-  if (body.incisionId !== undefined) {
-    body.incisionId = Number(body.incisionId);
-  }
-
-  if (body.doctorFee !== undefined) {
-    body.doctorFee = Number(body.doctorFee);
-  }
-
-  if (body.assistantFee !== undefined) {
-    body.assistantFee = Number(body.assistantFee);
-  }
-
-  if (body.implantFee !== undefined) {
-    body.implantFee = Number(body.implantFee);
-  }
-
-  if (body.totalAmount !== undefined) {
-    body.totalAmount = Number(body.totalAmount);
-  }
-
-  if (body.implantPaidByHospital !== undefined) {
-    body.implantPaidByHospital =
-      body.implantPaidByHospital === "true" ||
-      body.implantPaidByHospital === true;
-  }
-
-  if (body.implantReceivedFromHospital !== undefined) {
-    body.implantReceivedFromHospital =
-      body.implantReceivedFromHospital === "true" ||
-      body.implantReceivedFromHospital === true;
-  }
-
-  if (body.staffIds !== undefined) {
-    body.staffIds =
-      typeof body.staffIds === "string"
-        ? JSON.parse(body.staffIds)
-        : body.staffIds;
-  }
-
-  if (body.ivFluidIds !== undefined) {
-    body.ivFluidIds =
-      typeof body.ivFluidIds === "string"
-        ? JSON.parse(body.ivFluidIds)
-        : body.ivFluidIds;
-  }
-
-  if (body.medicationIds !== undefined) {
-    body.medicationIds =
-      typeof body.medicationIds === "string"
-        ? JSON.parse(body.medicationIds)
-        : body.medicationIds;
-  }
-
-  if (body.surgeryProcedure !== undefined) {
-    body.surgeryProcedure =
-      typeof body.surgeryProcedure === "string"
-        ? JSON.parse(body.surgeryProcedure)
-        : body.surgeryProcedure;
-  }
-
-  return body;
-}
   async create(context: any) {
     try {
 
@@ -436,16 +436,16 @@ const postOpImages: UploadedImage[] = [];
 
       const data = await this.service.create(body);
 
-return data;
+      return data;
 
     } catch (error: any) {
 
-    return {
+      return {
         success: false,
         message: error.message || "Something went wrong."
-    };
+      };
 
-}
+    }
   }
 
   async getById(params: any) {
@@ -471,45 +471,45 @@ return data;
     }
   }
 
- async getAll(context: any) {
-  try {
+  async getAll(context: any) {
+    try {
 
-    const doctorId = context.store.user.id;
+      const doctorId = context.store.user.id;
 
-    const page = Number(context.query.page || 1);
+      const page = Number(context.query.page || 1);
 
-    const limit = Number(context.query.limit || 10);
+      const limit = Number(context.query.limit || 10);
 
-    const filters = {
+      const filters = {
 
-      patientName: context.query.patientName,
+        patientName: context.query.patientName,
 
-      hospital: context.query.hospital,
+        hospital: context.query.hospital,
 
-      caseNumber: context.query.caseNumber,
+        caseNumber: context.query.caseNumber,
 
-      caseDate: context.query.caseDate,
+        caseDate: context.query.caseDate,
 
-    };
+      };
 
-    return this.service.getAllByDoctorId(
-      doctorId,
-      page,
-      limit,
-      filters
-    );
+      return this.service.getAllByDoctorId(
+        doctorId,
+        page,
+        limit,
+        filters
+      );
 
-  } catch (error: any) {
+    } catch (error: any) {
 
-    return {
-      success: false,
-      message:
-        error.message ||
-        "Something went wrong while fetching surgery cases.",
-    };
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while fetching surgery cases.",
+      };
 
+    }
   }
-}
 
   async update(context: any) {
     try {
@@ -517,8 +517,8 @@ return data;
       const id = Number(context.params.id);
 
       console.log("========== UPDATE ==========");
-console.log("Params :", context.params);
-console.log("Update Id :", id);
+      console.log("Params :", context.params);
+      console.log("Update Id :", id);
 
       const loggedInDoctorId = context.store.user.id;
 
@@ -533,25 +533,27 @@ console.log("Update Id :", id);
 
       const body = context.body;
       console.log("============== BODY ==============");
-console.dir(body, { depth: null });
-console.log("==================================");
+      console.dir(body, { depth: null });
+      console.log("==================================");
 
       await this.prepareUpdateBody(body, doctor);
 
-      return this.service.update(id, body);
+      return await this.service.update(id, body);
 
     } catch (error: any) {
 
-    console.error("UPDATE ERROR");
-    console.error(error);
+      console.error("UPDATE ERROR");
+      console.error(error);
 
-    return {
+      context.set.status = 400;
+
+      return {
         success: false,
-        message: error.message,
-        stack: error.stack,
-    };
-
-}
+        message: error instanceof Error
+          ? error.message
+          : "Something went wrong."
+      };
+    }
   }
 
   async delete(context: any) {
@@ -583,73 +585,73 @@ console.log("==================================");
 
     }
   }
- async downloadAllPdf(context: any) {
+  async downloadAllPdf(context: any) {
 
     try {
 
-        const doctorId = context.store.user.id;
+      const doctorId = context.store.user.id;
 
-const surgeries = await this.service.getAllPdfData(doctorId);
+      const surgeries = await this.service.getAllPdfData(doctorId);
 
-const pdf = await generateSurgeryPdf(surgeries);
+      const pdf = await generateSurgeryPdf(surgeries);
 
-const body = new Uint8Array(pdf);
+      const body = new Uint8Array(pdf);
 
-return new Response(body, {
-  headers: {
-    "Content-Type": "application/pdf",
-    "Content-Disposition": 'attachment; filename="record.pdf"',
-  },
-});
+      return new Response(body, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="record.pdf"',
+        },
+      });
 
     } catch (error: any) {
 
-        return {
-            success: false,
-            message:
-                error.message ||
-                "Failed to generate PDF.",
-        };
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Failed to generate PDF.",
+      };
 
     }
 
-}
+  }
 
-async downloadPdf(context: any) {
+  async downloadPdf(context: any) {
     try {
 
-        const id = Number(context.params.id);
+      const id = Number(context.params.id);
 
-        const loggedInDoctorId = context.store.user.id;
+      const loggedInDoctorId = context.store.user.id;
 
-        const doctor =
-            await this.service.getDoctorInfoByCaseId(id);
+      const doctor =
+        await this.service.getDoctorInfoByCaseId(id);
 
-        if (doctor.id !== loggedInDoctorId) {
-            throw new Error(
-                "You are not allowed to download this surgery case."
-            );
-        }
+      if (doctor.id !== loggedInDoctorId) {
+        throw new Error(
+          "You are not allowed to download this surgery case."
+        );
+      }
 
       const surgery = await this.service.getPdfData(id);
 
-const pdf = await generateSurgeryPdf(surgery);
+      const pdf = await generateSurgeryPdf(surgery);
 
-context.set.headers["Content-Type"] = "application/pdf";
-context.set.headers["Content-Disposition"] =
-    `attachment; filename="surgery-case-${id}.pdf"`;
+      context.set.headers["Content-Type"] = "application/pdf";
+      context.set.headers["Content-Disposition"] =
+        `attachment; filename="surgery-case-${id}.pdf"`;
 
-return pdf;
+      return pdf;
     } catch (error: any) {
 
-        return {
-            success: false,
-            message:
-                error.message ||
-                "Failed to generate PDF.",
-        };
+      return {
+        success: false,
+        message:
+          error.message ||
+          "Failed to generate PDF.",
+      };
 
     }
-}
+  }
 
 }
