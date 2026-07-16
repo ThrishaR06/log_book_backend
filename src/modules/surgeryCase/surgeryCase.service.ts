@@ -707,6 +707,69 @@ if (data.postOpImages !== undefined) {
     console.log("UPDATE DATA");
 console.dir(updateData, { depth: null });
 
+  // ==========================
+// Validate Storage Limit
+// ==========================
+
+// ======================================================
+// STORAGE VALIDATION (ONLY FOR NEWLY UPLOADED IMAGES)
+// ======================================================
+
+const newImages = [
+    ...(Array.isArray(data.preOpImages)
+        ? data.preOpImages.filter(
+              (img: any) =>
+                  typeof img === "object" &&
+                  img !== null &&
+                  img.size
+          )
+        : []),
+
+    ...(Array.isArray(data.intraOpImages)
+        ? data.intraOpImages.filter(
+              (img: any) =>
+                  typeof img === "object" &&
+                  img !== null &&
+                  img.size
+          )
+        : []),
+
+    ...(Array.isArray(data.postOpImages)
+        ? data.postOpImages.filter(
+              (img: any) =>
+                  typeof img === "object" &&
+                  img !== null &&
+                  img.size
+          )
+        : []),
+];
+
+// Total size of newly uploaded images
+const totalNewFileSize = newImages.reduce(
+    (total: number, image: any) => total + Number(image.size || 0),
+    0
+);
+
+console.log("====================================");
+console.log("NEW IMAGES :", newImages.length);
+console.log("NEW FILE SIZE :", totalNewFileSize, "bytes");
+console.log(
+    "NEW FILE SIZE :",
+    (totalNewFileSize / (1024 * 1024)).toFixed(2),
+    "MB"
+);
+console.log("====================================");
+
+// Validate only when a new file is uploaded
+if (totalNewFileSize > 0) {
+
+    await SubscriptionLimitService.validateStorageLimit(
+        existing.doctorId,
+        totalNewFileSize
+    );
+
+}
+
     const updatedRecord = await this.repository.update(
     id,
     updateData

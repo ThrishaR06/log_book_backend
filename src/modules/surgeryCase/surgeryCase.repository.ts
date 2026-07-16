@@ -9,11 +9,11 @@ export class SurgeryCaseRepository {
 
     private mediaRepository = new MediaRepository();
 
-  async create(data: any) {
+    async create(data: any) {
 
-    const [result]: any =
-      await pool.query(
-        `
+        const [result]: any =
+            await pool.query(
+                `
         INSERT INTO operative_records
 (
     doctor_id,
@@ -88,223 +88,97 @@ export class SurgeryCaseRepository {
           ?
         )
         `,
-        [
-data.doctorId,
+                [
+                    data.doctorId,
 
-          data.anaesthesiaId ?? null,
-          data.positionId ?? null,
-          data.incisionId ?? null,
+                    data.anaesthesiaId ?? null,
+                    data.positionId ?? null,
+                    data.incisionId ?? null,
 
-          JSON.stringify(
-            data.staffIds ?? []
-          ),
+                    JSON.stringify(
+                        data.staffIds ?? []
+                    ),
 
-          JSON.stringify(
-            data.surgeryProcedure ?? {}
-          ),
+                    JSON.stringify(
+                        data.surgeryProcedure ?? {}
+                    ),
 
-          data.diagnosis ?? null,
-          data.operativeFindings ?? null,
-          data.procedureDetails ?? null,
+                    data.diagnosis ?? null,
+                    data.operativeFindings ?? null,
+                    data.procedureDetails ?? null,
 
-          data.bloodLoss ?? null,
-          data.specimens ?? null,
-          data.additionalNotes ?? null,
+                    data.bloodLoss ?? null,
+                    data.specimens ?? null,
+                    data.additionalNotes ?? null,
 
-          JSON.stringify(
-            data.ivFluidIds ?? []
-          ),
+                    JSON.stringify(
+                        data.ivFluidIds ?? []
+                    ),
 
-          JSON.stringify(
-            data.medicationIds ?? []
-          ),
+                    JSON.stringify(
+                        data.medicationIds ?? []
+                    ),
 
-          data.monitoring ?? null,
-          data.diet ?? null,
+                    data.monitoring ?? null,
+                    data.diet ?? null,
 
-          data.drainManagement ?? null,
-          data.woundCare ?? null,
+                    data.drainManagement ?? null,
+                    data.woundCare ?? null,
 
-          data.specialInstructions ?? null,
-          data.followUp ?? null,
-          data.followUpImaging ?? null,
+                    data.specialInstructions ?? null,
+                    data.followUp ?? null,
+                    data.followUpImaging ?? null,
 
-          JSON.stringify(
-            data.preOpImages ?? []
-          ),
+                    JSON.stringify(
+                        data.preOpImages ?? []
+                    ),
 
-          JSON.stringify(
-            data.intraOpImages ?? []
-          ),
+                    JSON.stringify(
+                        data.intraOpImages ?? []
+                    ),
 
-          JSON.stringify(
-            data.postOpImages ?? []
-          ),
+                    JSON.stringify(
+                        data.postOpImages ?? []
+                    ),
 
-          data.doctorFee ?? 0,
-          data.doctorPaymentMode ?? null,
-          data.doctorRemarks ?? null,
+                    data.doctorFee ?? 0,
+                    data.doctorPaymentMode ?? null,
+                    data.doctorRemarks ?? null,
 
-          data.assistantFee ?? 0,
-          data.assistantPaymentMode ?? null,
-          data.assistantRemarks ?? null,
+                    data.assistantFee ?? 0,
+                    data.assistantPaymentMode ?? null,
+                    data.assistantRemarks ?? null,
 
-          data.implantFee ?? 0,
-          data.implantPaymentMode ?? null,
-          data.implantDetails ?? null,
+                    data.implantFee ?? 0,
+                    data.implantPaymentMode ?? null,
+                    data.implantDetails ?? null,
 
-          data.implantPaidByHospital ?? false,
-          data.paidByHospital ?? 0,
-          data.implantReceivedFromHospital ?? false,
+                    data.implantPaidByHospital ?? false,
+                    data.paidByHospital ?? 0,
+                    data.implantReceivedFromHospital ?? false,
 
-          data.totalAmount ?? 0
-        ]
-      );
+                    data.totalAmount ?? 0
+                ]
+            );
 
-    return result.insertId;
-  }
-  
+        return result.insertId;
+    }
 
-async findById(id: number) {
 
-  const [rows]: any = await pool.query(
-    `
+    async findById(id: number) {
+
+        const [rows]: any = await pool.query(
+            `
     SELECT *
     FROM operative_records
     WHERE surgery_id = ?
     `,
-    [id]
-  );
+            [id]
+        );
 
-  const row = rows[0];
+        const row = rows[0];
 
-  if (!row) return null;
-
-  row.staff_ids =
-    typeof row.staff_ids === "string"
-      ? JSON.parse(row.staff_ids)
-      : row.staff_ids;
-
-  row.surgery_procedure =
-    typeof row.surgery_procedure === "string"
-      ? JSON.parse(row.surgery_procedure)
-      : row.surgery_procedure;
-
-  row.iv_fluid_ids =
-    typeof row.iv_fluid_ids === "string"
-      ? JSON.parse(row.iv_fluid_ids)
-      : row.iv_fluid_ids;
-
-  row.medication_ids =
-    typeof row.medication_ids === "string"
-      ? JSON.parse(row.medication_ids)
-      : row.medication_ids;
-
-  row.pre_op_images =
-    typeof row.pre_op_images === "string"
-      ? JSON.parse(row.pre_op_images)
-      : row.pre_op_images;
-
-  row.intra_op_images =
-    typeof row.intra_op_images === "string"
-      ? JSON.parse(row.intra_op_images)
-      : row.intra_op_images;
-
-  row.post_op_images =
-    typeof row.post_op_images === "string"
-      ? JSON.parse(row.post_op_images)
-      : row.post_op_images;
-
-  return row;
-}
-
-async getAllByDoctorId(
-    doctorId: number,
-    page: number,
-    limit: number,
-    filters: any
-) {
-
-    const offset = (page - 1) * limit;
-
-    let query = `
-        SELECT *
-        FROM operative_records
-        WHERE doctor_id = ?
-    `;
-
-    const values: any[] = [doctorId];
-
-    if (filters.patientName) {
-        query += ` AND patient_name LIKE ?`;
-        values.push(`%${filters.patientName}%`);
-    }
-
-    if (filters.hospital) {
-        query += ` AND hospital LIKE ?`;
-        values.push(`%${filters.hospital}%`);
-    }
-
-    if (filters.caseNumber) {
-        query += ` AND case_number LIKE ?`;
-        values.push(`%${filters.caseNumber}%`);
-    }
-
-    if (filters.caseDate) {
-        query += ` AND case_date = ?`;
-        values.push(filters.caseDate);
-    }
-
-    // Count Query
-    let countQuery = `
-        SELECT COUNT(*) AS total
-        FROM operative_records
-        WHERE doctor_id = ?
-    `;
-
-    const countValues: any[] = [doctorId];
-
-    if (filters.patientName) {
-        countQuery += ` AND patient_name LIKE ?`;
-        countValues.push(`%${filters.patientName}%`);
-    }
-
-    if (filters.hospital) {
-        countQuery += ` AND hospital LIKE ?`;
-        countValues.push(`%${filters.hospital}%`);
-    }
-
-    if (filters.caseNumber) {
-        countQuery += ` AND case_number LIKE ?`;
-        countValues.push(`%${filters.caseNumber}%`);
-    }
-
-    if (filters.caseDate) {
-        countQuery += ` AND case_date = ?`;
-        countValues.push(filters.caseDate);
-    }
-
-    query += `
-        ORDER BY created_at DESC
-        LIMIT ?
-        OFFSET ?
-    `;
-
-    values.push(limit);
-    values.push(offset);
-
-    const [rows]: any = await pool.query(query, values);
-
-    const [countRows]: any = await pool.query(
-        countQuery,
-        countValues
-    );
-
-    const total = Number(countRows[0].total);
-
-    const totalPages = Math.ceil(total / limit);
-
-    const data = rows.map((row: any) => {
+        if (!row) return null;
 
         row.staff_ids =
             typeof row.staff_ids === "string"
@@ -342,229 +216,370 @@ async getAllByDoctorId(
                 : row.post_op_images;
 
         return row;
-    });
-
-    return {
-        data,
-        pagination: {
-            page,
-            limit,
-            total,
-            totalPages,
-        },
-    };
-}
-
-async update(id: number, data: any) {
-
-    console.log("========== REPOSITORY UPDATE ==========");
-    console.log("ID =", id);
-    console.dir(data, { depth: null });
-
-    const existing = await db.query.surgeryCases.findFirst({
-        where: (table, { eq }) => eq(table.surgeryId, id),
-    });
-
-    if (!existing) {
-        throw new Error("Surgery case not found");
     }
 
-    await db.transaction(async (tx) => {
+    async getAllByDoctorId(
+        doctorId: number,
+        page: number,
+        limit: number,
+        filters: any
+    ) {
 
-        //--------------------------------------------------
-        // PRE OP
-        //--------------------------------------------------
+        const offset = (page - 1) * limit;
 
-        if (data.preOpImages) {
+        let query = `
+        SELECT *
+        FROM operative_records
+        WHERE doctor_id = ?
+    `;
 
-            const ids: number[] = [];
+        const values: any[] = [doctorId];
 
-            for (const image of data.preOpImages) {
+        if (filters.patientName) {
+            query += ` AND patient_name LIKE ?`;
+            values.push(`%${filters.patientName}%`);
+        }
 
-    // Existing image URL - keep it
-    if (typeof image === "string") {
-        ids.push(image as any);
-        continue;
-    }
+        if (filters.hospital) {
+            query += ` AND hospital LIKE ?`;
+            values.push(`%${filters.hospital}%`);
+        }
 
-    // Existing media id - keep it
-    if (typeof image === "number") {
-        ids.push(image);
-        continue;
-    }
+        if (filters.caseNumber) {
+            query += ` AND case_number LIKE ?`;
+            values.push(`%${filters.caseNumber}%`);
+        }
 
-    // New uploaded image
-    const mediaRow = await this.mediaRepository.create({
+        if (filters.caseDate) {
+            query += ` AND case_date = ?`;
+            values.push(filters.caseDate);
+        }
 
-        fileName: image.fileName,
+        // Count Query
+        let countQuery = `
+        SELECT COUNT(*) AS total
+        FROM operative_records
+        WHERE doctor_id = ?
+    `;
 
-        s3Key: image.key,
+        const countValues: any[] = [doctorId];
 
-        mimeType: image.mimeType,
+        if (filters.patientName) {
+            countQuery += ` AND patient_name LIKE ?`;
+            countValues.push(`%${filters.patientName}%`);
+        }
 
-        surgeryCaseId: id,
+        if (filters.hospital) {
+            countQuery += ` AND hospital LIKE ?`;
+            countValues.push(`%${filters.hospital}%`);
+        }
 
-        mediaType: "PRE_OP",
+        if (filters.caseNumber) {
+            countQuery += ` AND case_number LIKE ?`;
+            countValues.push(`%${filters.caseNumber}%`);
+        }
 
-        size: 1,
+        if (filters.caseDate) {
+            countQuery += ` AND case_date = ?`;
+            countValues.push(filters.caseDate);
+        }
 
-        isPublic: false,
+        query += `
+        ORDER BY created_at DESC
+        LIMIT ?
+        OFFSET ?
+    `;
 
-        uploadedBy: existing.doctorId,
+        values.push(limit);
+        values.push(offset);
 
-    });
+        const [rows]: any = await pool.query(query, values);
 
-    ids.push(mediaRow.id);
-}
+        const [countRows]: any = await pool.query(
+            countQuery,
+            countValues
+        );
 
-data.preOpImages = ids;
+        const total = Number(countRows[0].total);
 
-            }
+        const totalPages = Math.ceil(total / limit);
 
-        //--------------------------------------------------
-        // INTRA OP
-        //--------------------------------------------------
+        const data = rows.map((row: any) => {
 
-        if (data.intraOpImages) {
+            row.staff_ids =
+                typeof row.staff_ids === "string"
+                    ? JSON.parse(row.staff_ids)
+                    : row.staff_ids;
 
-            const ids: number[] = [];
+            row.surgery_procedure =
+                typeof row.surgery_procedure === "string"
+                    ? JSON.parse(row.surgery_procedure)
+                    : row.surgery_procedure;
 
-            for (const image of data.intraOpImages) {
+            row.iv_fluid_ids =
+                typeof row.iv_fluid_ids === "string"
+                    ? JSON.parse(row.iv_fluid_ids)
+                    : row.iv_fluid_ids;
 
-    if (typeof image === "string") {
-        ids.push(image as any);
-        continue;
-    }
+            row.medication_ids =
+                typeof row.medication_ids === "string"
+                    ? JSON.parse(row.medication_ids)
+                    : row.medication_ids;
 
-    if (typeof image === "number") {
-        ids.push(image);
-        continue;
-    }
+            row.pre_op_images =
+                typeof row.pre_op_images === "string"
+                    ? JSON.parse(row.pre_op_images)
+                    : row.pre_op_images;
 
-    const mediaRow = await this.mediaRepository.create({
+            row.intra_op_images =
+                typeof row.intra_op_images === "string"
+                    ? JSON.parse(row.intra_op_images)
+                    : row.intra_op_images;
 
-        fileName: image.fileName,
+            row.post_op_images =
+                typeof row.post_op_images === "string"
+                    ? JSON.parse(row.post_op_images)
+                    : row.post_op_images;
 
-        s3Key: image.key,
+            return row;
+        });
 
-        mimeType: image.mimeType,
-
-        surgeryCaseId: id,
-
-        mediaType: "INTRA_OP",
-
-        size: 1,
-
-        isPublic: false,
-
-        uploadedBy: existing.doctorId,
-
-    });
-
-    ids.push(mediaRow.id);
-}
-
-data.intraOpImages = ids;
-
-            }
-
-        //--------------------------------------------------
-        // POST OP
-        //--------------------------------------------------
-
-        if (data.postOpImages) {
-
-            const ids: number[] = [];
-
-           for (const image of data.postOpImages) {
-
-    if (typeof image === "string") {
-        ids.push(image as any);
-        continue;
-    }
-
-    if (typeof image === "number") {
-        ids.push(image);
-        continue;
-    }
-
-    const mediaRow = await this.mediaRepository.create({
-
-        fileName: image.fileName,
-
-        s3Key: image.key,
-
-        mimeType: image.mimeType,
-
-        surgeryCaseId: id,
-
-        mediaType: "POST_OP",
-
-        size: 1,
-
-        isPublic: false,
-
-        uploadedBy: existing.doctorId,
-
-    });
-
-    ids.push(mediaRow.id);
-}
-
-data.postOpImages = ids;
-}
-
-        //--------------------------------------------------
-        // UPDATE SURGERY
-        //--------------------------------------------------
-
-        await tx
-            .update(surgeryCases)
-            .set(data)
-            .where(eq(surgeryCases.surgeryId, id));
-
-    });
-
-    const record =
-        await db.query.surgeryCases.findFirst({
-
-            where: (table, { eq }) =>
-                eq(table.surgeryId, id),
-
-            with: {
-                media: true,
+        return {
+            data,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
             },
+        };
+    }
+
+    async update(id: number, data: any) {
+
+        console.log("========== REPOSITORY UPDATE ==========");
+        console.log("ID =", id);
+        console.dir(data, { depth: null });
+
+        const existing = await db.query.surgeryCases.findFirst({
+            where: (table, { eq }) => eq(table.surgeryId, id),
+        });
+
+        if (!existing) {
+            throw new Error("Surgery case not found");
+        }
+
+        await db.transaction(async (tx) => {
+
+            //--------------------------------------------------
+            // PRE OP
+            //--------------------------------------------------
+
+            if (data.preOpImages) {
+
+                const ids: number[] = [];
+
+                for (const image of data.preOpImages) {
+
+                    // Existing image URL - keep it
+                    if (typeof image === "string") {
+                        ids.push(image as any);
+                        continue;
+                    }
+
+                    // Existing media id - keep it
+                    if (typeof image === "number") {
+                        ids.push(image);
+                        continue;
+                    }
+
+                    // New uploaded image
+                    const existingMedia = await db.query.media.findFirst({
+                        where: (table, { and, eq }) =>
+                            and(
+                                eq(table.surgeryCaseId, id),
+                                eq(table.s3Key, image.key)
+                            ),
+                    });
+
+                    if (existingMedia) {
+                        ids.push(existingMedia.id);
+                        continue;
+                    }
+
+                    const mediaRow =
+                        await this.mediaRepository.create({
+                            fileName: image.fileName,
+                            s3Key: image.key,
+                            mimeType: image.mimeType,
+                            surgeryCaseId: id,
+                            mediaType: "PRE_OP",
+                            size: image.size,
+                            isPublic: false,
+                            uploadedBy: existing.doctorId,
+                        });
+
+                    ids.push(mediaRow.id);
+                }
+
+                data.preOpImages = ids;
+
+            }
+
+            //--------------------------------------------------
+            // INTRA OP
+            //--------------------------------------------------
+
+            if (data.intraOpImages) {
+
+                const ids: number[] = [];
+
+                for (const image of data.intraOpImages) {
+
+                    if (typeof image === "string") {
+                        ids.push(image as any);
+                        continue;
+                    }
+
+                    if (typeof image === "number") {
+                        ids.push(image);
+                        continue;
+                    }
+
+                    const existingMedia = await db.query.media.findFirst({
+                        where: (table, { and, eq }) =>
+                            and(
+                                eq(table.surgeryCaseId, id),
+                                eq(table.s3Key, image.key)
+                            ),
+                    });
+
+                    if (existingMedia) {
+                        ids.push(existingMedia.id);
+                        continue;
+                    }
+
+                    const mediaRow =
+                        await this.mediaRepository.create({
+                            fileName: image.fileName,
+                            s3Key: image.key,
+                            mimeType: image.mimeType,
+                            surgeryCaseId: id,
+                            mediaType: "INTRA_OP",
+                            size: image.size,
+                            isPublic: false,
+                            uploadedBy: existing.doctorId,
+                        });
+
+                    ids.push(mediaRow.id);
+                }
+
+                data.intraOpImages = ids;
+
+            }
+
+            //--------------------------------------------------
+            // POST OP
+            //--------------------------------------------------
+
+            if (data.postOpImages) {
+
+                const ids: number[] = [];
+
+                for (const image of data.postOpImages) {
+
+                    if (typeof image === "string") {
+                        ids.push(image as any);
+                        continue;
+                    }
+
+                    if (typeof image === "number") {
+                        ids.push(image);
+                        continue;
+                    }
+
+                    const existingMedia = await db.query.media.findFirst({
+                        where: (table, { and, eq }) =>
+                            and(
+                                eq(table.surgeryCaseId, id),
+                                eq(table.s3Key, image.key)
+                            ),
+                    });
+
+                    if (existingMedia) {
+                        ids.push(existingMedia.id);
+                        continue;
+                    }
+
+                    const mediaRow =
+                        await this.mediaRepository.create({
+                            fileName: image.fileName,
+                            s3Key: image.key,
+                            mimeType: image.mimeType,
+                            surgeryCaseId: id,
+                            mediaType: "POST_OP",
+                            size: image.size,
+                            isPublic: false,
+                            uploadedBy: existing.doctorId,
+                        });
+
+                    ids.push(mediaRow.id);
+                }
+
+                data.postOpImages = ids;
+            }
+
+            //--------------------------------------------------
+            // UPDATE SURGERY
+            //--------------------------------------------------
+
+            await tx
+                .update(surgeryCases)
+                .set(data)
+                .where(eq(surgeryCases.surgeryId, id));
 
         });
 
-    return record;
-}
+        const record =
+            await db.query.surgeryCases.findFirst({
 
-async getDoctorById(id: number) {
-    const [rows]: any = await pool.query(
-        `
+                where: (table, { eq }) =>
+                    eq(table.surgeryId, id),
+
+                with: {
+                    media: true,
+                },
+
+            });
+
+        return record;
+    }
+
+    async getDoctorById(id: number) {
+        const [rows]: any = await pool.query(
+            `
         SELECT
             id,
             full_name
         FROM doctors
         WHERE id = ?
         `,
-        [id]
-    );
+            [id]
+        );
 
-    if (!rows.length) {
-        throw new Error("Doctor not found");
+        if (!rows.length) {
+            throw new Error("Doctor not found");
+        }
+
+        return rows[0];
     }
 
-    return rows[0];
-}
+    async getDoctorInfoByCaseId(caseId: number) {
 
-async getDoctorInfoByCaseId(caseId: number) {
+        console.log("Searching surgery =", caseId);
 
-    console.log("Searching surgery =", caseId);
-
-    const [rows]: any = await pool.query(
-        `
+        const [rows]: any = await pool.query(
+            `
         SELECT
             d.id,
             d.full_name,
@@ -574,86 +589,86 @@ async getDoctorInfoByCaseId(caseId: number) {
         ON d.id = oc.doctor_id
         WHERE oc.surgery_id = ?
         `,
-        [caseId]
-    );
+            [caseId]
+        );
 
-    console.log(rows);
+        console.log(rows);
 
-    if (!rows.length) {
-        throw new Error("Surgery case not found");
+        if (!rows.length) {
+            throw new Error("Surgery case not found");
+        }
+
+        return rows[0];
     }
 
-    return rows[0];
-}
+    async delete(id: number) {
 
-async delete(id: number) {
+        await db
+            .delete(media)
+            .where(
+                eq(
+                    media.surgeryCaseId,
+                    id
+                )
+            );
 
-    await db
-        .delete(media)
-        .where(
-            eq(
-                media.surgeryCaseId,
-                id
-            )
-        );
+        await db
+            .delete(surgeryCases)
+            .where(
+                eq(
+                    surgeryCases.surgeryId,
+                    id
+                )
+            );
 
-    await db
-        .delete(surgeryCases)
-        .where(
-            eq(
-                surgeryCases.surgeryId,
-                id
-            )
-        );
+        return {
+            success: true,
+            message: "Surgery case deleted successfully"
+        };
 
-    return {
-        success: true,
-        message: "Surgery case deleted successfully"
-    };
+    }
+    async getAllPdfData(doctorId: number) {
 
-}
-async getAllPdfData(doctorId: number) {
+        return await db.query.surgeryCases.findMany({
 
-    return await db.query.surgeryCases.findMany({
+            where: (sc, { eq }) => eq(sc.doctorId, doctorId),
 
-        where: (sc, { eq }) => eq(sc.doctorId, doctorId),
+            with: {
 
-        with: {
+                media: true,
 
-            media: true,
+                anaesthesia: true,
 
-            anaesthesia: true,
+                position: true,
 
-            position: true,
+                incision: true,
 
-            incision: true,
+            },
 
-        },
+        });
 
-    });
+    }
 
-}
+    async getPdfData(id: number) {
 
-async getPdfData(id: number) {
+        return await db.query.surgeryCases.findFirst({
 
-    return await db.query.surgeryCases.findFirst({
+            where: (sc, { eq }) => eq(sc.surgeryId, id),
 
-        where: (sc, { eq }) => eq(sc.surgeryId, id),
+            with: {
 
-        with: {
+                media: true,
 
-            media: true,
+                anaesthesia: true,
 
-            anaesthesia: true,
+                position: true,
 
-            position: true,
+                incision: true,
 
-            incision: true,
+            },
 
-        },
+        });
 
-    });
-
-}
+    }
 
 }
